@@ -26,7 +26,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessor;
-import com.chookapp.org.bracketeer.helpers.BackDoors;
+import com.chookapp.org.bracketeer.helpers.Utils;
 
 
 public class EditorEvents implements IStartup {
@@ -85,7 +85,7 @@ public class EditorEvents implements IStartup {
         		return;
         	
         	IEditorPart editorPart = (IEditorPart) part;
-            ITextViewer viewer = BackDoors.callGetSourceViewer(editorPart);
+            ITextViewer viewer = Utils.callGetSourceViewer(editorPart);
             if (viewer == null) return;
 
             hook(editorPart, viewer);

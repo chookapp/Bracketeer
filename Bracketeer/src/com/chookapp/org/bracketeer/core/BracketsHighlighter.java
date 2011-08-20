@@ -52,7 +52,8 @@ import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessor;
 
 public class BracketsHighlighter implements CaretListener, Listener, PaintListener, IDisposable, IPainter {
 
-	private ITextViewer _textViewer;
+	private static final int UNMATCHED_BRACKET_COLOR_CODE = 20;
+    private ITextViewer _textViewer;
 	private IBracketeerProcessor _processor;
 	private IPaintPositionManager _positionManager;
 	
@@ -127,7 +128,6 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 		{
 			caret = st.getOffsetAtLocation(new Point(event.x, event.y));
 			caret = ((ProjectionViewer)_textViewer).widgetOffset2ModelOffset(caret);
-			
 		}
 		catch(SWTException e)
 		{
@@ -203,7 +203,7 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
     {
 
         int startPoint = Math.max(0, origCaret - 2);
-        int endPoint = Math.min(_textViewer.getDocument().getLength() - 1,
+        int endPoint = Math.min(_textViewer.getDocument().getLength(),
                                 origCaret + 2);
 
         List<BracketsPair> listOfPairs = new LinkedList<BracketsPair>();
@@ -214,7 +214,11 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
             if (pair == null)
                 continue;
             
-            listOfPairs.add(pair);
+            if( !pair.isValid() )
+                continue;
+            
+            if( !listOfPairs.contains(pair) )
+                listOfPairs.add(pair);
         }
 
         if(listOfPairs.isEmpty())
@@ -225,11 +229,18 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
             _bracketsToClear.addAll(_bracketsToPaint);
             _bracketsToPaint = new LinkedList<BracketPosition>();
             int colorCode = 1;
+            int colorCodeStep = 1;
+            
+            if( listOfPairs.get(0).getBrackets().get(0).isOpening() )
+            {
+                colorCode = listOfPairs.size();
+                colorCodeStep = -1;
+            }
             
             for (BracketsPair bracketsPair : listOfPairs)
             {
                 createPositionsFromPair(bracketsPair, colorCode);
-                colorCode++;                
+                colorCode += colorCodeStep;                
             }            
         }
         
@@ -249,7 +260,7 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
                     }
                 }
                 catch (Exception err) {
-                    err.printStackTrace();
+                    Activator.log(err);
                 }
             }
 
@@ -260,11 +271,45 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
                 for (BracketPosition pos : _bracketsToClear)
                 {
                     IRegion widgetRange = getWidgetRange(pos.getPosition().getOffset(), 
-                                                         pos.getPosition().getLength() + 1);
+                                                         pos.getPosition().getLength());
+                    
                     if( widgetRange != null )
-                        st.redrawRange(widgetRange.getOffset(), 
-                                       widgetRange.getLength(),
-                                       true);
+                    {
+                        int offset = widgetRange.getOffset();
+                        int length = widgetRange.getLength() + 1;
+                        
+                        if( offset + length + 1 >= st.getCharCount() )
+                        {
+                            st.redraw();
+                        }
+                        else
+                        {
+                            /* copied from "SourceViewerDecorationSupoprt"... */
+                            
+                            char ch = st.getTextRange(offset + 1, 1).charAt(0);
+                            if (ch == '\r' || ch == '\n') {
+                                // at the end of a line, redraw up to the next line start
+                                int nextLine = st.getLineAtOffset(offset + 1) + 1;
+                                if (nextLine >= st.getLineCount()) {
+                                    /*
+                                     * Panic code: should not happen, as offset is not the last offset,
+                                     * and there is a delimiter character at offset.
+                                     */
+                                    st.redraw();
+                                    continue;
+                                }
+
+                                int nextLineOffset = st.getOffsetAtLine(nextLine);
+                                length = nextLineOffset - offset;                            
+                            }
+                            
+                            st.redrawRange(offset, length, true);
+                        }
+                    }
+                    else
+                    {
+                        st.redraw();
+                    }
                     
                     _positionManager.unmanagePosition(pos.getPosition());
                 }
@@ -305,7 +350,7 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
                 int offset = widgetRange.getOffset();
                 int length = widgetRange.getLength();
                 if (length != 1)
-                    throw new IllegalArgumentException(String.format("length %d != 1", length));
+                    throw new IllegalArgumentException(String.format("length %1$d != 1", length));
                 
                 Point p = st.getLocationAtOffset(offset);
                 
@@ -321,7 +366,7 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
                 gc.drawText(_textViewer.getDocument().get(pos.getOffset(), 1), p.x, p.y);
                 
                 gc.setBackground(oldBackground);
-                gc.setForeground(oldForeground);
+                gc.setForeground(oldForeground);                
                 
                 bg.dispose();
                 fg.dispose();
@@ -366,6 +411,9 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 
             private RGB getBgColorCode(int colorCode)
             {
+                if( colorCode == UNMATCHED_BRACKET_COLOR_CODE )
+                    return new RGB(250,0,0);
+                
                 return new RGB(0+(colorCode*50),
                                0+(colorCode*50),
                                0+(colorCode*50));
@@ -377,11 +425,13 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
     private void createPositionsFromPair(BracketsPair bracketsPair,
                                          int colorCode)
     {
-        // TODO: if the pair is only one bracket, change the color code
+        if( bracketsPair.getBrackets().size() == 1 )
+            colorCode = UNMATCHED_BRACKET_COLOR_CODE;
         
-        for (int offset : bracketsPair.getLocations())
+        for (BracketsPair.Bracket bracket : bracketsPair.getBrackets())
         {
-            BracketPosition pos = new BracketPosition(offset - 1, colorCode);
+            BracketPosition pos = new BracketPosition(bracket.getOffset() - 1, 
+                                                      colorCode);
             _bracketsToPaint.add(pos);
             _positionManager.managePosition(pos.getPosition());
         }        

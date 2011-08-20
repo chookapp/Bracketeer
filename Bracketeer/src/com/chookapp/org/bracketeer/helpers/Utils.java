@@ -23,8 +23,10 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import com.chookapp.org.bracketeer.Activator;
 
-public class BackDoors {
+public class Utils {
 	
+    private static final String _openingBrackets = "([{<";
+    
     /**
      * Calls AbstractTextEditor.getSourceViewer() through reflection, as that method is normally protected (for some
      * ungodly reason).
@@ -45,6 +47,11 @@ public class BackDoors {
         }
         
         return null;
+    }
+
+    public static boolean isOpenningBracket(char prevChar)
+    {
+        return _openingBrackets.indexOf(prevChar) != -1;
     }
 
 }
