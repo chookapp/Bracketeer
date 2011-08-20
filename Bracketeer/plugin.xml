@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="com.chookapp.org.bracketeer.processors_factory" name="BracketeerProcessorsFactory" schema="schema/com.chookapp.org.bracketeer.processors_factory.exsd"/>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.chookapp.org.bracketeer.core.EditorEvents">
+      </startup>
+   </extension>
+
+</plugin>
