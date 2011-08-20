@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: BracketeerCDT
+Bundle-SymbolicName: BracketeerCDT;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.chookapp.org.bracketeer.cdt.Activator
+Bundle-Vendor: Gil Barash
+Require-Bundle: org.eclipse.core.runtime,
+ com.chookapp.org.Bracketeer,
+ org.eclipse.jface.text,
+ org.eclipse.cdt.core
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.cdt.ui.text,
+ org.eclipse.jface.text,
+ org.eclipse.ui,
+ org.eclipse.ui.texteditor

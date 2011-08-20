@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.chookapp.org.bracketeer.processors_factory">
+      <BracketeerProcessorsFactory
+            class="com.chookapp.org.bracketeer.cdt.BracketeerProcessorsFactory"
+            name="CDT">
+      </BracketeerProcessorsFactory>
+   </extension>
+
+</plugin>
