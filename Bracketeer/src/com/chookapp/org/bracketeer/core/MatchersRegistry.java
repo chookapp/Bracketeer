@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IEditorPart;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessor;
+import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessorsFactory;
 
 public class MatchersRegistry {
@@ -48,11 +48,11 @@ public class MatchersRegistry {
 		}
 	}
 
-	public IBracketeerProcessor findProcessorFor(IEditorPart part) {
-		IBracketeerProcessor processorFound = null;
+	public BracketeerProcessor findProcessorFor(IEditorPart part) {
+		BracketeerProcessor processorFound = null;
 		
 		for( IBracketeerProcessorsFactory processorFactory : _processors ) {
-			IBracketeerProcessor processor = processorFactory.createProcessorFor(part);
+			BracketeerProcessor processor = processorFactory.createProcessorFor(part);
 			if( processor != null )
 			{
 				if( processorFound != null )

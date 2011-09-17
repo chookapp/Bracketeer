@@ -25,7 +25,7 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessor;
+import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 import com.chookapp.org.bracketeer.helpers.Utils;
 
 
@@ -111,13 +111,13 @@ public class EditorEvents implements IStartup {
 		}
 		
         if (oldBracketsHighlighter != null && 
-        		oldBracketsHighlighter.getTextViewer() == textViewer) return;
+            oldBracketsHighlighter.getTextViewer() == textViewer) return;
 
         if (textViewer == null) return;
 
         Display.getDefault().asyncExec(new Runnable() {
             public void run() {
-            	IBracketeerProcessor processor = null;
+            	BracketeerProcessor processor = null;
             	try 
             	{
             		processor = _processorsRegistry.findProcessorFor(part);
@@ -132,7 +132,7 @@ public class EditorEvents implements IStartup {
                 	return;
                 
             	BracketsHighlighter bracketsHighlighter = new BracketsHighlighter(); 
-            	bracketsHighlighter.Init(processor, textViewer);
+            	bracketsHighlighter.Init(processor, part, textViewer);
             	synchronized (_activeMap) {					
             		_activeMap.put(part, bracketsHighlighter);
             	}

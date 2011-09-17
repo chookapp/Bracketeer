@@ -18,6 +18,6 @@ import org.eclipse.ui.IEditorPart;
 public interface IBracketeerProcessorsFactory
 {
 
-    IBracketeerProcessor createProcessorFor(IEditorPart part);
+    BracketeerProcessor createProcessorFor(IEditorPart part);
 
 }
