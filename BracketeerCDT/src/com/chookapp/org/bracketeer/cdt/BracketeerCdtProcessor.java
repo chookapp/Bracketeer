@@ -16,17 +16,21 @@ import org.eclipse.cdt.ui.text.ICPartitions;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
+import org.eclipse.ui.IEditorPart;
 
 import com.chookapp.org.bracketeer.cdt.core.internals.CPairMatcher;
+import com.chookapp.org.bracketeer.common.BracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.BracketsPair;
-import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessor;
+import com.chookapp.org.bracketeer.common.SingleBracket;
+import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 import com.chookapp.org.bracketeer.helpers.Utils;
 
-public class BracketeerCdtProcessor implements IBracketeerProcessor
+public class BracketeerCdtProcessor extends BracketeerProcessor
 {
+
+    
     protected final static char[] BRACKETS = { '{', '}', '(', ')', '[', ']', '<', '>' };
     
     /* Lonely brackets is different from BRACKETS because matching an 
@@ -34,20 +38,20 @@ public class BracketeerCdtProcessor implements IBracketeerProcessor
     protected final static String LONELY_BRACKETS = "()[]{}";
     
     private CPairMatcher _matcher;
-    private ITextViewer _textViewer;
 
-    public BracketeerCdtProcessor(ITextViewer textViewer)
+    public BracketeerCdtProcessor(IEditorPart part) 
     {
+        super(part);
+        
         _matcher = new CPairMatcher(BRACKETS);
-        _textViewer = textViewer;
     }
+   
     
-    @Override
-    public BracketsPair getMatchingPair(int offset)
+    private BracketsPair getMatchingPair(IDocument doc, int offset)
     {
-        IRegion region = _matcher.match(_textViewer.getDocument(), offset);
+        IRegion region = _matcher.match(doc, offset);
         if( region == null )
-            return matchLonelyBracket(offset);
+            return null;
         
         if( region.getLength() < 1 )
             throw new RuntimeException("length is less than 1");
@@ -55,18 +59,18 @@ public class BracketeerCdtProcessor implements IBracketeerProcessor
         boolean isAnchorOpening = (ICharacterPairMatcher.LEFT == _matcher.getAnchor());        
         int targetOffset =  isAnchorOpening ? region.getOffset() + region.getLength() : region.getOffset() + 1;
         
-        BracketsPair pair = new BracketsPair();
+        offset--;
+        targetOffset--;
         
-        pair.addBracket(offset, isAnchorOpening);
-        pair.addBracket(targetOffset, !isAnchorOpening);
-        
-        return pair;
+        if( isAnchorOpening )
+            return new BracketsPair(offset, targetOffset);
+        else
+            return new BracketsPair(targetOffset, offset);
     }
 
-    private BracketsPair matchLonelyBracket(int offset)
+    private SingleBracket getLonelyBracket(IDocument doc, int offset)
     {
         final int charOffset = offset - 1;
-        IDocument doc = _textViewer.getDocument();
         char prevChar;
         try
         {
@@ -79,14 +83,39 @@ public class BracketeerCdtProcessor implements IBracketeerProcessor
                     return null;
             }
             
-            BracketsPair pair = new BracketsPair();
-            pair.addBracket(offset, Utils.isOpenningBracket(prevChar));
-            return pair;
+            return new SingleBracket(charOffset, Utils.isOpenningBracket(prevChar));
         }
         catch (BadLocationException e)
         {
         }
         return null;
     }
+
+
+    @Override
+    protected void processDocument(IDocument doc,
+                                   BracketeerProcessingContainer container)
+    {
+        for(int i = 1; i < doc.getLength(); i++)
+        {
+            if( container.getMatchingPair(i-1) != null )
+                continue;
+            
+            BracketsPair pair = getMatchingPair(doc, i);
+            if(pair != null)
+            {
+                container.add(pair);
+                continue;
+            }
+            
+            SingleBracket single = getLonelyBracket(doc, i);
+            if( single != null )
+                container.add(single);
+            
+            if( _cancelProcessing )
+                break;
+        }
+    }
+
 
 }

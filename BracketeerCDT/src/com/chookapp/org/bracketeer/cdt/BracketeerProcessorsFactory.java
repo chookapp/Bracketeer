@@ -12,22 +12,25 @@
 
 package com.chookapp.org.bracketeer.cdt;
 
-import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessor;
+import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessorsFactory;
 import com.chookapp.org.bracketeer.helpers.Utils;
 
 import org.eclipse.ui.IEditorPart;
 
 public class BracketeerProcessorsFactory implements
-		IBracketeerProcessorsFactory {
+		IBracketeerProcessorsFactory 
+{
 
-	public BracketeerProcessorsFactory() {
+	public BracketeerProcessorsFactory() 
+	{
 	}
 
 	@Override
-	public IBracketeerProcessor createProcessorFor(IEditorPart part) {
+	public BracketeerProcessor createProcessorFor(IEditorPart part) 
+	{
 		if( part.getClass().getName().contains("CEditor") )
-		    return new BracketeerCdtProcessor(Utils.callGetSourceViewer(part));
+		    return new BracketeerCdtProcessor(part);
 		
 		return null;
 	}
