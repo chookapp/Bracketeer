@@ -61,4 +61,14 @@ public class BracketsPair
     {        
         return _brackets.hashCode();
     }
+    
+    public SingleBracket getOpeningBracket()
+    {
+        return _brackets.get(0);
+    }
+
+    public SingleBracket getClosingBracket()
+    {
+        return _brackets.get(1);
+    }
 }

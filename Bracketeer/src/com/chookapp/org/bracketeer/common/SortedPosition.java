@@ -5,12 +5,11 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.Position;
 
-class SortedPosition extends Position implements Comparable<SortedPosition>
+public class SortedPosition extends Position implements Comparable<SortedPosition>
 {
     //private Position _position;
     
-    Map<SortedPosition, ?> _container;
-    
+    Map<SortedPosition, ? extends Object> _container;
 
     public SortedPosition(int offset, int length)
     {
@@ -19,7 +18,7 @@ class SortedPosition extends Position implements Comparable<SortedPosition>
     }
     
     
-    public void setContainer(Map<SortedPosition, ?> container)
+    public void setContainer(Map<SortedPosition, ? extends Object> container)
     {
         _container = container;
     }
@@ -60,10 +59,34 @@ class SortedPosition extends Position implements Comparable<SortedPosition>
         super.delete();
         if( _container != null )
         {
-            Object r = _container.remove(this);
-            Assert.isNotNull(r);
+            synchronized(_container)
+            {
+                Object r = _container.remove(this);
+                Assert.isNotNull(r);
+            }
         }
     }
     
+    @SuppressWarnings("unchecked")
+    public void update(int a_offset, int a_length)
+    {
+        Object r = null;
+        if( _container != null )
+        {
+            synchronized(_container)
+            {
+                r = _container.remove(this);
+                Assert.isNotNull(r);
+                offset = a_offset;
+                length = a_length;
+                ((Map<SortedPosition, Object>)_container).put(this, r);
+            }
+        }
+        else
+        {
+            offset = a_offset;
+            length = a_length;
+        }
+    }
 
 }

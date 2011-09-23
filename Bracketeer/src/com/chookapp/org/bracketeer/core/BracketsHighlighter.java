@@ -75,9 +75,10 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 	private boolean _isActive;
 	
 	private Object _objectsToPaintListsLock;
-	private List<PaintableObject> _pairsToPaint;
+	private List<PaintableObject> _hoveredPairsToPaint;
+	private List<PaintableObject> _surroundingPairsToPaint;
+	private List<PaintableObject> _singleBracketsToPaint;
 	
-	private List<Annotation> _annotationsShown;	
 	
 	public BracketsHighlighter()
 	{
@@ -89,7 +90,9 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 	    _isActive = false;
 	    
 	    _objectsToPaintListsLock = new Object();
-	    _pairsToPaint = new LinkedList<PaintableObject>();
+	    _hoveredPairsToPaint = new LinkedList<PaintableObject>();
+	    _surroundingPairsToPaint = new LinkedList<PaintableObject>();
+	    _singleBracketsToPaint = new LinkedList<PaintableObject>();
 	}
 	
 	@Override
@@ -132,11 +135,16 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 	 ************************************************************/
 	
 	@Override
-	public void caretMoved(CaretEvent event) {
-//		_caretOffset = event.caretOffset;
+	public void caretMoved(CaretEvent event) 
+	{
+	    int caret = event.caretOffset;
+	    caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
+	    caretMovedTo(caret);
 	}
 	
-	/*
+
+
+    /*
 	 * Events:
 	 * - MouseHover
 	 * 
@@ -180,15 +188,28 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 
 	    int startOfset = region.getOffset();
 	    int length = region.getLength();
-	    int endOfset = startOfset + length;
 
-	    for (PaintableObject paintObj : _pairsToPaint)
+	    for (PaintableObject paintObj : _singleBracketsToPaint)
+        {
+            if(paintObj.getPosition().overlapsWith(startOfset, length))
+                paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
+                               getWidgetRange(paintObj.getPosition().getOffset(), paintObj.getPosition().getLength()));
+        }
+
+	    List<PaintableObject> pairsToPaint;
+	    if( _hoveredPairsToPaint.isEmpty() )
+	        pairsToPaint = _surroundingPairsToPaint;
+	    else
+	        pairsToPaint = _hoveredPairsToPaint;
+	        
+	    for (PaintableObject paintObj : pairsToPaint)
         {
             if(paintObj.getPosition().overlapsWith(startOfset, length))
                 paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
                                getWidgetRange(paintObj.getPosition().getOffset(), paintObj.getPosition().getLength()));
         }
 	    
+	   
 	}
 	
     /************************************************************
@@ -237,6 +258,36 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 	 * the work itself
 	 ************************************************************/	
 
+    private void caretMovedTo(int caretOffset)
+    {        
+        boolean update = updateSurroundingPairsToPaint(caretOffset);
+        update |= clearHoveredPairsToPaint();
+        
+        if(update)
+        {
+            // TODO: optimize? (redraw only the needed sections)
+            _textWidget.redraw();
+        }
+    }
+    
+    private boolean updateSurroundingPairsToPaint(int caretOffset)
+    {
+        BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
+        List<BracketsPair> listOfPairs = cont.getPairsSurrounding(caretOffset, 4);
+        
+        // do nothing if _surroundingPairsToPaint is equal to listOfPairs
+        if(areEqual(listOfPairs, _surroundingPairsToPaint))
+            return false;
+        
+        clearSurroundingPairsToPaint();
+        synchronized (_surroundingPairsToPaint)
+        {            
+            addPaintableObjects(listOfPairs, 1, 1, _surroundingPairsToPaint);
+        }
+        
+        return true;
+    }
+    
     private void mouseHoverAt(StyledText st, int origCaret)
     {
 
@@ -245,57 +296,114 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 //                                origCaret + 2);
 
         
+        int length = 4;
+        int startPoint = origCaret-2;
+        int endPoint = origCaret+2;
+        
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
-        List<BracketsPair> listOfPairs = cont.getMatchingPairs(origCaret-2, origCaret+2);
+        List<BracketsPair> listOfPairs = cont.getMatchingPairs(startPoint, endPoint);
                 
         if(listOfPairs.isEmpty())
             return;        
         
-        //clearCurrentPairs();
-        _pairsToPaint.clear();
-        synchronized (_pairsToPaint)
+        // do nothing if _hoveredPairsToPaint is equal to listOfPairs
+        if(areEqual(listOfPairs, _hoveredPairsToPaint))
+            return;
+        
+        clearHoveredPairsToPaint();        
+        synchronized (_hoveredPairsToPaint)
         {            
             int colorCode = 1;
             int colorCodeStep = 1;
             
-            if( listOfPairs.get(0).getBrackets().get(0).isOpening() )
+            if( listOfPairs.get(0).getOpeningBracket().getPosition().overlapsWith(startPoint, length) )
             {
                 colorCode = listOfPairs.size();
                 colorCodeStep = -1;
             }
             
-            for (BracketsPair bracketsPair : listOfPairs)
-            {
-                for( SingleBracket bracket : bracketsPair.getBrackets() )
-                {
-                    _pairsToPaint.add(new PaintableObject(bracket.getPosition(),
-                                                          new RGB(255,255,255),
-                                                          new RGB(0+(colorCode*50),
-                                                                  0+(colorCode*50),
-                                                                  0+(colorCode*50))));
-                }
-                colorCode += colorCodeStep;                
-            }            
+            addPaintableObjects(listOfPairs, colorCode,
+                                colorCodeStep, _hoveredPairsToPaint);
         }
+        
+        // TODO: optimize? (redraw only the needed sections)
         _textWidget.redraw();
                 
         //drawHighlights();
-                
     }
 
-    private void clearCurrentPairs()
+    private boolean areEqual(List<BracketsPair> listOfPairs,
+                             List<PaintableObject> pairsToPaint)    
     {
-        synchronized (_pairsToPaint)
+        if( listOfPairs.size()*2 != pairsToPaint.size() )
+            return false;
+        
+        for (BracketsPair bracketsPair : listOfPairs)
         {
-            if( _pairsToPaint.isEmpty() )
-                return;
-            
-            _pairsToPaint.clear();
-            // optimize... (redraw only what we cleared)
+            for( SingleBracket bracket : bracketsPair.getBrackets() )
+            {
+                boolean found = false;
+                for (PaintableObject paintableObject : pairsToPaint)
+                {
+                    if(paintableObject.getPosition().equals(bracket.getPosition()))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
+                    return false;
+            }
         }
-        _textWidget.redraw();
+        
+        return true;
     }
 
+    private void addPaintableObjects(List<BracketsPair> listOfPairs,
+                                     int colorCode, int colorCodeStep,
+                                     List<PaintableObject> paintableObjectsList)
+    {
+        for (BracketsPair bracketsPair : listOfPairs)
+        {
+            for( SingleBracket bracket : bracketsPair.getBrackets() )
+            {
+                paintableObjectsList.add(new PaintableObject(bracket.getPosition(),
+                                                      new RGB(255,255,255),
+                                                      new RGB(0+(colorCode*50),
+                                                              0+(colorCode*50),
+                                                              0+(colorCode*50))));
+            }
+            colorCode += colorCodeStep;                
+        }
+    }
+
+
+    private boolean clearHoveredPairsToPaint()
+    {
+        synchronized (_hoveredPairsToPaint)
+        {
+            if(!_hoveredPairsToPaint.isEmpty())
+            {
+                _hoveredPairsToPaint.clear();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean clearSurroundingPairsToPaint()
+    {
+        synchronized (_surroundingPairsToPaint)
+        {
+            if(!_surroundingPairsToPaint.isEmpty())
+            {
+                _surroundingPairsToPaint.clear();
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * (Copied from AnnotationPainter)
      * 

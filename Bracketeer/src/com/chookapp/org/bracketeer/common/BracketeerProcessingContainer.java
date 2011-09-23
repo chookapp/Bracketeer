@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.core.runtime.Assert;
@@ -42,8 +44,9 @@ public class BracketeerProcessingContainer implements IDisposable
         public void setToDelete(boolean toDelete)
         {
             _toDelete = toDelete;
-        }        
+        }
     }    
+ 
         
     private IDocument _doc;
     
@@ -144,6 +147,17 @@ public class BracketeerProcessingContainer implements IDisposable
             delete(bracket.getPosition());            
         }
     }
+    
+    static <T> List<T> mapObjListToObjList(Collection<MapObjectContainer<T>> vals)
+    {
+        List<T> retVal = new LinkedList<T>();
+        for (MapObjectContainer<T> mapObj : vals)
+        {
+            if( !retVal.contains(mapObj.getObject()) && !mapObj.isToDelete() )
+                retVal.add(mapObj.getObject());
+        }
+        return retVal;
+    }
 
     public void add(SingleBracket bracket)
     {
@@ -187,6 +201,39 @@ public class BracketeerProcessingContainer implements IDisposable
         }
     }
 
+    public List<BracketsPair> getPairsSurrounding(int offset, int count)
+    {
+        SortedPosition startPos = new SortedPosition(offset,0);
+        Collection<MapObjectContainer<BracketsPair>> pairs = 
+                _bracketsPairMap.tailMap(startPos, false).values();
+        List<BracketsPair> retVal = new LinkedList<BracketsPair>();
+        
+        for (MapObjectContainer<BracketsPair> mapObj : pairs)
+        {
+            if( mapObj.isToDelete() )
+                continue;
+            
+            BracketsPair pair = mapObj.getObject();
+            
+            SingleBracket opBr = pair.getOpeningBracket();
+            SingleBracket clBr = pair.getClosingBracket();
+            
+            if( opBr.getPosition().offset <= offset )
+            {
+                Assert.isTrue(clBr.getPosition().offset > offset);
+                if( !retVal.contains(pair) )
+                {
+                    retVal.add(pair);
+                    if(retVal.size() == count)
+                        break;
+                }
+            }
+        }
+        
+        return retVal;
+    }
+
+   
     public List<BracketsPair> getMatchingPairs(int startOfset, int endOfset)
     {
         SortedPosition startPos = new SortedPosition(startOfset,0);
@@ -194,14 +241,7 @@ public class BracketeerProcessingContainer implements IDisposable
         Collection<MapObjectContainer<BracketsPair>> vals = 
                 _bracketsPairMap.subMap(startPos, true, endPos, true).values();
         
-        List<BracketsPair> retVal = new LinkedList<BracketsPair>();
-        for (MapObjectContainer<BracketsPair> mapObj : vals)
-        {
-            if( !retVal.contains(mapObj.getObject()) && !mapObj.isToDelete() )
-                retVal.add(mapObj.getObject());
-        }
-        
-        return retVal;
+        return mapObjListToObjList(vals);
     }
 
     
