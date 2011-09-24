@@ -6,22 +6,21 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.NavigableMap;
-import java.util.Set;
 import java.util.TreeMap;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.ui.services.IDisposable;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.common.BracketeerProcessingContainer.MapObjectContainer;
+import com.chookapp.org.bracketeer.core.BracketeerPositionUpdater;
 
 public class BracketeerProcessingContainer implements IDisposable
 {
-    class MapObjectContainer<T>
+    private class MapObjectContainer<T>
     {
         private T _object;
         private boolean _toDelete;
@@ -54,7 +53,7 @@ public class BracketeerProcessingContainer implements IDisposable
     private TreeMap<SortedPosition, MapObjectContainer<BracketsPair>> _bracketsPairMap;
     
     private String _positionCategory;
-    private DefaultPositionUpdater _positionUpdater;
+    private IPositionUpdater _positionUpdater;
     
     public BracketeerProcessingContainer(IDocument doc)
     {
@@ -66,7 +65,7 @@ public class BracketeerProcessingContainer implements IDisposable
         _positionCategory = "bracketeerPosition";
         
         _doc.addPositionCategory(_positionCategory);
-        _positionUpdater = new DefaultPositionUpdater(_positionCategory);
+        _positionUpdater = new BracketeerPositionUpdater(_positionCategory);
         _doc.addPositionUpdater(_positionUpdater);        
     }
     
@@ -143,8 +142,15 @@ public class BracketeerProcessingContainer implements IDisposable
         {
             SortedPosition spos = bracket.getPosition();
             MapObjectContainer<BracketsPair> existing = _bracketsPairMap.remove(spos);
-            Assert.isTrue(mapObj.getObject().equals(existing.getObject()));
-            delete(bracket.getPosition());            
+            if( existing == null || spos.isDeleted )
+            {
+                Assert.isTrue(existing == null && spos.isDeleted);
+            }
+            else
+            {
+                Assert.isTrue(mapObj.getObject().equals(existing.getObject()));
+                delete(bracket.getPosition());
+            }
         }
     }
     

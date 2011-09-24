@@ -1,5 +1,7 @@
 package com.chookapp.org.bracketeer.core;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -21,7 +23,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
     private BracketeerProcessor _processor;
     private BracketeerProcessingContainer _bracketContainer;
     //private Lock _bracketContainerLock = new ReentrantLock();
-    
+    private List<ProcessingThreadListener> _listeners;
     
     private boolean _documentChanged;
     
@@ -29,14 +31,17 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
 //    private boolean _cancelProcessing;
 //    private Semaphore _processingCanceled = new Semaphore(0);
     private Object _docChangedLock = new Object();
+    private boolean _docIsChanging;
     
     public ProcessingThread(IEditorPart part, BracketeerProcessor processor)
     {
         _processor = processor;
         _documentChanged = false;
+        _docIsChanging = false;
         _doc = Utils.getPartDocument(part);
         _bracketContainer = new BracketeerProcessingContainer(_doc);
 //        _isProcessing = false;
+        _listeners = new LinkedList<ProcessingThreadListener>();
         
         _doc.addDocumentListener(this);
         
@@ -50,11 +55,16 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
         _doc.removeDocumentListener(this);        
     }
     
+    public void addListener(ProcessingThreadListener listener)
+    {
+        _listeners.add(listener);
+    }
+    
     public void run()
     {
         while(true)
         {                
-            while(_documentChanged)
+            while(_documentChanged || _docIsChanging)
             {
                 _documentChanged = false;
                 try
@@ -82,6 +92,11 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
             }
         }
         _bracketContainer.deleteAllMarked();
+        
+        for (ProcessingThreadListener listener : _listeners)
+        {
+            listener.processingContainerUpdated();
+        }
 
     }
     
@@ -134,7 +149,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
     @Override
     public void documentAboutToBeChanged(DocumentEvent event)
     {
-        // nothing...
+        _docIsChanging = true;
     }
     
     @Override
@@ -142,6 +157,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
     {
         // TODO put the event in an events list so that the processor could parse only part of the file
 
+        _docIsChanging = false;
         synchronized (_docChangedLock)
         {
             _documentChanged = true;

@@ -56,6 +56,7 @@ public abstract class BracketeerProcessor implements IDocumentListener
     {
         try
         {
+            Activator.log("doc about to be chnaged");
             _cancelProcessing = true;        
             _processingCanceled.acquire();
         }

@@ -33,6 +33,7 @@ import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.JFaceTextUtil;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -62,7 +63,8 @@ import com.chookapp.org.bracketeer.common.SingleBracket;
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 
 
-public class BracketsHighlighter implements CaretListener, Listener, PaintListener, IDisposable, IPainter 
+public class BracketsHighlighter implements CaretListener, Listener, 
+    PaintListener, IDisposable, IPainter, ProcessingThreadListener 
 {
 
 	private static final int UNMATCHED_BRACKET_COLOR_CODE = 20;
@@ -78,7 +80,6 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 	private List<PaintableObject> _hoveredPairsToPaint;
 	private List<PaintableObject> _surroundingPairsToPaint;
 	private List<PaintableObject> _singleBracketsToPaint;
-	
 	
 	public BracketsHighlighter()
 	{
@@ -117,6 +118,7 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 	public void Init(BracketeerProcessor processor, IEditorPart part, ITextViewer textViewer) {
 		
 	    _processingThread = new ProcessingThread(part, processor);
+	    _processingThread.addListener(this);
 		_sourceViewer = (ISourceViewer) textViewer;
 		_part = part;
 		_textWidget = _sourceViewer.getTextWidget();
@@ -139,10 +141,10 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
 	{
 	    int caret = event.caretOffset;
 	    caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
+	    caret -= 1;
 	    caretMovedTo(caret);
 	}
 	
-
 
     /*
 	 * Events:
@@ -210,6 +212,27 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
         }
 	    
 	   
+	}
+
+	public ITextViewer getTextViewer()
+	{
+	    return _sourceViewer;
+	}
+
+	@Override
+	public void processingContainerUpdated()
+	{	
+	    _textWidget.getDisplay().asyncExec(new Runnable()
+        {            
+            @Override
+            public void run()
+            {
+                int caret = _textWidget.getCaretOffset();
+                caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
+                caret -= 1;
+                caretMovedTo(caret);
+            }
+        });
 	}
 	
     /************************************************************
@@ -571,8 +594,5 @@ public class BracketsHighlighter implements CaretListener, Listener, PaintListen
         }
     }
 
-    public ITextViewer getTextViewer()
-    {
-        return _sourceViewer;
-    }
+   
 }

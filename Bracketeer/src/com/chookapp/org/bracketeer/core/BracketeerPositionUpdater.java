@@ -5,6 +5,7 @@ import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.Position;
 
+import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.SortedPosition;
 
 
@@ -19,7 +20,7 @@ public class BracketeerPositionUpdater extends DefaultPositionUpdater
     public void update(DocumentEvent event) {
 
         try {
-
+            Activator.log("Update started...");
 
             fOffset= event.getOffset();
             fLength= event.getLength();
@@ -47,6 +48,7 @@ public class BracketeerPositionUpdater extends DefaultPositionUpdater
             // do nothing
         } finally {
             fDocument= null;
+            Activator.log("Update done.");
         }
     }
 }
