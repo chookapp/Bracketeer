@@ -1,17 +1,19 @@
 package com.chookapp.org.bracketeer.common;
 
+import org.eclipse.jface.text.Position;
+
 public class SingleBracket
 {
-    SortedPosition _position;
+    Position _position;
     boolean _isOpening; // is this an opening bracket, such as "("
     
     public SingleBracket(int offset, boolean isOpening)
     {
-        _position = new SortedPosition(offset, 1);
+        _position = new Position(offset, 1);
         _isOpening = isOpening;
     }
     
-    public SortedPosition getPosition()
+    public Position getPosition()
     {
         return _position;
     }

@@ -15,7 +15,9 @@
 
 package com.chookapp.org.bracketeer.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -297,6 +299,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     {
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
         List<BracketsPair> listOfPairs = cont.getPairsSurrounding(caretOffset, 4);
+        listOfPairs = sortPairs(listOfPairs);
         
         // do nothing if _surroundingPairsToPaint is equal to listOfPairs
         if(areEqual(listOfPairs, _surroundingPairsToPaint))
@@ -311,6 +314,28 @@ public class BracketsHighlighter implements CaretListener, Listener,
         return true;
     }
     
+    private List<BracketsPair> sortPairs(List<BracketsPair> listOfPairs)
+    {
+        List<BracketsPair> ret = new ArrayList<BracketsPair>(listOfPairs.size());
+        
+        for (BracketsPair pair : listOfPairs)
+        {
+            int i = 0;
+            while( i < ret.size() )
+            {
+                if( ret.get(i).getOpeningBracket().getPosition().offset <
+                    pair.getOpeningBracket().getPosition().offset )
+                {
+                    break;
+                }
+                i++;
+            }
+            ret.add(i, pair);
+        }
+        
+        return ret;
+    }
+
     private void mouseHoverAt(StyledText st, int origCaret)
     {
 
@@ -321,11 +346,11 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         int length = 4;
         int startPoint = origCaret-2;
-        int endPoint = origCaret+2;
         
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
-        List<BracketsPair> listOfPairs = cont.getMatchingPairs(startPoint, endPoint);
-                
+        List<BracketsPair> listOfPairs = cont.getMatchingPairs(startPoint, length);
+        listOfPairs = sortPairs(listOfPairs);
+        
         if(listOfPairs.isEmpty())
             return;        
         
@@ -335,18 +360,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         clearHoveredPairsToPaint();        
         synchronized (_hoveredPairsToPaint)
-        {            
-            int colorCode = 1;
-            int colorCodeStep = 1;
-            
-            if( listOfPairs.get(0).getOpeningBracket().getPosition().overlapsWith(startPoint, length) )
-            {
-                colorCode = listOfPairs.size();
-                colorCodeStep = -1;
-            }
-            
-            addPaintableObjects(listOfPairs, colorCode,
-                                colorCodeStep, _hoveredPairsToPaint);
+        {           
+            addPaintableObjects(listOfPairs, 1, 1, _hoveredPairsToPaint);
         }
         
         // TODO: optimize? (redraw only the needed sections)

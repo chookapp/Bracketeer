@@ -5,27 +5,25 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
+import org.eclipse.jface.text.Position;
 import org.eclipse.ui.services.IDisposable;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.core.BracketeerPositionUpdater;
 
 public class BracketeerProcessingContainer implements IDisposable
 {
-    private class MapObjectContainer<T>
+    private class ObjectContainer<T>
     {
         private T _object;
         private boolean _toDelete;
         
-        public MapObjectContainer(T obj)
+        public ObjectContainer(T obj)
         {
             _object = obj;
         }
@@ -44,13 +42,27 @@ public class BracketeerProcessingContainer implements IDisposable
         {
             _toDelete = toDelete;
         }
+        
+        @Override
+        public boolean equals(Object other)
+        {
+            if( other == null )
+                return false;
+            
+            if( other instanceof ObjectContainer<?> )
+            {
+                return _object.equals(((ObjectContainer<?>) other)._object);
+            }
+            
+            return _object.equals(other);            
+        }
     }    
  
         
     private IDocument _doc;
     
     private List<SingleBracket> _singleBrackets;
-    private TreeMap<SortedPosition, MapObjectContainer<BracketsPair>> _bracketsPairMap;
+    private List<ObjectContainer<BracketsPair>> _bracketsPairList;
     
     private String _positionCategory;
     private IPositionUpdater _positionUpdater;
@@ -58,14 +70,14 @@ public class BracketeerProcessingContainer implements IDisposable
     public BracketeerProcessingContainer(IDocument doc)
     {
         _singleBrackets = new ArrayList<SingleBracket>();
-        _bracketsPairMap = new TreeMap<SortedPosition, MapObjectContainer<BracketsPair>>();
+        _bracketsPairList = new LinkedList<ObjectContainer<BracketsPair>>();
         
         _doc = doc;
         
         _positionCategory = "bracketeerPosition";
         
         _doc.addPositionCategory(_positionCategory);
-        _positionUpdater = new BracketeerPositionUpdater(_positionCategory);
+        _positionUpdater = new DefaultPositionUpdater(_positionCategory);
         _doc.addPositionUpdater(_positionUpdater);        
     }
     
@@ -85,49 +97,58 @@ public class BracketeerProcessingContainer implements IDisposable
     
     public void add(BracketsPair pair)
     {
-        MapObjectContainer<BracketsPair> existing = 
-                _bracketsPairMap.get(pair.getBrackets().get(0).getPosition());
-        
-        if( existing != null && existing.getObject().equals(pair) )
+        synchronized(_bracketsPairList)
         {
-            Assert.isTrue(existing.isToDelete());
-            existing.setToDelete(false);
-            return;
-        }
-        
-        MapObjectContainer<BracketsPair> pairContainer =
-                new MapObjectContainer<BracketsPair>(pair);
-        
-        for (SingleBracket bracket : pair.getBrackets())
-        {
-            try
-            {
-                _doc.addPosition(_positionCategory, bracket.getPosition());
-            }
-            catch (Exception e)
-            {
-                Activator.log(e);
-            }
+            ObjectContainer<BracketsPair> existing = 
+                    findExistingObj(_bracketsPairList, pair);
             
-            SortedPosition spos = bracket.getPosition();
-            existing = _bracketsPairMap.get(spos);
             if( existing != null )
             {
                 Assert.isTrue(existing.isToDelete());
-                delete(existing);
+                if(  existing.equals(pair) )
+                {
+                    existing.setToDelete(false);
+                    return;
+                }
+                else
+                {
+                    delete(existing);
+                }
             }
             
-            spos.setContainer(_bracketsPairMap);
-            existing = _bracketsPairMap.put(spos, pairContainer);
-            Assert.isTrue(existing == null);
+            ObjectContainer<BracketsPair> pairContainer =
+                    new ObjectContainer<BracketsPair>(pair);
+            
+            _bracketsPairList.add(pairContainer);
+            for (SingleBracket br : pair.getBrackets())
+            {
+                try
+                {
+                    _doc.addPosition(_positionCategory, br.getPosition());
+                }
+                catch (Exception e)
+                {
+                    Activator.log(e);
+                }
+            }
         }
     }
     
-    private void delete(SortedPosition position)
+    private ObjectContainer<BracketsPair> findExistingObj(List<ObjectContainer<BracketsPair>> bracketsPairList,
+                                                          BracketsPair pair)
+    {
+        for (ObjectContainer<BracketsPair> objCont : bracketsPairList)
+        {
+            if(objCont.equals(pair))
+                return objCont;
+        }
+        return null;
+    }
+
+    private void delete(Position position)
     {
         try
         {
-            position.setContainer(null);
             _doc.removePosition(_positionCategory, position);
         }
         catch (BadPositionCategoryException e)
@@ -136,28 +157,24 @@ public class BracketeerProcessingContainer implements IDisposable
         }
     }
     
-    private void delete(MapObjectContainer<BracketsPair> mapObj)
-    {        
-        for (SingleBracket bracket : mapObj.getObject().getBrackets())
+    private void delete(ObjectContainer<BracketsPair> objCont)
+    {   
+        synchronized(_bracketsPairList)
         {
-            SortedPosition spos = bracket.getPosition();
-            MapObjectContainer<BracketsPair> existing = _bracketsPairMap.remove(spos);
-            if( existing == null || spos.isDeleted )
+            boolean found = _bracketsPairList.remove(objCont);
+            Assert.isTrue(found);        
+            
+            for (SingleBracket bracket : objCont.getObject().getBrackets())
             {
-                Assert.isTrue(existing == null && spos.isDeleted);
-            }
-            else
-            {
-                Assert.isTrue(mapObj.getObject().equals(existing.getObject()));
                 delete(bracket.getPosition());
             }
         }
     }
     
-    static <T> List<T> mapObjListToObjList(Collection<MapObjectContainer<T>> vals)
+    static <T> List<T> mapObjListToObjList(Collection<ObjectContainer<T>> vals)
     {
         List<T> retVal = new LinkedList<T>();
-        for (MapObjectContainer<T> mapObj : vals)
+        for (ObjectContainer<T> mapObj : vals)
         {
             if( !retVal.contains(mapObj.getObject()) && !mapObj.isToDelete() )
                 retVal.add(mapObj.getObject());
@@ -170,68 +187,84 @@ public class BracketeerProcessingContainer implements IDisposable
         _singleBrackets.add(bracket);
     }    
         
-    //public final Collection<BracketsPair> getBracketsPairs() { return _bracketsPairMap.values(); }
+    //public final Collection<BracketsPair> getBracketsPairs() { return _bracketsPairList.values(); }
     public final List<SingleBracket> getSingleBrackets() { return _singleBrackets; }
 
     public BracketsPair getMatchingPair(int offset)
     {
-        // TODO: but what if the position is updated when we access it?
-        MapObjectContainer<BracketsPair> mapObj = _bracketsPairMap.get(new SortedPosition(offset, 1));
-        if(mapObj == null || mapObj.isToDelete())
-            return null;
-        
-        return mapObj.getObject();
+        synchronized(_bracketsPairList)
+        {
+            for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
+            {
+                if(!objCont.isToDelete() && 
+                   objCont.getObject().getBracketAt(offset) != null )
+                {
+                    return objCont.getObject();
+                }
+            }
+        }
+        return null;
     }
 
     public void markAllToBeDeleted()
     {
-        for (MapObjectContainer<BracketsPair> mapObj : _bracketsPairMap.values())
+        synchronized(_bracketsPairList)
         {
-            mapObj.setToDelete(true);
+            for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
+            {
+                objCont.setToDelete(true);
+            }
         }
     }
 
     public void deleteAllMarked()
     {
-        Iterator<Entry<SortedPosition, MapObjectContainer<BracketsPair>>> it =
-                _bracketsPairMap.entrySet().iterator();
-        while(it.hasNext())
+        synchronized(_bracketsPairList)
         {
-            Entry<SortedPosition, MapObjectContainer<BracketsPair>> entry =
-                    it.next();
-            if(entry.getValue().isToDelete())
+            Iterator<ObjectContainer<BracketsPair>> it = _bracketsPairList.iterator();
+            while(it.hasNext())
             {
-                delete(entry.getKey());
-                it.remove();
+                ObjectContainer<BracketsPair> objCont = it.next();
+                
+                if( objCont.isToDelete() )
+                {
+                    for (SingleBracket bracket : objCont.getObject().getBrackets())
+                    {
+                        delete(bracket.getPosition());
+                    }
+                    it.remove();
+                }
             }
         }
     }
 
     public List<BracketsPair> getPairsSurrounding(int offset, int count)
     {
-        SortedPosition startPos = new SortedPosition(offset,0);
-        Collection<MapObjectContainer<BracketsPair>> pairs = 
-                _bracketsPairMap.tailMap(startPos, false).values();
         List<BracketsPair> retVal = new LinkedList<BracketsPair>();
         
-        for (MapObjectContainer<BracketsPair> mapObj : pairs)
+        synchronized(_bracketsPairList)
         {
-            if( mapObj.isToDelete() )
-                continue;
-            
-            BracketsPair pair = mapObj.getObject();
-            
-            SingleBracket opBr = pair.getOpeningBracket();
-            SingleBracket clBr = pair.getClosingBracket();
-            
-            if( opBr.getPosition().offset <= offset )
+            for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
             {
-                Assert.isTrue(clBr.getPosition().offset > offset);
-                if( !retVal.contains(pair) )
+                if( objCont.isToDelete() )
+                    continue;
+                
+                BracketsPair pair = objCont.getObject();
+                if( pair.hasDeletedPosition() )
+                    continue;            
+                
+                SingleBracket opBr = pair.getOpeningBracket();
+                SingleBracket clBr = pair.getClosingBracket();
+                
+                if( (opBr.getPosition().offset <= offset) &&
+                    (clBr.getPosition().offset > offset) )
                 {
-                    retVal.add(pair);
-                    if(retVal.size() == count)
-                        break;
+                    if( !retVal.contains(pair) )
+                    {
+                        retVal.add(pair);
+                        if(retVal.size() == count)
+                            break;
+                    }
                 }
             }
         }
@@ -240,14 +273,31 @@ public class BracketeerProcessingContainer implements IDisposable
     }
 
    
-    public List<BracketsPair> getMatchingPairs(int startOfset, int endOfset)
+    public List<BracketsPair> getMatchingPairs(int startOffset, int length)
     {
-        SortedPosition startPos = new SortedPosition(startOfset,0);
-        SortedPosition endPos = new SortedPosition(endOfset,0);
-        Collection<MapObjectContainer<BracketsPair>> vals = 
-                _bracketsPairMap.subMap(startPos, true, endPos, true).values();
-        
-        return mapObjListToObjList(vals);
+        List<BracketsPair> retVal = new LinkedList<BracketsPair>();
+        synchronized(_bracketsPairList)
+        {
+            for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
+            {
+                if( objCont.isToDelete() )
+                    continue;
+                
+                BracketsPair pair = objCont.getObject();
+                
+                for (SingleBracket br : pair.getBrackets())
+                {
+                    Position pos = br.getPosition();
+                    if(!pos.isDeleted && pos.overlapsWith(startOffset, length) &&
+                       !retVal.contains(pair) )
+                    {
+                        retVal.add(pair);
+                        break;
+                    }
+                }
+            }
+        }
+        return retVal;        
     }
 
     

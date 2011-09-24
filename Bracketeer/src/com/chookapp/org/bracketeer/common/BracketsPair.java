@@ -15,6 +15,8 @@ package com.chookapp.org.bracketeer.common;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.text.Position;
+
 public class BracketsPair
 {
     private List<SingleBracket> _brackets;
@@ -70,5 +72,26 @@ public class BracketsPair
     public SingleBracket getClosingBracket()
     {
         return _brackets.get(1);
+    }
+
+    public SingleBracket getBracketAt(int offset)
+    {
+        for (SingleBracket br : _brackets)
+        {
+            Position pos = br.getPosition();
+            if( pos.offset == offset && !pos.isDeleted)
+                return br;
+        }
+        return null;
+    }
+
+    public boolean hasDeletedPosition()
+    {
+        for (SingleBracket br : _brackets)
+        {
+            if( br.getPosition().isDeleted )
+                return true;
+        }
+        return false;
     }
 }
