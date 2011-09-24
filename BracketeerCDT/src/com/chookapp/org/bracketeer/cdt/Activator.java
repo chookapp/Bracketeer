@@ -1,10 +1,16 @@
 package com.chookapp.org.bracketeer.cdt;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+    // The plug-in ID
+    public static final String PLUGIN_ID = "com.chookapp.org.Braketeer.CDT"; //$NON-NLS-1$
+    
 	private static BundleContext context;
 
 	static BundleContext getContext() {
@@ -26,5 +32,28 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext bundleContext) throws Exception {
 		Activator.context = null;
 	}
+
+	/**
+	 * @param e
+	 */
+    public static void log(Throwable e) {
+        Platform.getLog(context.getBundle()).log(getStatus(e));
+    }
+
+    public static void log(String message) {
+        Platform.getLog(context.getBundle()).log(new Status(Status.ERROR, PLUGIN_ID, message));
+    }
+    
+    public static void trace(String message) {
+        System.out.println(message);
+    }
+    
+    /**
+     * @param e
+     * @return
+     */
+    public static IStatus getStatus(Throwable e) {
+        return new Status(Status.WARNING, PLUGIN_ID, e.getLocalizedMessage(), e);
+    }       
 
 }
