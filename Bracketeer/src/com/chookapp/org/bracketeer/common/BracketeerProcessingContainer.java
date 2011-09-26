@@ -117,7 +117,7 @@ public class BracketeerProcessingContainer implements IDisposable
     }
 
 
-    public List<BracketsPair> getPairsSurrounding(int offset, int count)
+    public List<BracketsPair> getPairsSurrounding(int offset)
     {
         List<BracketsPair> retVal = new LinkedList<BracketsPair>();
         
@@ -140,9 +140,7 @@ public class BracketeerProcessingContainer implements IDisposable
                 {
                     if( !retVal.contains(pair) )
                     {
-                        retVal.add(pair);
-                        if(retVal.size() == count)
-                            break;
+                        retVal.add(pair);                     
                     }
                 }
             }

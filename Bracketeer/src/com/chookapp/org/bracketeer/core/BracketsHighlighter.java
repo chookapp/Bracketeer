@@ -307,8 +307,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
     private boolean updateSurroundingPairsToPaint(int caretOffset)
     {
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
-        List<BracketsPair> listOfPairs = cont.getPairsSurrounding(caretOffset, 4);
+        List<BracketsPair> listOfPairs = cont.getPairsSurrounding(caretOffset);
         listOfPairs = sortPairs(listOfPairs);
+        listOfPairs = listOfPairs.subList(0, Math.min(4, listOfPairs.size()));
         
         // do nothing if _surroundingPairsToPaint is equal to listOfPairs
         if(areEqualPairs(listOfPairs, _surroundingPairsToPaint))
