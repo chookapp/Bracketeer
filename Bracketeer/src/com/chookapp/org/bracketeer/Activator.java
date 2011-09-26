@@ -13,6 +13,8 @@ public class Activator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.chookapp.org.Braketeer"; //$NON-NLS-1$
 
+    public static final boolean DEBUG = true;
+
 	// The shared instance
 	private static Activator plugin;
 	
@@ -59,6 +61,10 @@ public class Activator extends AbstractUIPlugin {
 	public static void log(String message) {
 		getDefault().getLog().log(new Status(Status.ERROR, PLUGIN_ID, message));
 	}
+
+	public static void trace(String message) {
+        getDefault().getLog().log(new Status(Status.INFO, PLUGIN_ID, message));
+    }
 
 	/**
 	 * @param e
