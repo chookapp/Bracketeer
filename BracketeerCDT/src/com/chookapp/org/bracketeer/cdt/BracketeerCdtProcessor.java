@@ -96,19 +96,15 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
     protected void processDocument(IDocument doc,
                                    BracketeerProcessingContainer container)
     {
-        Activator.trace("starting process...");
+        if(Activator.DEBUG)
+            Activator.trace("starting process...");
         for(int i = 1; i < doc.getLength(); i++)
-        {
-            if( container.getMatchingPair(i-1) != null )
-            {
-                Activator.trace("matching pair already found at " + (i-1));
-                continue;
-            }
-            
+        {           
             BracketsPair pair = getMatchingPair(doc, i);
             if(pair != null)
             {
-                Activator.trace("matching pair added: " + pair.toString());
+                if(Activator.DEBUG)
+                    Activator.trace("matching pair added: " + pair.toString());
                 container.add(pair);
                 continue;
             }
@@ -120,7 +116,8 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
             if( _cancelProcessing )
                 break;
         }
-        Activator.trace("process ended ("+_cancelProcessing+")");
+        if(Activator.DEBUG)
+            Activator.trace("process ended (" + _cancelProcessing + ")");
     }
 
 

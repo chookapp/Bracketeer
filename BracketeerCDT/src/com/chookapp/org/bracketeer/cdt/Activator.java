@@ -10,6 +10,8 @@ public class Activator implements BundleActivator {
 
     // The plug-in ID
     public static final String PLUGIN_ID = "com.chookapp.org.Braketeer.CDT"; //$NON-NLS-1$
+
+    public static final boolean DEBUG = false;
     
 	private static BundleContext context;
 
