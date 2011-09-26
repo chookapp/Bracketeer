@@ -61,7 +61,7 @@ public class BracketeerProcessingContainer implements IDisposable
         
     private IDocument _doc;
     
-    private List<SingleBracket> _singleBrackets;
+    private List<ObjectContainer<SingleBracket>> _singleBrackets;
     private List<ObjectContainer<BracketsPair>> _bracketsPairList;
     
     private String _positionCategory;
@@ -69,7 +69,7 @@ public class BracketeerProcessingContainer implements IDisposable
     
     public BracketeerProcessingContainer(IDocument doc)
     {
-        _singleBrackets = new ArrayList<SingleBracket>();
+        _singleBrackets = new ArrayList<ObjectContainer<SingleBracket>>();
         _bracketsPairList = new LinkedList<ObjectContainer<BracketsPair>>();
         
         _doc = doc;
@@ -105,14 +105,14 @@ public class BracketeerProcessingContainer implements IDisposable
             if( existing != null )
             {
                 Assert.isTrue(existing.isToDelete());
-                if(  existing.equals(pair) )
+                if(  existing.equals(pair) && !existing.getObject().hasDeletedPosition() )
                 {
                     existing.setToDelete(false);
                     return;
                 }
                 else
                 {
-                    delete(existing);
+                    deletePair(existing);
                 }
             }
             
@@ -122,24 +122,29 @@ public class BracketeerProcessingContainer implements IDisposable
             _bracketsPairList.add(pairContainer);
             for (SingleBracket br : pair.getBrackets())
             {
-                try
-                {
-                    _doc.addPosition(_positionCategory, br.getPosition());
-                }
-                catch (Exception e)
-                {
-                    Activator.log(e);
-                }
+                addPosition(br.getPosition());
             }
         }
     }
     
-    private ObjectContainer<BracketsPair> findExistingObj(List<ObjectContainer<BracketsPair>> bracketsPairList,
-                                                          BracketsPair pair)
+    private void addPosition(Position position)
     {
-        for (ObjectContainer<BracketsPair> objCont : bracketsPairList)
+        try
         {
-            if(objCont.equals(pair))
+            _doc.addPosition(_positionCategory, position);
+        }
+        catch (Exception e)
+        {
+            Activator.log(e);
+        }
+    }
+
+    private static <T> ObjectContainer<T> findExistingObj(List<ObjectContainer<T>> objList,
+                                                          T obj)
+    {
+        for (ObjectContainer<T> objCont : objList)
+        {
+            if(objCont.equals(obj))
                 return objCont;
         }
         return null;
@@ -157,7 +162,7 @@ public class BracketeerProcessingContainer implements IDisposable
         }
     }
     
-    private void delete(ObjectContainer<BracketsPair> objCont)
+    private void deletePair(ObjectContainer<BracketsPair> objCont)
     {   
         synchronized(_bracketsPairList)
         {
@@ -168,6 +173,18 @@ public class BracketeerProcessingContainer implements IDisposable
             {
                 delete(bracket.getPosition());
             }
+        }
+    }
+    
+    private void deleteSingle(ObjectContainer<SingleBracket> objCont)
+    {   
+        synchronized(_singleBrackets)
+        {
+            boolean found = _singleBrackets.remove(objCont);
+            Assert.isTrue(found);        
+            
+            SingleBracket bracket = objCont.getObject();
+            delete(bracket.getPosition());
         }
     }
     
@@ -184,12 +201,31 @@ public class BracketeerProcessingContainer implements IDisposable
 
     public void add(SingleBracket bracket)
     {
-        _singleBrackets.add(bracket);
+        synchronized(_singleBrackets)
+        {
+            ObjectContainer<SingleBracket> existing = 
+                    findExistingObj(_singleBrackets, bracket);
+            
+            if( existing != null )
+            {
+                Assert.isTrue(existing.isToDelete());
+                if(  existing.equals(bracket) && !existing.getObject().getPosition().isDeleted )
+                {
+                    existing.setToDelete(false);
+                    return;
+                }
+                else
+                {
+                    deleteSingle(existing);
+                }
+            }
+            
+            _singleBrackets.add(new ObjectContainer<SingleBracket>(bracket));
+            
+            addPosition(bracket.getPosition());
+        }
     }    
-        
-    //public final Collection<BracketsPair> getBracketsPairs() { return _bracketsPairList.values(); }
-    public final List<SingleBracket> getSingleBrackets() { return _singleBrackets; }
-
+    
     public BracketsPair getMatchingPair(int offset)
     {
         synchronized(_bracketsPairList)
@@ -215,6 +251,13 @@ public class BracketeerProcessingContainer implements IDisposable
                 objCont.setToDelete(true);
             }
         }
+        synchronized (_singleBrackets)
+        {
+            for (ObjectContainer<SingleBracket> objCont : _singleBrackets)
+            {
+                objCont.setToDelete(true);
+            }            
+        }
     }
 
     public void deleteAllMarked()
@@ -232,6 +275,20 @@ public class BracketeerProcessingContainer implements IDisposable
                     {
                         delete(bracket.getPosition());
                     }
+                    it.remove();
+                }
+            }
+        }
+        synchronized (_singleBrackets)
+        {
+            Iterator<ObjectContainer<SingleBracket>> it = _singleBrackets.iterator();
+            while(it.hasNext())
+            {
+                ObjectContainer<SingleBracket> objCont = it.next();
+                
+                if( objCont.isToDelete() )
+                {
+                    delete(objCont.getObject().getPosition());
                     it.remove();
                 }
             }
@@ -298,6 +355,22 @@ public class BracketeerProcessingContainer implements IDisposable
             }
         }
         return retVal;        
+    }
+
+    public List<SingleBracket> getSingleBrackets()
+    {
+        List<SingleBracket> ret = new LinkedList<SingleBracket>();
+        synchronized(_singleBrackets)
+        {
+            for (ObjectContainer<SingleBracket> objCont : _singleBrackets)
+            {
+                SingleBracket br = objCont.getObject();
+                
+                if( !objCont.isToDelete() && !br.getPosition().isDeleted )
+                    ret.add(br);
+            }
+        }
+        return ret;
     }
 
     

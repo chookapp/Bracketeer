@@ -228,11 +228,20 @@ public class BracketsHighlighter implements CaretListener, Listener,
         {            
             @Override
             public void run()
-            {
+            {                
                 int caret = _textWidget.getCaretOffset();
                 caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
                 caret -= 1;
-                caretMovedTo(caret);
+                
+                boolean update = updateSurroundingPairsToPaint(caret);
+                update |= updateSingleBrackets();
+                update |= clearHoveredPairsToPaint();
+                
+                if(update)
+                {
+                    // TODO: optimize? (redraw only the needed sections)
+                    _textWidget.redraw();
+                }
             }
         });
 	}
@@ -302,18 +311,37 @@ public class BracketsHighlighter implements CaretListener, Listener,
         listOfPairs = sortPairs(listOfPairs);
         
         // do nothing if _surroundingPairsToPaint is equal to listOfPairs
-        if(areEqual(listOfPairs, _surroundingPairsToPaint))
+        if(areEqualPairs(listOfPairs, _surroundingPairsToPaint))
             return false;
         
         clearSurroundingPairsToPaint();
         synchronized (_surroundingPairsToPaint)
         {            
-            addPaintableObjects(listOfPairs, 1, 1, _surroundingPairsToPaint);
+            addPaintableObjectsPairs(listOfPairs, 1, 1, _surroundingPairsToPaint);
         }
         
         return true;
     }
     
+    private boolean updateSingleBrackets()
+    {
+        BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
+        List<SingleBracket> list = cont.getSingleBrackets();
+
+        // do nothing if _surroundingPairsToPaint is equal to listOfPairs
+        if(areEqualSingle(list, _singleBracketsToPaint))
+            return false;
+        
+        clearSingleBracketsToPaint();
+        synchronized (_singleBracketsToPaint)
+        {            
+            addPaintableObjectsSingles(list, _singleBracketsToPaint);
+        }
+        
+        return true;
+    }
+
+
     private List<BracketsPair> sortPairs(List<BracketsPair> listOfPairs)
     {
         List<BracketsPair> ret = new ArrayList<BracketsPair>(listOfPairs.size());
@@ -355,13 +383,13 @@ public class BracketsHighlighter implements CaretListener, Listener,
             return;        
         
         // do nothing if _hoveredPairsToPaint is equal to listOfPairs
-        if(areEqual(listOfPairs, _hoveredPairsToPaint))
+        if(areEqualPairs(listOfPairs, _hoveredPairsToPaint))
             return;
         
         clearHoveredPairsToPaint();        
         synchronized (_hoveredPairsToPaint)
         {           
-            addPaintableObjects(listOfPairs, 1, 1, _hoveredPairsToPaint);
+            addPaintableObjectsPairs(listOfPairs, 1, 1, _hoveredPairsToPaint);
         }
         
         // TODO: optimize? (redraw only the needed sections)
@@ -370,8 +398,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
         //drawHighlights();
     }
 
-    private boolean areEqual(List<BracketsPair> listOfPairs,
-                             List<PaintableObject> pairsToPaint)    
+    private boolean areEqualPairs(List<BracketsPair> listOfPairs,
+                                  List<PaintableObject> pairsToPaint)    
     {
         if( listOfPairs.size()*2 != pairsToPaint.size() )
             return false;
@@ -397,9 +425,33 @@ public class BracketsHighlighter implements CaretListener, Listener,
         return true;
     }
 
-    private void addPaintableObjects(List<BracketsPair> listOfPairs,
-                                     int colorCode, int colorCodeStep,
-                                     List<PaintableObject> paintableObjectsList)
+    private boolean areEqualSingle(List<SingleBracket> list,
+                                   List<PaintableObject> singlesToPaint)    
+    {
+        if( list.size() != singlesToPaint.size() )
+            return false;
+        
+        for (SingleBracket bracket : list)
+        {
+            boolean found = false;
+            for (PaintableObject paintableObject : singlesToPaint)
+            {
+                if(paintableObject.getPosition().equals(bracket.getPosition()))
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found)
+                return false;
+        }
+        
+        return true;
+    }
+    
+    private void addPaintableObjectsPairs(List<BracketsPair> listOfPairs,
+                                          int colorCode, int colorCodeStep,
+                                          List<PaintableObject> paintableObjectsList)
     {
         for (BracketsPair bracketsPair : listOfPairs)
         {
@@ -412,6 +464,17 @@ public class BracketsHighlighter implements CaretListener, Listener,
                                                               0+(colorCode*50))));
             }
             colorCode += colorCodeStep;                
+        }
+    }
+
+    private void addPaintableObjectsSingles(List<SingleBracket> listOfSingles,
+                                            List<PaintableObject> paintableObjectsList)
+    {
+        for (SingleBracket bracket : listOfSingles)
+        {
+            paintableObjectsList.add(new PaintableObject(bracket.getPosition(),
+                                                         new RGB(255,255,255),
+                                                         new RGB(250, 0, 0)));
         }
     }
 
@@ -436,6 +499,19 @@ public class BracketsHighlighter implements CaretListener, Listener,
             if(!_surroundingPairsToPaint.isEmpty())
             {
                 _surroundingPairsToPaint.clear();
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private boolean clearSingleBracketsToPaint()
+    {
+        synchronized (_singleBracketsToPaint)
+        {
+            if(!_singleBracketsToPaint.isEmpty())
+            {
+                _singleBracketsToPaint.clear();
                 return true;
             }
         }
