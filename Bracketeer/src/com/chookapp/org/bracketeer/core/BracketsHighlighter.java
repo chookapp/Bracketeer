@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -82,6 +83,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	private List<PaintableObject> _hoveredPairsToPaint;
 	private List<PaintableObject> _surroundingPairsToPaint;
 	private List<PaintableObject> _singleBracketsToPaint;
+    private Point m_hoverEntryPoint;
 	
 	public BracketsHighlighter()
 	{
@@ -96,6 +98,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    _hoveredPairsToPaint = new LinkedList<PaintableObject>();
 	    _surroundingPairsToPaint = new LinkedList<PaintableObject>();
 	    _singleBracketsToPaint = new LinkedList<PaintableObject>();
+	    m_hoverEntryPoint = null;
 	}
 	
 	@Override
@@ -141,9 +144,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	@Override
 	public void caretMoved(CaretEvent event) 
 	{
-	    int caret = event.caretOffset;
-	    caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
-	    caret -= 1;
+	    int caret = getCurrentCaretOffset();
 	    caretMovedTo(caret);
 	}
 	
@@ -151,39 +152,49 @@ public class BracketsHighlighter implements CaretListener, Listener,
     /*
 	 * Events:
 	 * - MouseHover
+	 * - MouseMove
 	 * 
 	 * (non-Javadoc)
 	 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
 	 */
 	@Override
 	public void handleEvent(Event event) {
-		int caret;
-		try
-		{
-			caret = _textWidget.getOffsetAtLocation(new Point(event.x, event.y));
-			caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
-		}
-		catch(SWTException e)
-		{
-			Activator.log(e);
-			return;			
-		}
-		catch(IllegalArgumentException e)
-		{
-			return;
-		}
-		
-		try
-		{
-		    mouseHoverAt(_textWidget, caret);
-		} 
-		catch(Exception e )
-		{
-		    Activator.log(e);
-		}
+	    switch( event.type)
+	    {
+	    case SWT.MouseHover:
+    		try
+    		{
+    			int caret = _textWidget.getOffsetAtLocation(new Point(event.x, event.y));
+    			caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
+
+    		    if( mouseHoverAt(_textWidget, caret) )
+    		    {
+    		        m_hoverEntryPoint = new Point(event.x, event.y);    		        
+    		    }
+    		} 
+    		catch(Exception e )
+    		{
+    		    Activator.log(e);
+    		}
+    		break;
+    		
+	    case SWT.MouseMove:
+	        if( m_hoverEntryPoint == null )
+	            break;
+	        
+	        if( getDistanceBetween(new Point(event.x, event.y), m_hoverEntryPoint) > 20 )
+	        {
+	            caretMovedTo(getCurrentCaretOffset());
+	            m_hoverEntryPoint = null;
+	        }
+	        break;
+	        
+	    default:
+	        Assert.isTrue(false, "unexpected event " + event.type);
+	    }
 	}
-	
-	@Override
+
+    @Override
 	public void paintControl(PaintEvent event) 
 	{
 	    IRegion region = computeClippingRegion(event);
@@ -229,9 +240,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
             @Override
             public void run()
             {                
-                int caret = _textWidget.getCaretOffset();
-                caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
-                caret -= 1;
+                int caret = getCurrentCaretOffset();
                 
                 boolean update = updateSurroundingPairsToPaint(caret);
                 update |= updateSingleBrackets();
@@ -261,6 +270,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
             
             st.addCaretListener(this);
             st.addListener(SWT.MouseHover, this);
+            st.addListener(SWT.MouseMove, this);
             st.addPaintListener(this);
         }
     }
@@ -365,7 +375,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
         return ret;
     }
 
-    private void mouseHoverAt(StyledText st, int origCaret)
+    /*
+     * Return true iff the hover is not empty...
+     */
+    private boolean mouseHoverAt(StyledText st, int origCaret)
     {
 
 //        int startPoint = Math.max(0, origCaret - 2);
@@ -381,11 +394,11 @@ public class BracketsHighlighter implements CaretListener, Listener,
         listOfPairs = sortPairs(listOfPairs);
         
         if(listOfPairs.isEmpty())
-            return;        
+            return false;        
         
         // do nothing if _hoveredPairsToPaint is equal to listOfPairs
         if(areEqualPairs(listOfPairs, _hoveredPairsToPaint))
-            return;
+            return true;
         
         clearHoveredPairsToPaint();        
         synchronized (_hoveredPairsToPaint)
@@ -397,6 +410,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         _textWidget.redraw();
                 
         //drawHighlights();
+        return true;
     }
 
     private boolean areEqualPairs(List<BracketsPair> listOfPairs,
@@ -684,6 +698,19 @@ public class BracketsHighlighter implements CaretListener, Listener,
             
             return new Region(offset, length);
         }
+    }
+
+    private int getDistanceBetween(Point p1, Point p2)
+    {
+        return (int) Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+    }
+    
+    private int getCurrentCaretOffset()
+    {
+        int caret = _textWidget.getCaretOffset();
+        caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
+        caret -= 1;
+        return caret;
     }
 
    
