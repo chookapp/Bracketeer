@@ -43,7 +43,7 @@ public class PaintableObject
 
     public void paint(GC gc, StyledText st, IDocument doc, IRegion widgetRange)
     {
-        if(_position.isDeleted)
+        if(_position.isDeleted || _position.length == 0)
             return;
         
         if( widgetRange == null )

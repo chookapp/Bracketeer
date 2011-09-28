@@ -129,14 +129,13 @@ public class BracketeerProcessingContainer implements IDisposable
                     continue;
                 
                 BracketsPair pair = objCont.getObject();
-                if( pair.hasDeletedPosition() )
-                    continue;            
                 
-                SingleBracket opBr = pair.getOpeningBracket();
-                SingleBracket clBr = pair.getClosingBracket();
+                Position opBrPos = pair.getOpeningBracket().getPosition();
+                Position clBrPos = pair.getClosingBracket().getPosition();
+                if( (opBrPos == null) || (clBrPos == null) )
+                    continue;
                 
-                if( (opBr.getPosition().offset <= offset) &&
-                    (clBr.getPosition().offset > offset) )
+                if( (opBrPos.offset <= offset) && (clBrPos.offset > offset) )
                 {
                     if( !retVal.contains(pair) )
                     {
@@ -165,7 +164,7 @@ public class BracketeerProcessingContainer implements IDisposable
                 for (SingleBracket br : pair.getBrackets())
                 {
                     Position pos = br.getPosition();
-                    if(!pos.isDeleted && pos.overlapsWith(startOffset, length) &&
+                    if(pos != null && pos.overlapsWith(startOffset, length) &&
                        !retVal.contains(pair) )
                     {
                         retVal.add(pair);
@@ -186,7 +185,7 @@ public class BracketeerProcessingContainer implements IDisposable
             {
                 SingleBracket br = objCont.getObject();
                 
-                if( !objCont.isToDelete() && !br.getPosition().isDeleted )
+                if( !objCont.isToDelete() && br.getPosition() != null )
                     ret.add(br);
             }
         }
@@ -225,7 +224,7 @@ public class BracketeerProcessingContainer implements IDisposable
                 {
                     for (SingleBracket bracket : objCont.getObject().getBrackets())
                     {
-                        delete(bracket.getPosition());
+                        delete(bracket.getPositionRaw());
                     }
                     it.remove();
                 }
@@ -241,7 +240,7 @@ public class BracketeerProcessingContainer implements IDisposable
                 
                 if( objCont.isToDelete() )
                 {
-                    delete(objCont.getObject().getPosition());
+                    delete(objCont.getObject().getPositionRaw());
                     it.remove();
                 }
             }
@@ -315,7 +314,7 @@ public class BracketeerProcessingContainer implements IDisposable
             
             if( existing != null )
             {
-                if(  existing.equals(bracket) && !existing.getObject().getPosition().isDeleted )
+                if( existing.equals(bracket) && existing.getObject().getPosition() != null )
                 {
                     existing.setToDelete(false);
                     return;
@@ -336,7 +335,8 @@ public class BracketeerProcessingContainer implements IDisposable
     {
         try
         {
-            _doc.addPosition(_positionCategory, position);
+            if( position != null )
+                _doc.addPosition(_positionCategory, position);
         }
         catch (Exception e)
         {
@@ -376,7 +376,7 @@ public class BracketeerProcessingContainer implements IDisposable
             
             for (SingleBracket bracket : objCont.getObject().getBrackets())
             {
-                delete(bracket.getPosition());
+                delete(bracket.getPositionRaw());
             }
         }
     }
@@ -389,11 +389,12 @@ public class BracketeerProcessingContainer implements IDisposable
             Assert.isTrue(found);        
             
             SingleBracket bracket = objCont.getObject();
-            delete(bracket.getPosition());
+            delete(bracket.getPositionRaw());
         }
     }
     
-    static <T> List<T> mapObjListToObjList(Collection<ObjectContainer<T>> vals)
+    /*
+    private static <T> List<T> mapObjListToObjList(Collection<ObjectContainer<T>> vals)
     {
         List<T> retVal = new LinkedList<T>();
         for (ObjectContainer<T> mapObj : vals)
@@ -403,7 +404,8 @@ public class BracketeerProcessingContainer implements IDisposable
         }
         return retVal;
     }
-
+    */
+    
 
     
 }

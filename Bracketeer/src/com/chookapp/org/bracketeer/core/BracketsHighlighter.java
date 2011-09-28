@@ -362,8 +362,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
             int i = 0;
             while( i < ret.size() )
             {
-                if( ret.get(i).getOpeningBracket().getPosition().offset <
-                    pair.getOpeningBracket().getPosition().offset )
+                if( ret.get(i).getOpeningBracket().getPositionRaw().offset <
+                    pair.getOpeningBracket().getPositionRaw().offset )
                 {
                     break;
                 }
@@ -426,7 +426,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
                 boolean found = false;
                 for (PaintableObject paintableObject : pairsToPaint)
                 {
-                    if(paintableObject.getPosition().equals(bracket.getPosition()))
+                    if(paintableObject.getPosition().equals(bracket.getPositionRaw()))
                     {
                         found = true;
                         break;
@@ -451,7 +451,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
             boolean found = false;
             for (PaintableObject paintableObject : singlesToPaint)
             {
-                if(paintableObject.getPosition().equals(bracket.getPosition()))
+                if(paintableObject.getPosition().equals(bracket.getPositionRaw()))
                 {
                     found = true;
                     break;
@@ -472,7 +472,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
         {
             for( SingleBracket bracket : bracketsPair.getBrackets() )
             {
-                paintableObjectsList.add(new PaintableObject(bracket.getPosition(),
+                Position pos = bracket.getPositionRaw();
+                paintableObjectsList.add(new PaintableObject(pos,
                                                       new RGB(255,255,255),
                                                       new RGB(0+(colorCode*50),
                                                               0+(colorCode*50),
@@ -487,7 +488,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
     {
         for (SingleBracket bracket : listOfSingles)
         {
-            paintableObjectsList.add(new PaintableObject(bracket.getPosition(),
+            Position pos = bracket.getPositionRaw();
+            paintableObjectsList.add(new PaintableObject(pos,
                                                          new RGB(255,255,255),
                                                          new RGB(250, 0, 0)));
         }

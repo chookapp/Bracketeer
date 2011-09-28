@@ -15,6 +15,14 @@ public class SingleBracket
     
     public Position getPosition()
     {
+        if (!_position.isDeleted && _position.length > 0)
+            return _position;
+        else
+            return null;
+    }
+    
+    public Position getPositionRaw()
+    {
         return _position;
     }
     
@@ -45,4 +53,6 @@ public class SingleBracket
     {
         return _position.hashCode() ^ (_isOpening ? 2 : 4);
     }
+
+    
 }

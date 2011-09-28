@@ -79,7 +79,7 @@ public class BracketsPair
         for (SingleBracket br : _brackets)
         {
             Position pos = br.getPosition();
-            if( pos.offset == offset && !pos.isDeleted)
+            if( pos != null && pos.offset == offset )
                 return br;
         }
         return null;
@@ -89,7 +89,7 @@ public class BracketsPair
     {
         for (SingleBracket br : _brackets)
         {
-            if( br.getPosition().isDeleted )
+            if( br.getPosition() == null )
                 return true;
         }
         return false;
