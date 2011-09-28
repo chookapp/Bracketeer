@@ -172,6 +172,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
     		        m_hoverEntryPoint = new Point(event.x, event.y);    		        
     		    }
     		} 
+    		catch(IllegalArgumentException e)
+            {
+                return;
+            }
     		catch(Exception e )
     		{
     		    Activator.log(e);
