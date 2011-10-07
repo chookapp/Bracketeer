@@ -15,7 +15,6 @@ package com.chookapp.org.bracketeer.core;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IEditorPart;
@@ -28,7 +27,7 @@ public class ProcessorsRegistry
 {	
 	public static final String PROC_FACTORY_ID = "com.chookapp.org.bracketeer.processorsFactory";
 	public static final String SUPPORTED_BRACKETS_ATTR = "supportedBrackets";
-	
+
 	private List<IBracketeerProcessorsFactory> _processorFactories;
 	private List<ProcessorConfiguration> _processorConfigurations;
 	

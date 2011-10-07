@@ -4,15 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import com.chookapp.org.bracketeer.Activator;
@@ -116,8 +112,6 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     private String _name;
     
     private IPreferenceStore _prefStore;
-    private String _bracketFgColorAttr;
-
     
     public ProcessorConfiguration(IConfigurationElement confElement)
     {
@@ -127,27 +121,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         _name = confElement.getAttribute("name");
         
         List<IPreferenceStore> stores= new ArrayList<IPreferenceStore>();        
-        stores.add(EditorsUI.getPreferenceStore());
         stores.add(Activator.getDefault().getPreferenceStore());
-        
-        String qualifier = confElement.getAttribute("plugin_qualifier");
-        
-        if( qualifier != null && !qualifier.isEmpty() )
-        {
-            IPreferenceStore prefStore = 
-                    new ScopedPreferenceStore(InstanceScope.INSTANCE, 
-                                              qualifier);
-            if (prefStore != null)
-                stores.add(prefStore);
-        }
         
         _prefStore = new ChainedPreferenceStore(stores.toArray(new IPreferenceStore[stores.size()]));
         _prefStore.addPropertyChangeListener(this);
-        
-        _bracketFgColorAttr = confElement.getAttribute("bracket_fg_color_attr");
-        if( _bracketFgColorAttr == null || _bracketFgColorAttr.isEmpty() )
-            _bracketFgColorAttr = null;
-        
+
         updateConfiguartion();
     }
     
@@ -169,20 +147,14 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     private void updateConfiguartion()
     {
         RGB[] defColor = new RGB[2]; // 0 - BG, 1 - FG 
-        
-        if( !_prefStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT) )
-            defColor[0] = PreferenceConverter.getColor(_prefStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
-        
-        if( !_prefStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT) )
-            defColor[1] = PreferenceConverter.getColor(_prefStore, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND);
-     
-        if( _bracketFgColorAttr != null )
-            defColor[1] = PreferenceConverter.getColor(_prefStore, _bracketFgColorAttr);
+
+        defColor[0] = null;
+        defColor[1] = null;
 
         for( int fgIndex = 0; fgIndex < 2; fgIndex++ )
         {
             boolean foregound = (fgIndex == 1);  
-            
+
             /* default */ 
             
             if( !_prefStore.getBoolean( PreferencesConstants.preferencePath(_name) +
