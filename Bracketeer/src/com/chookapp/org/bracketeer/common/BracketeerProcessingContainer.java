@@ -105,8 +105,7 @@ public class BracketeerProcessingContainer implements IDisposable
         {
             for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
             {
-                if(!objCont.isToDelete() && 
-                   objCont.getObject().getBracketAt(offset) != null )
+                if(objCont.getObject().getBracketAt(offset) != null )
                 {
                     return objCont.getObject();
                 }
@@ -124,9 +123,6 @@ public class BracketeerProcessingContainer implements IDisposable
         {
             for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
             {
-                if( objCont.isToDelete() )
-                    continue;
-                
                 BracketsPair pair = objCont.getObject();
                 
                 Position opBrPos = pair.getOpeningBracket().getPosition();
@@ -155,9 +151,6 @@ public class BracketeerProcessingContainer implements IDisposable
         {
             for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
             {
-                if( objCont.isToDelete() )
-                    continue;
-                
                 BracketsPair pair = objCont.getObject();
                 
                 for (SingleBracket br : pair.getBrackets())
@@ -184,7 +177,7 @@ public class BracketeerProcessingContainer implements IDisposable
             {
                 SingleBracket br = objCont.getObject();
                 
-                if( !objCont.isToDelete() && br.getPosition() != null )
+                if( br.getPosition() != null )
                     ret.add(br);
             }
         }
