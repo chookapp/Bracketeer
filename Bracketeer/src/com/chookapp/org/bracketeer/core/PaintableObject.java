@@ -56,14 +56,22 @@ public class PaintableObject
         
         Point p = st.getLocationAtOffset(offset);
         
-        Color bg = new Color(Display.getDefault(), _background);
-        Color fg = new Color(Display.getDefault(), _foreground);
+        Color bg = null, fg = null;
+        Color oldBackground = null, oldForeground = null;
         
-        Color oldBackground = gc.getBackground();
-        Color oldForeground = gc.getForeground();
+        if( _background != null )
+        {
+            bg = new Color(Display.getDefault(), _background);
+            oldBackground = gc.getBackground();
+            gc.setBackground(bg);
+        }
         
-        gc.setBackground(bg);
-        gc.setForeground(fg);
+        if( _foreground != null )
+        {
+            fg = new Color(Display.getDefault(), _foreground);
+            oldForeground = gc.getForeground();
+            gc.setForeground(fg);
+        }
         
         try
         {
@@ -74,11 +82,17 @@ public class PaintableObject
             Activator.log(e);
         }
         
-        gc.setBackground(oldBackground);
-        gc.setForeground(oldForeground);                
+        if( _background != null )
+        {
+            gc.setBackground(oldBackground);
+            bg.dispose();
+        }
+        if( _foreground != null )
+        {
+            gc.setForeground(oldForeground);                
+            fg.dispose();
+        }
         
-        bg.dispose();
-        fg.dispose();        
     }
         
    

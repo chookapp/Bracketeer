@@ -16,15 +16,10 @@
 package com.chookapp.org.bracketeer.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPaintPositionManager;
@@ -36,13 +31,9 @@ import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.JFaceTextUtil;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
@@ -54,10 +45,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.services.IDisposable;
-import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
 
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.BracketeerProcessingContainer;
@@ -70,16 +57,15 @@ public class BracketsHighlighter implements CaretListener, Listener,
     PaintListener, IDisposable, IPainter, ProcessingThreadListener 
 {
 
-	private static final int UNMATCHED_BRACKET_COLOR_CODE = 20;
     private ISourceViewer _sourceViewer;
     private StyledText _textWidget;
     private IEditorPart _part;
 	private ProcessingThread _processingThread;
+	private ProcessorConfiguration _conf;
 	private IPaintPositionManager _positionManager;	
 	
 	private boolean _isActive;
 	
-	private Object _objectsToPaintListsLock;
 	private List<PaintableObject> _hoveredPairsToPaint;
 	private List<PaintableObject> _surroundingPairsToPaint;
 	private List<PaintableObject> _singleBracketsToPaint;
@@ -91,10 +77,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    _processingThread = null;
 	    _positionManager = null;
 	    _textWidget = null;
+	    _conf = null;
 	    
 	    _isActive = false;
 	    
-	    _objectsToPaintListsLock = new Object();
 	    _hoveredPairsToPaint = new LinkedList<PaintableObject>();
 	    _surroundingPairsToPaint = new LinkedList<PaintableObject>();
 	    _singleBracketsToPaint = new LinkedList<PaintableObject>();
@@ -120,13 +106,16 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	 * @param part 
 	 ************************************************************/
 	
-	public void Init(BracketeerProcessor processor, IEditorPart part, ITextViewer textViewer) {
+	public void Init(BracketeerProcessor processor, IEditorPart part, 
+	                 ITextViewer textViewer, ProcessorConfiguration conf) 
+	{
 		
-	    _processingThread = new ProcessingThread(part, processor);
-	    _processingThread.addListener(this);
 		_sourceViewer = (ISourceViewer) textViewer;
 		_part = part;
 		_textWidget = _sourceViewer.getTextWidget();
+		_conf = conf;
+        _processingThread = new ProcessingThread(part, processor);
+        _processingThread.addListener(this);		
         
         ITextViewerExtension2 extension= (ITextViewerExtension2) textViewer;
         extension.addPainter(this);
@@ -332,7 +321,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         clearSurroundingPairsToPaint();
         synchronized (_surroundingPairsToPaint)
         {            
-            addPaintableObjectsPairs(listOfPairs, 1, 1, _surroundingPairsToPaint);
+            addPaintableObjectsPairs(listOfPairs, 0, 1, _surroundingPairsToPaint);
         }
         
         return true;
@@ -407,7 +396,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         clearHoveredPairsToPaint();        
         synchronized (_hoveredPairsToPaint)
         {           
-            addPaintableObjectsPairs(listOfPairs, 1, 1, _hoveredPairsToPaint);
+            addPaintableObjectsPairs(listOfPairs, 0, 1, _hoveredPairsToPaint);
         }
         
         // TODO: optimize? (redraw only the needed sections)
@@ -477,11 +466,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
             for( SingleBracket bracket : bracketsPair.getBrackets() )
             {
                 Position pos = bracket.getPositionRaw();
-                paintableObjectsList.add(new PaintableObject(pos,
-                                                      new RGB(255,255,255),
-                                                      new RGB(0+(colorCode*50),
-                                                              0+(colorCode*50),
-                                                              0+(colorCode*50))));
+                RGB fg = _conf.getPairConfiguration().getColor(true, colorCode);
+                RGB bg = _conf.getPairConfiguration().getColor(false, colorCode);
+                paintableObjectsList.add(new PaintableObject(pos, fg, bg));
             }
             colorCode += colorCodeStep;                
         }
@@ -493,9 +480,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
         for (SingleBracket bracket : listOfSingles)
         {
             Position pos = bracket.getPositionRaw();
-            paintableObjectsList.add(new PaintableObject(pos,
-                                                         new RGB(255,255,255),
-                                                         new RGB(250, 0, 0)));
+            RGB fg = _conf.getSingleBracketConfiguration().getColor(true);
+            RGB bg = _conf.getSingleBracketConfiguration().getColor(false);
+            paintableObjectsList.add(new PaintableObject(pos, fg, bg));
         }
     }
 

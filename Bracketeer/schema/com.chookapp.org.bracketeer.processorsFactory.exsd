@@ -49,6 +49,13 @@
 
    <element name="BracketeerProcessorsFactory">
       <complexType>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -59,10 +66,10 @@
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="name" type="string" use="required">
+         <attribute name="supportedBrackets" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  This is a string representing the brackets supported by thie plugin. Valid string exmaples: &quot;()&quot;, &quot;()[]{}&quot;, etc...
                </documentation>
             </annotation>
          </attribute>

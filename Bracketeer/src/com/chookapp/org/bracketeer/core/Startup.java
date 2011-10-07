@@ -29,15 +29,16 @@ import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 import com.chookapp.org.bracketeer.helpers.Utils;
 
 
-public class EditorEvents implements IStartup {
+public class Startup implements IStartup 
+{
 
 	private HashMap<IWorkbenchPart, BracketsHighlighter> _activeMap;
-	private MatchersRegistry _processorsRegistry;
+	private ProcessorsRegistry _processorsRegistry;
 	
-	public EditorEvents()
+	public Startup()
 	{
 		_activeMap = new HashMap<IWorkbenchPart, BracketsHighlighter>();
-		_processorsRegistry = new MatchersRegistry();
+		_processorsRegistry = new ProcessorsRegistry();
 	}
 	
 	public void earlyStartup()
@@ -117,7 +118,7 @@ public class EditorEvents implements IStartup {
 
         Display.getDefault().asyncExec(new Runnable() {
             public void run() {
-            	BracketeerProcessor processor = null;
+            	BracketeerProcessorInfo processor = null;
             	try 
             	{
             		processor = _processorsRegistry.findProcessorFor(part);
@@ -132,7 +133,9 @@ public class EditorEvents implements IStartup {
                 	return;
                 
             	BracketsHighlighter bracketsHighlighter = new BracketsHighlighter(); 
-            	bracketsHighlighter.Init(processor, part, textViewer);
+            	bracketsHighlighter.Init(processor.getProcessor(), 
+            	                         part, textViewer,
+            	                         processor.getConfiguration());
             	synchronized (_activeMap) {					
             		_activeMap.put(part, bracketsHighlighter);
             	}

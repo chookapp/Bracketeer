@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="com.chookapp.org.bracketeer.processors_factory" name="BracketeerProcessorsFactory" schema="schema/com.chookapp.org.bracketeer.processors_factory.exsd"/>
+   <extension-point id="com.chookapp.org.bracketeer.processorsFactory" name="BracketeerProcessorsFactory" schema="schema/com.chookapp.org.bracketeer.processorsFactory.exsd"/>
    <extension
          point="org.eclipse.ui.startup">
       <startup
-            class="com.chookapp.org.bracketeer.core.EditorEvents">
+            class="com.chookapp.org.bracketeer.core.Startup">
       </startup>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="Bracketeer.preferencePages.Main"
+            class="com.chookapp.org.bracketeer.preferences.HighlightingBracketsPrefPage"
+            id="Bracketeer.preferencePages.Main.BracketHighlighting"
+            name="Bracket Highlighting">
+      </page>
+      <page
+            category="org.eclipse.ui.preferencePages.Editors"
+            class="com.chookapp.org.bracketeer.preferences.MainPrefPage"
+            id="Bracketeer.preferencePages.Main"
+            name="Bracketeer">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.chookapp.org.bracketeer.preferences.PreferencesInitializer">
+      </initializer>
    </extension>
 
 </plugin>
