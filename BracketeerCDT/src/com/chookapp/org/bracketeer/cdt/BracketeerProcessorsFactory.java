@@ -14,7 +14,6 @@ package com.chookapp.org.bracketeer.cdt;
 
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessorsFactory;
-import com.chookapp.org.bracketeer.helpers.Utils;
 
 import org.eclipse.ui.IEditorPart;
 

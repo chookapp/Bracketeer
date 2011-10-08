@@ -21,11 +21,11 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.ui.IEditorPart;
 
 import com.chookapp.org.bracketeer.cdt.core.internals.CPairMatcher;
-import com.chookapp.org.bracketeer.common.BracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.BracketsPair;
+import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.SingleBracket;
+import com.chookapp.org.bracketeer.common.Utils;
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
-import com.chookapp.org.bracketeer.helpers.Utils;
 
 public class BracketeerCdtProcessor extends BracketeerProcessor
 {
@@ -104,7 +104,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
 
     @Override
     protected void processDocument(IDocument doc,
-                                   BracketeerProcessingContainer container)
+                                   IBracketeerProcessingContainer container)
     {
         if(Activator.DEBUG)
             Activator.trace("starting process...");
