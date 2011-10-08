@@ -62,10 +62,20 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         offset--;
         targetOffset--;
         
-        if( isAnchorOpening )
-            return new BracketsPair(offset, targetOffset);
-        else
-            return new BracketsPair(targetOffset, offset);
+        try
+        {
+            if( isAnchorOpening )
+                return new BracketsPair(offset, doc.getChar(offset), 
+                                        targetOffset, doc.getChar(targetOffset));
+            else
+                return new BracketsPair(targetOffset, doc.getChar(targetOffset), 
+                                        offset, doc.getChar(offset));
+        }
+        catch (BadLocationException e)
+        {
+            Activator.log(e);
+        }
+        return null;
     }
 
     private SingleBracket getLonelyBracket(IDocument doc, int offset)
@@ -83,7 +93,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
                     return null;
             }
             
-            return new SingleBracket(charOffset, Utils.isOpenningBracket(prevChar));
+            return new SingleBracket(charOffset, Utils.isOpenningBracket(prevChar), prevChar);
         }
         catch (BadLocationException e)
         {
