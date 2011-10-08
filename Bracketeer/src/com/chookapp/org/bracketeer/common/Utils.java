@@ -13,7 +13,7 @@
  *    "eclipsemissingfeatrues" plugin. 
  *******************************************************************************/
 
-package com.chookapp.org.bracketeer.helpers;
+package com.chookapp.org.bracketeer.common;
 
 import java.lang.reflect.Method;
 

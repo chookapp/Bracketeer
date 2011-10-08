@@ -11,8 +11,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.chookapp.org.bracketeer.common,
- com.chookapp.org.bracketeer.extensionpoint,
- com.chookapp.org.bracketeer.helpers
+ com.chookapp.org.bracketeer.extensionpoint
 Import-Package: org.eclipse.jface.text,
  org.eclipse.jface.text.source,
  org.eclipse.jface.text.source.projection,

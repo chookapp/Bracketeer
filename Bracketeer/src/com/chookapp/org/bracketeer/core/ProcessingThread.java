@@ -10,9 +10,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.services.IDisposable;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.common.BracketeerProcessingContainer;
+import com.chookapp.org.bracketeer.common.Utils;
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
-import com.chookapp.org.bracketeer.helpers.Utils;
 
 public class ProcessingThread implements Runnable, IDocumentListener, IDisposable
 {

@@ -1,4 +1,4 @@
-package com.chookapp.org.bracketeer.common;
+package com.chookapp.org.bracketeer.core;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,8 +14,11 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.ui.services.IDisposable;
 
 import com.chookapp.org.bracketeer.Activator;
+import com.chookapp.org.bracketeer.common.BracketsPair;
+import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
+import com.chookapp.org.bracketeer.common.SingleBracket;
 
-public class BracketeerProcessingContainer implements IDisposable
+public class BracketeerProcessingContainer implements IDisposable, IBracketeerProcessingContainer
 {
     private class ObjectContainer<T>
     {
@@ -93,27 +96,6 @@ public class BracketeerProcessingContainer implements IDisposable
             Activator.log(e);
         }            
     }
-    
-    /**
-     * Gets a pair which has a bracket in the specified offset
-     * @param offset the (absolute) offset of the bracket
-     * @return A pair, or null if no such pair found
-     */
-    public BracketsPair getMatchingPair(int offset)
-    {
-        synchronized(_bracketsPairList)
-        {
-            for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
-            {
-                if(objCont.getObject().getBracketAt(offset) != null )
-                {
-                    return objCont.getObject();
-                }
-            }
-        }
-        return null;
-    }
-
 
     public List<BracketsPair> getPairsSurrounding(int offset)
     {
@@ -253,13 +235,6 @@ public class BracketeerProcessingContainer implements IDisposable
         }
     }
 
-    
-    /**
-     * Adds a pair to the container
-     * If the pair already exists nothing happens
-     * Adding a pair which has a single bracket shared with another pair is illegal and would cause unexpected results  
-     * @param pair the pair to add
-     */
     public void add(BracketsPair pair)
     {
         synchronized(_bracketsPairList)
@@ -291,12 +266,7 @@ public class BracketeerProcessingContainer implements IDisposable
         }
     }
     
-    /**
-     * Adds a single bracket (has a missing pair) to the container
-     * If the bracket already exists (as a single bracket) nothing happens
-     * Adding a single bracket which is also in a pair is illegal and would cause unexpected results  
-     * @param bracket the single bracket to add
-     */
+    
     public void add(SingleBracket bracket)
     {
         synchronized(_singleBrackets)

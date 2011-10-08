@@ -20,8 +20,8 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.ui.IEditorPart;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.common.BracketeerProcessingContainer;
-import com.chookapp.org.bracketeer.helpers.Utils;
+import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
+import com.chookapp.org.bracketeer.common.Utils;
 
 public abstract class BracketeerProcessor implements IDocumentListener
 {
@@ -35,7 +35,7 @@ public abstract class BracketeerProcessor implements IDocumentListener
         _part = part;
     }
     
-    public boolean process(BracketeerProcessingContainer container)
+    public boolean process(IBracketeerProcessingContainer container)
     {
         _cancelProcessing = false;
         IDocument doc = Utils.getPartDocument(_part);
@@ -78,5 +78,5 @@ public abstract class BracketeerProcessor implements IDocumentListener
      * @param container The contains to add the brackets to
      */
     protected abstract void processDocument(IDocument doc,
-                                            BracketeerProcessingContainer container);
+                                            IBracketeerProcessingContainer container);
 }

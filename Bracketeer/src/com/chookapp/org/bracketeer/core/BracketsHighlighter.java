@@ -48,7 +48,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.services.IDisposable;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.common.BracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.BracketsPair;
 import com.chookapp.org.bracketeer.common.SingleBracket;
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;

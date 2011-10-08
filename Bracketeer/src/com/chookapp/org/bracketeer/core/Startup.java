@@ -25,8 +25,8 @@ import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.chookapp.org.bracketeer.Activator;
+import com.chookapp.org.bracketeer.common.Utils;
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
-import com.chookapp.org.bracketeer.helpers.Utils;
 
 
 public class Startup implements IStartup 
