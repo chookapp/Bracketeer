@@ -21,11 +21,12 @@ public class BracketsPair
 {
     private List<SingleBracket> _brackets;
     
-    public BracketsPair(int openingOffset, int closingOffset)
+    public BracketsPair(int openingOffset, char openingChar,
+                        int closingOffset, char closingChar)
     {
         _brackets = new ArrayList<SingleBracket>();
-        _brackets.add( new SingleBracket(openingOffset, true));
-        _brackets.add( new SingleBracket(closingOffset, false));
+        _brackets.add( new SingleBracket(openingOffset, true, openingChar));
+        _brackets.add( new SingleBracket(closingOffset, false, closingChar));
     }   
 
     public List<SingleBracket> getBrackets()

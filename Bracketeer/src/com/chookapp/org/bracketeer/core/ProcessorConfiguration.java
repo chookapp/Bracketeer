@@ -1,6 +1,7 @@
 package com.chookapp.org.bracketeer.core;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -25,7 +26,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         
         private int _surroundingPairsCount;
         private boolean _surroundingPairsEnable;
-        private String _surroundingPairsToExclude;
+        private String _surroundingPairsToInclude;
         
         private boolean _hoveredPairsEnable;
         
@@ -43,6 +44,26 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                 _fgColors[colorIndex] = color;
             else
                 _bgColors[colorIndex] = color;
+        }
+        
+        public void setEnableSurrounding(boolean enable)
+        {
+            _surroundingPairsEnable = enable;
+        }
+
+        public void setEnableHovering(boolean enable)
+        {
+            _hoveredPairsEnable = enable;
+        }
+        
+        public void setSurroundingPairsCount(int count)
+        {
+            _surroundingPairsCount = count;
+        }
+        
+        public void setSurroundingPairsToInclude(String pairs)
+        {
+            _surroundingPairsToInclude = pairs;
         }
         
         /* getters */
@@ -65,15 +86,17 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             return _surroundingPairsCount;
         }
         
-        public String getSurroundingPairsToExclude()
+        public String getSurroundingPairsToInclude()
         {
-            return _surroundingPairsToExclude;
+            return _surroundingPairsToInclude;
         }
 
         public boolean isHoveredPairsEnabled()
         {
             return _hoveredPairsEnable;
         }
+
+   
         
     }
     
@@ -113,6 +136,8 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     
     private IPreferenceStore _prefStore;
     
+    private List<IProcessorConfigurationListener> _listeners;
+    
     public ProcessorConfiguration(IConfigurationElement confElement)
     {
         _pairConf = new PairConfiguration();
@@ -126,6 +151,8 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         _prefStore = new ChainedPreferenceStore(stores.toArray(new IPreferenceStore[stores.size()]));
         _prefStore.addPropertyChangeListener(this);
 
+        _listeners = new LinkedList<IProcessorConfigurationListener>();
+        
         updateConfiguartion();
     }
     
@@ -185,6 +212,15 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                 }
             }
             
+            _pairConf.setEnableSurrounding(_prefStore.getBoolean(PreferencesConstants.preferencePath(_name) +
+                                                                 PreferencesConstants.Surrounding.Enable));
+            _pairConf.setEnableHovering(_prefStore.getBoolean(PreferencesConstants.preferencePath(_name) +
+                                                              PreferencesConstants.Hovering.Enable));
+            _pairConf.setSurroundingPairsCount(_prefStore.getInt(PreferencesConstants.preferencePath(_name) +
+                                                                 PreferencesConstants.Surrounding.NumBracketsToShow));
+            _pairConf.setSurroundingPairsToInclude(_prefStore.getString(PreferencesConstants.preferencePath(_name) +
+                                                                        PreferencesConstants.Surrounding.ShowBrackets));
+            
             /* single */ 
             
             int pairIdx = PreferencesConstants.MAX_PAIRS + 1;
@@ -203,11 +239,29 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                                                                                PreferencesConstants.Highlights.Color ) );
             }
         }
+        
+        /* notify listeners */
+        
+        for( IProcessorConfigurationListener listener : _listeners )
+        {
+            listener.configurationUpdated();
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent event)
     {
         updateConfiguartion();
+    }
+
+    public void addListener(IProcessorConfigurationListener listener)
+    {
+        _listeners.add(listener);
+    }
+    
+    public void removeListener(IProcessorConfigurationListener listener)
+    {
+        if( !_listeners.remove(listener) )
+            Activator.log("listener was not found");
     }
 }

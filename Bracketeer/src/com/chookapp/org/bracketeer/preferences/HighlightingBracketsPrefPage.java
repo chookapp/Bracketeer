@@ -286,10 +286,15 @@ public class HighlightingBracketsPrefPage extends FieldLayoutPreferencePage
         }
         
         super.initialize();
+        updateAll();
+    }
+    
+    private void updateAll()
+    {
         updateHihglightFieldEditors();
         updateSurroundingEnable();
     }
-    
+
     @Override
     public boolean performOk()
     {
@@ -321,6 +326,7 @@ public class HighlightingBracketsPrefPage extends FieldLayoutPreferencePage
         {
             _tempPrefs.setValue(attr, _realPrefs.getDefaultString(attr));
         }
+        updateAll();
     }
     
     private void updateHihglightFieldEditors()

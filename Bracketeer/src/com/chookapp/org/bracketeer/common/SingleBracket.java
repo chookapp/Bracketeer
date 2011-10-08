@@ -6,11 +6,13 @@ public class SingleBracket
 {
     Position _position;
     boolean _isOpening; // is this an opening bracket, such as "("
+    char _char;
     
-    public SingleBracket(int offset, boolean isOpening)
+    public SingleBracket(int offset, boolean isOpening, char ch)
     {
         _position = new Position(offset, 1);
         _isOpening = isOpening;
+        _char = ch;
     }
     
     public Position getPosition()
@@ -29,6 +31,11 @@ public class SingleBracket
     public boolean isOpening()
     {
         return _isOpening;
+    }
+    
+    public char getChar()
+    {
+        return _char;
     }
     
     @Override

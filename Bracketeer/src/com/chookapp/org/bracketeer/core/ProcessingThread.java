@@ -21,7 +21,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
     private BracketeerProcessor _processor;
     private BracketeerProcessingContainer _bracketContainer;
     //private Lock _bracketContainerLock = new ReentrantLock();
-    private List<ProcessingThreadListener> _listeners;
+    private List<IProcessingThreadListener> _listeners;
     
     private boolean _documentChanged;
     
@@ -39,7 +39,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
         _doc = Utils.getPartDocument(part);
         _bracketContainer = new BracketeerProcessingContainer(_doc);
 //        _isProcessing = false;
-        _listeners = new LinkedList<ProcessingThreadListener>();
+        _listeners = new LinkedList<IProcessingThreadListener>();
         
         _doc.addDocumentListener(this);
         
@@ -53,7 +53,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
         _doc.removeDocumentListener(this);        
     }
     
-    public void addListener(ProcessingThreadListener listener)
+    public void addListener(IProcessingThreadListener listener)
     {
         _listeners.add(listener);
     }
@@ -91,7 +91,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
         }
         _bracketContainer.deleteAllMarked();
         
-        for (ProcessingThreadListener listener : _listeners)
+        for (IProcessingThreadListener listener : _listeners)
         {
             listener.processingContainerUpdated();
         }

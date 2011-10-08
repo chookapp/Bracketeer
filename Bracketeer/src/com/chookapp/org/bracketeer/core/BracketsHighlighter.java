@@ -16,6 +16,7 @@
 package com.chookapp.org.bracketeer.core;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,7 +55,8 @@ import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 
 
 public class BracketsHighlighter implements CaretListener, Listener, 
-    PaintListener, IDisposable, IPainter, ProcessingThreadListener 
+    PaintListener, IDisposable, IPainter, IProcessingThreadListener,
+    IProcessorConfigurationListener
 {
 
     private ISourceViewer _sourceViewer;
@@ -92,6 +94,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		if( _sourceViewer == null )
 			return;
 		
+		_conf.removeListener(this);
+		
 		deactivate(false);
 		
 		if (_processingThread != null)
@@ -115,7 +119,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		_textWidget = _sourceViewer.getTextWidget();
 		_conf = conf;
         _processingThread = new ProcessingThread(part, processor);
-        _processingThread.addListener(this);		
+        _processingThread.addListener(this);
+        conf.addListener(this);
         
         ITextViewerExtension2 extension= (ITextViewerExtension2) textViewer;
         extension.addPainter(this);
@@ -225,6 +230,12 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    return _sourceViewer;
 	}
 
+    @Override
+    public void configurationUpdated()
+    {
+        processingContainerUpdated();
+    }
+	
 	@Override
 	public void processingContainerUpdated()
 	{	
@@ -309,10 +320,32 @@ public class BracketsHighlighter implements CaretListener, Listener,
     
     private boolean updateSurroundingPairsToPaint(int caretOffset)
     {
+        if(!_conf.getPairConfiguration().isSurroundingPairsEnabled())
+            return clearSurroundingPairsToPaint();
+        
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
         List<BracketsPair> listOfPairs = cont.getPairsSurrounding(caretOffset);
+        
+        /* excluding... */
+        String includedPairs= _conf.getPairConfiguration().getSurroundingPairsToInclude();
+        Iterator<BracketsPair> it = listOfPairs.iterator();
+        while(it.hasNext())
+        {
+            BracketsPair pair = it.next();
+            for( SingleBracket br : pair.getBrackets())
+            {
+                if( includedPairs.indexOf(br.getChar()) == -1 )
+                {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+        
+        
         listOfPairs = sortPairs(listOfPairs);
-        listOfPairs = listOfPairs.subList(0, Math.min(4, listOfPairs.size()));
+        listOfPairs = listOfPairs.subList(0, Math.min(_conf.getPairConfiguration().getSurroundingPairsCount(),
+                                                      listOfPairs.size()));
         
         // do nothing if _surroundingPairsToPaint is equal to listOfPairs
         if(areEqualPairs(listOfPairs, _surroundingPairsToPaint))
@@ -378,6 +411,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
 //        int endPoint = Math.min(_sourceViewer.getDocument().getLength(),
 //                                origCaret + 2);
 
+        if( !_conf.getPairConfiguration().isHoveredPairsEnabled() )
+            return false;
         
         int length = 4;
         int startPoint = origCaret-2;
@@ -705,6 +740,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         caret -= 1;
         return caret;
     }
+
 
    
 }

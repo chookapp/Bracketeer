@@ -1,6 +1,6 @@
 package com.chookapp.org.bracketeer.core;
 
-public interface ProcessingThreadListener
+public interface IProcessingThreadListener
 {
     void processingContainerUpdated();
 }
