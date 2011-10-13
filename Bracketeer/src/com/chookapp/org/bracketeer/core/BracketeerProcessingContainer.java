@@ -15,6 +15,7 @@ import org.eclipse.ui.services.IDisposable;
 
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.BracketsPair;
+import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.SingleBracket;
 
@@ -65,14 +66,22 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
     
     private List<ObjectContainer<SingleBracket>> _singleBrackets;
     private List<ObjectContainer<BracketsPair>> _bracketsPairList;
+    private List<ObjectContainer<Hint>> _hints;
     
     private String _positionCategory;
     private IPositionUpdater _positionUpdater;
+    private List<IProcessingContainerListener> _listeners;
+
+    private boolean _bracketsPairsTouched;
+    private boolean _singleBracketsTouched;
+    private boolean _hintsTouched;
+    private boolean _updatingListeners;
     
     public BracketeerProcessingContainer(IDocument doc)
     {
         _singleBrackets = new ArrayList<ObjectContainer<SingleBracket>>();
         _bracketsPairList = new LinkedList<ObjectContainer<BracketsPair>>();
+        _hints = new LinkedList<ObjectContainer<Hint>>();
         
         _doc = doc;
         
@@ -80,7 +89,11 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         
         _doc.addPositionCategory(_positionCategory);
         _positionUpdater = new DefaultPositionUpdater(_positionCategory);
-        _doc.addPositionUpdater(_positionUpdater);        
+        _doc.addPositionUpdater(_positionUpdater);
+        
+        _listeners = new LinkedList<IProcessingContainerListener>();
+        
+        _updatingListeners = false;
     }
     
     @Override
@@ -97,6 +110,43 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         }            
     }
 
+    public void addListener(IProcessingContainerListener listener)
+    {
+        _listeners.add(listener);
+    }
+    
+    public void removeListener(IProcessingContainerListener listener)
+    {
+        if( !_listeners.remove(listener) )
+            Activator.log("listener was not found");        
+    }
+    
+    public BracketsPair getMatchingPair(int openOffset, int closeOffset)
+    {
+        synchronized(_bracketsPairList)
+        {
+            for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
+            {
+                if(objCont.isToDelete())
+                    continue;
+                
+                BracketsPair pair = objCont.getObject();
+                Position openPos = pair.getOpeningBracket().getPosition();
+                if(openPos != null && openPos.getOffset() == openOffset)
+                {
+                    Position closePos = pair.getClosingBracket().getPosition();
+                    if(closePos != null && closePos.getOffset() == closeOffset )
+                        return pair;
+                    
+                    Activator.log(String.format("[%1$d,%2$d] paritally found - %3$s", 
+                                                openOffset, closeOffset, pair.toString()));
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+    
     public List<BracketsPair> getPairsSurrounding(int offset)
     {
         List<BracketsPair> retVal = new LinkedList<BracketsPair>();
@@ -165,7 +215,37 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         }
         return ret;
     }
-
+    
+    public List<Hint> getHints()
+    {
+        List<Hint> ret = new LinkedList<Hint>();
+        synchronized(_hints)
+        {
+            for (ObjectContainer<Hint> objCont : _hints)
+            {
+                Hint hint = objCont.getObject();
+                
+                if( !hint.hasDeletedPosition() )
+                    ret.add(hint);
+            }
+        }
+        return ret;
+    }
+    
+    public List<BracketsPair> getBracketPairs()
+    {
+        List<BracketsPair> ret = new LinkedList<BracketsPair>();
+        synchronized(_bracketsPairList)
+        {
+            for (ObjectContainer<BracketsPair> objCont : _bracketsPairList)
+            {
+                BracketsPair pair = objCont.getObject();
+                if( !pair.hasDeletedPosition() )
+                    ret.add(pair);
+            }
+        }
+        return ret;
+    }
     
     public void markAllToBeDeleted()
     {
@@ -175,14 +255,24 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
             {
                 objCont.setToDelete(true);
             }
-        }
+        }        
+        
         synchronized (_singleBrackets)
         {
             for (ObjectContainer<SingleBracket> objCont : _singleBrackets)
             {
                 objCont.setToDelete(true);
             }            
-        }
+        }        
+        
+        synchronized (_hints)
+        {
+            for (ObjectContainer<Hint> objCont : _hints)
+            {
+                objCont.setToDelete(true);
+            }
+        }        
+        
     }
 
     public void deleteAllMarked()
@@ -196,6 +286,7 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
                 
                 if( objCont.isToDelete() )
                 {
+                    _bracketsPairsTouched = true;
                     for (SingleBracket bracket : objCont.getObject().getBrackets())
                     {
                         delete(bracket.getPositionRaw());
@@ -214,7 +305,25 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
                 
                 if( objCont.isToDelete() )
                 {
+                    _singleBracketsTouched = true;
                     delete(objCont.getObject().getPositionRaw());
+                    it.remove();
+                }
+            }
+        }
+        
+        synchronized (_hints)
+        {
+            Iterator<ObjectContainer<Hint>> it = _hints.iterator();
+            while(it.hasNext())
+            {
+                ObjectContainer<Hint> objCont = it.next();
+                
+                if( objCont.isToDelete() )
+                {
+                    _hintsTouched = true;
+                    delete(objCont.getObject().getOriginPositionRaw());
+                    delete(objCont.getObject().getHintPositionRaw());
                     it.remove();
                 }
             }
@@ -232,9 +341,33 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
             }
             Activator.trace("Pairs = " + _bracketsPairList.size());
             Activator.trace("Singles = " + _singleBrackets.size());
+            Activator.trace("Hints = " + _hints.size());
         }
     }
 
+    public void updateComplete()
+    {
+        _updatingListeners = true;
+        
+        for (IProcessingContainerListener listener : _listeners)
+        {
+            listener.containerUpdated(_bracketsPairsTouched, 
+                                      _singleBracketsTouched,
+                                      _hintsTouched);
+        }
+        
+        _bracketsPairsTouched = false;
+        _singleBracketsTouched = false;
+        _hintsTouched = false;
+        
+        _updatingListeners = false;
+    }
+    
+    public boolean isUpdatingListeners()
+    {
+        return _updatingListeners;
+    }
+    
     public void add(BracketsPair pair)
     {
         synchronized(_bracketsPairList)
@@ -254,6 +387,8 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
                     deletePair(existing);
                 }
             }
+            
+            _bracketsPairsTouched = true;
             
             ObjectContainer<BracketsPair> pairContainer =
                     new ObjectContainer<BracketsPair>(pair);
@@ -287,9 +422,40 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
                 }
             }
             
+            _singleBracketsTouched = true;
+            
             _singleBrackets.add(new ObjectContainer<SingleBracket>(bracket));
             
             addPosition(bracket.getPosition());
+        }
+    }    
+    
+    public void add(Hint hint)
+    {
+        synchronized(_hints)
+        {
+            ObjectContainer<Hint> existing = 
+                    findExistingObj(_hints, hint);
+            
+            if( existing != null )
+            {
+                if( existing.equals(hint) && !existing.getObject().hasDeletedPosition() )
+                {
+                    existing.setToDelete(false);
+                    return;
+                }
+                else
+                {
+                    deleteHint(existing);
+                }
+            }
+            
+            _hintsTouched = true;
+            
+            _hints.add(new ObjectContainer<Hint>(hint));
+            
+            addPosition(hint.getHintPosition());
+            addPosition(hint.getOriginPosition());
         }
     }    
     
@@ -352,6 +518,19 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
             
             SingleBracket bracket = objCont.getObject();
             delete(bracket.getPositionRaw());
+        }
+    }
+    
+    private void deleteHint(ObjectContainer<Hint> objCont)
+    {   
+        synchronized(_hints)
+        {
+            boolean found = _hints.remove(objCont);
+            Assert.isTrue(found);        
+            
+            Hint hint = objCont.getObject();
+            delete(hint.getOriginPositionRaw());
+            delete(hint.getHintPositionRaw());
         }
     }
     

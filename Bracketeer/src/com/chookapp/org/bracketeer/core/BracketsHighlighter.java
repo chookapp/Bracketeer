@@ -49,12 +49,13 @@ import org.eclipse.ui.services.IDisposable;
 
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.BracketsPair;
+import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.SingleBracket;
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 
 
 public class BracketsHighlighter implements CaretListener, Listener, 
-    PaintListener, IDisposable, IPainter, IProcessingThreadListener,
+    PaintListener, IDisposable, IPainter, IProcessingContainerListener,
     IProcessorConfigurationListener
 {
 
@@ -67,10 +68,13 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	
 	private boolean _isActive;
 	
-	private List<PaintableObject> _hoveredPairsToPaint;
-	private List<PaintableObject> _surroundingPairsToPaint;
-	private List<PaintableObject> _singleBracketsToPaint;
+	private List<PaintableBracket> _hoveredPairsToPaint;
+	private List<PaintableBracket> _surroundingPairsToPaint;
+	private List<PaintableBracket> _singleBracketsToPaint;
+	private List<PaintableHint> _hintsToPaint;
     private Point m_hoverEntryPoint;
+    
+    private int _caretOffset;
 	
 	public BracketsHighlighter()
 	{
@@ -82,9 +86,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    
 	    _isActive = false;
 	    
-	    _hoveredPairsToPaint = new LinkedList<PaintableObject>();
-	    _surroundingPairsToPaint = new LinkedList<PaintableObject>();
-	    _singleBracketsToPaint = new LinkedList<PaintableObject>();
+	    _hoveredPairsToPaint = new LinkedList<PaintableBracket>();
+	    _surroundingPairsToPaint = new LinkedList<PaintableBracket>();
+	    _singleBracketsToPaint = new LinkedList<PaintableBracket>();
+	    _hintsToPaint = new ArrayList<PaintableHint>();
 	    m_hoverEntryPoint = null;
 	}
 	
@@ -98,7 +103,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		deactivate(false);
 		
 		if (_processingThread != null)
-		{
+		{		    
+		    _processingThread.getBracketContainer().removeListener(this);
 		    _processingThread.dispose();
 		    _processingThread = null;
 		}
@@ -117,9 +123,11 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		_part = part;
 		_textWidget = _sourceViewer.getTextWidget();
 		_conf = conf;
+		processor.setHintConf(conf.getHintConfiguration());
+		
         _processingThread = new ProcessingThread(part, processor);
-        _processingThread.addListener(this);
-        conf.addListener(this);
+        _processingThread.getBracketContainer().addListener(this);
+        _conf.addListener(this);
         
         ITextViewerExtension2 extension= (ITextViewerExtension2) textViewer;
         extension.addPainter(this);
@@ -137,8 +145,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	@Override
 	public void caretMoved(CaretEvent event) 
 	{
-	    int caret = getCurrentCaretOffset();
-	    caretMovedTo(caret);
+	    _caretOffset = getCurrentCaretOffset();
+	    caretMovedTo(_caretOffset);
 	}
 	
 
@@ -205,10 +213,11 @@ public class BracketsHighlighter implements CaretListener, Listener,
         {
             if(paintObj.getPosition().overlapsWith(startOfset, length))
                 paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
-                               getWidgetRange(paintObj.getPosition().getOffset(), paintObj.getPosition().getLength()));
+                               getWidgetRange(paintObj.getPosition().getOffset(), 
+                                              paintObj.getPosition().getLength()));
         }
 
-	    List<PaintableObject> pairsToPaint;
+	    List<PaintableBracket> pairsToPaint;
 	    if( _hoveredPairsToPaint.isEmpty() )
 	        pairsToPaint = _surroundingPairsToPaint;
 	    else
@@ -232,30 +241,19 @@ public class BracketsHighlighter implements CaretListener, Listener,
     @Override
     public void configurationUpdated()
     {
-        processingContainerUpdated();
+        boolean updated = false;
+        updated |= clearSurroundingPairsToPaint();
+        updated |= clearSingleBracketsToPaint();
+        rebuild(true, true, true, updated);
     }
 	
 	@Override
-	public void processingContainerUpdated()
+	public void containerUpdated(boolean bracketsPairsTouched,
+                                 boolean singleBracketsTouched,
+                                 boolean hintsTouched)
 	{	
-	    _textWidget.getDisplay().asyncExec(new Runnable()
-        {            
-            @Override
-            public void run()
-            {                
-                int caret = getCurrentCaretOffset();
-                
-                boolean update = updateSurroundingPairsToPaint(caret);
-                update |= updateSingleBrackets();
-                update |= clearHoveredPairsToPaint();
-                
-                if(update)
-                {
-                    // TODO: optimize? (redraw only the needed sections)
-                    _textWidget.redraw();
-                }
-            }
-        });
+	    rebuild( bracketsPairsTouched, singleBracketsTouched,
+	             hintsTouched, false );
 	}
 	
     /************************************************************
@@ -275,6 +273,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
             st.addListener(SWT.MouseHover, this);
             st.addListener(SWT.MouseMove, this);
             st.addPaintListener(this);
+            
+            _caretOffset = getCurrentCaretOffset();
         }
     }
 
@@ -305,6 +305,37 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	 * the work itself
 	 ************************************************************/	
 
+    private void rebuild(boolean bracketsPairsTouched,
+                         boolean singleBracketsTouched,
+                         boolean hintsTouched,
+                         boolean alwaysRedraw)
+    {
+        
+       boolean update = alwaysRedraw;
+       if( bracketsPairsTouched )
+       {
+           update |= updateSurroundingPairsToPaint(_caretOffset);
+           update |= clearHoveredPairsToPaint();
+       }
+       if( singleBracketsTouched )
+           update |= updateSingleBrackets();
+       if( hintsTouched )
+           update |= updateHints();                
+
+       if(update)
+       {
+           // TODO: optimize? (redraw only the needed sections)
+           _textWidget.getDisplay().asyncExec(new Runnable()
+           {
+               @Override
+               public void run()
+               {
+                   _textWidget.redraw();
+               }
+           });
+       }        
+    }
+    
     private void caretMovedTo(int caretOffset)
     {        
         boolean update = updateSurroundingPairsToPaint(caretOffset);
@@ -377,6 +408,25 @@ public class BracketsHighlighter implements CaretListener, Listener,
         return true;
     }
 
+    private boolean updateHints()
+    {
+        BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
+        
+        ArrayList<PaintableHint> hintsToPaint = new ArrayList<PaintableHint>();
+        for (Hint hint : cont.getHints())
+        {            
+            PaintableHint pHint = new PaintableHint(hint.getHintPositionRaw(),
+                                                    _conf.getHintConfiguration().getColor(hint.getType(), true),
+                                                    _conf.getHintConfiguration().getColor(hint.getType(), false), 
+                                                    hint.getTxt());
+            
+            hintsToPaint.add(pHint);
+        }
+        
+        // TODO: compare with what's in _hintsToPaint and replace if needed
+        
+        return false;
+    }
 
     private List<BracketsPair> sortPairs(List<BracketsPair> listOfPairs)
     {
@@ -441,7 +491,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     }
 
     private boolean areEqualPairs(List<BracketsPair> listOfPairs,
-                                  List<PaintableObject> pairsToPaint)    
+                                  List<PaintableBracket> pairsToPaint)    
     {
         if( listOfPairs.size()*2 != pairsToPaint.size() )
             return false;
@@ -468,7 +518,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     }
 
     private boolean areEqualSingle(List<SingleBracket> list,
-                                   List<PaintableObject> singlesToPaint)    
+                                   List<PaintableBracket> singlesToPaint)    
     {
         if( list.size() != singlesToPaint.size() )
             return false;
@@ -493,7 +543,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     
     private void addPaintableObjectsPairs(List<BracketsPair> listOfPairs,
                                           int colorCode, int colorCodeStep,
-                                          List<PaintableObject> paintableObjectsList)
+                                          List<PaintableBracket> paintableObjectsList)
     {
         for (BracketsPair bracketsPair : listOfPairs)
         {
@@ -502,21 +552,21 @@ public class BracketsHighlighter implements CaretListener, Listener,
                 Position pos = bracket.getPositionRaw();
                 RGB fg = _conf.getPairConfiguration().getColor(true, colorCode);
                 RGB bg = _conf.getPairConfiguration().getColor(false, colorCode);
-                paintableObjectsList.add(new PaintableObject(pos, fg, bg));
+                paintableObjectsList.add(new PaintableBracket(pos, fg, bg));
             }
             colorCode += colorCodeStep;                
         }
     }
 
     private void addPaintableObjectsSingles(List<SingleBracket> listOfSingles,
-                                            List<PaintableObject> paintableObjectsList)
+                                            List<PaintableBracket> paintableObjectsList)
     {
         for (SingleBracket bracket : listOfSingles)
         {
             Position pos = bracket.getPositionRaw();
             RGB fg = _conf.getSingleBracketConfiguration().getColor(true);
             RGB bg = _conf.getSingleBracketConfiguration().getColor(false);
-            paintableObjectsList.add(new PaintableObject(pos, fg, bg));
+            paintableObjectsList.add(new PaintableBracket(pos, fg, bg));
         }
     }
 
@@ -739,7 +789,5 @@ public class BracketsHighlighter implements CaretListener, Listener,
         caret -= 1;
         return caret;
     }
-
-
    
 }

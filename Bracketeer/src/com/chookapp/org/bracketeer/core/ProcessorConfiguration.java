@@ -1,18 +1,21 @@
 package com.chookapp.org.bracketeer.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
 import com.chookapp.org.bracketeer.Activator;
+import com.chookapp.org.bracketeer.common.IHintConfiguration;
 import com.chookapp.org.bracketeer.preferences.PreferencesConstants;
 
 public class ProcessorConfiguration implements IPropertyChangeListener
@@ -130,8 +133,50 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         }
     }
     
+    public class HintConfiguration implements IHintConfiguration
+    {
+        private static final String ENABLED = "enabled";
+        private static final String FG_COLOR = "fgColor";
+        private static final String BG_COLOR = "bgColor";
+        
+        private HashMap<String, HashMap<String, String>> _attrMaps;
+        
+        public HintConfiguration()
+        {
+            _attrMaps = new HashMap<String, HashMap<String,String>>();
+        }
+
+        public boolean getBoolAttr(String type, String attr)
+        {
+            return Boolean.parseBoolean(getAttr(type,attr));
+        }
+        
+        public String getAttr(String type, String attr)
+        {
+            HashMap<String, String> attrMap = _attrMaps.get(type);
+            if( attrMap == null )
+                return null;
+            return attrMap.get(attr);
+        }
+
+        public boolean isEnabled(String type)
+        {
+            return getBoolAttr(type, ENABLED);
+        }
+        
+        public RGB getColor(String type, boolean foreground)
+        {
+            String str = getAttr(type, foreground ? FG_COLOR : BG_COLOR );
+            if( str == null )
+                return null;
+            
+            return StringConverter.asRGB(str);
+        }
+    }
+    
     private PairConfiguration _pairConf;
     private SingleBracketConfiguration _singleConf;
+    private HintConfiguration _hintConf;
     private String _name;
     
     private IPreferenceStore _prefStore;
@@ -169,6 +214,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     public SingleBracketConfiguration getSingleBracketConfiguration()
     {
         return _singleConf;
+    }
+    
+    public HintConfiguration getHintConfiguration()
+    {
+        return _hintConf; 
     }
     
     private void updateConfiguartion()
@@ -240,6 +290,8 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             }
         }
         
+        
+        
         /* notify listeners */
         
         for( IProcessorConfigurationListener listener : _listeners )
@@ -264,4 +316,6 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         if( !_listeners.remove(listener) )
             Activator.log("listener was not found");
     }
+
+  
 }

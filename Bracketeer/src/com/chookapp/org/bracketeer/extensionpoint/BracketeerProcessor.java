@@ -21,18 +21,25 @@ import org.eclipse.ui.IEditorPart;
 
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
+import com.chookapp.org.bracketeer.common.IHintConfiguration;
 import com.chookapp.org.bracketeer.common.Utils;
 
 public abstract class BracketeerProcessor implements IDocumentListener
 {
     
-    protected boolean _cancelProcessing;
     private Semaphore _processingCanceled = new Semaphore(0);
+    protected Boolean _cancelProcessing;
     protected IEditorPart _part;
+    protected IHintConfiguration _hintConf;
     
     protected BracketeerProcessor(IEditorPart part)
     {
         _part = part;
+    }
+    
+    public void setHintConf(IHintConfiguration conf)
+    {
+        _hintConf = conf;
     }
     
     public boolean process(IBracketeerProcessingContainer container)
@@ -41,7 +48,8 @@ public abstract class BracketeerProcessor implements IDocumentListener
         IDocument doc = Utils.getPartDocument(_part);
         doc.addDocumentListener(this);
         
-        processDocument(doc, container);
+        processDocument(doc, container);        
+        postProcess(doc, container);
         
         doc.removeDocumentListener(this);
         
@@ -50,6 +58,13 @@ public abstract class BracketeerProcessor implements IDocumentListener
         
         return !_cancelProcessing;
     }        
+
+    private void postProcess(IDocument doc,
+                             IBracketeerProcessingContainer container)
+    {
+        // TODO: remove hints which are NA (there is something behind them)
+        // TODO: use _hintConf to update the hints in the container (elipsis, etc...)
+    }
 
     @Override
     public void documentAboutToBeChanged(DocumentEvent event)

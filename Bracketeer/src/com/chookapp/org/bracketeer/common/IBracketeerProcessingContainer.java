@@ -17,4 +17,20 @@ public interface IBracketeerProcessingContainer
      * @param bracket the single bracket to add
      */
     public void add(SingleBracket bracket);
+ 
+    /**
+     * Adds a hint to the container
+     * A hint may overlap with a pair or a single bracket
+     * @param hint the hint to add
+     */
+    public void add(Hint hint);
+    
+    /**
+     * Gets a pair which matches the specified offsets (there can be at most one match)
+     * @param openOffset the (absolute) offset of the opening bracket
+     * @param closeOffset the (absolute) offset of the closing bracket
+     * @return A pair, or null if no such pair found
+     */
+    public BracketsPair getMatchingPair(int openOffset, int closeOffset);
+     
 }

@@ -1,6 +1,5 @@
 package com.chookapp.org.bracketeer.core;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
@@ -11,11 +10,10 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
-import com.chookapp.org.bracketeer.Activator;
 
-public class PaintableObject
+public abstract class PaintableObject
 {
-    private Position _position;
+    protected Position _position;
     private RGB _foreground;
     private RGB _background;
     
@@ -48,14 +46,7 @@ public class PaintableObject
         
         if( widgetRange == null )
             return;
-        
-        int offset = widgetRange.getOffset();
-        int length = widgetRange.getLength();
-        if (length != 1)
-            throw new IllegalArgumentException(String.format("length %1$d != 1", length));
-        
-        Point p = st.getLocationAtOffset(offset);
-        
+   
         Color bg = null, fg = null;
         Color oldBackground = null, oldForeground = null;
         
@@ -73,14 +64,7 @@ public class PaintableObject
             gc.setForeground(fg);
         }
         
-        try
-        {
-            gc.drawText(doc.get(_position.getOffset(), 1), p.x, p.y);
-        }
-        catch (BadLocationException e)
-        {
-            Activator.log(e);
-        }
+        innerPaint(gc, st, doc, widgetRange);
         
         if( _background != null )
         {
@@ -94,6 +78,8 @@ public class PaintableObject
         }
         
     }
-        
+
+    protected abstract void innerPaint(GC gc, StyledText st, IDocument doc,
+                                       IRegion widgetRange);    
    
 }
