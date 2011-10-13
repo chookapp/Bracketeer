@@ -12,7 +12,13 @@
 
 package com.chookapp.org.bracketeer.cdt;
 
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.model.CoreModel;
+import org.eclipse.cdt.core.model.ICElement;
+import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.ui.text.ICPartitions;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -29,8 +35,6 @@ import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 
 public class BracketeerCdtProcessor extends BracketeerProcessor
 {
-
-    
     protected final static char[] BRACKETS = { '{', '}', '(', ')', '[', ']', '<', '>' };
     
     /* Lonely brackets is different from BRACKETS because matching an 
@@ -38,12 +42,14 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
     protected final static String LONELY_BRACKETS = "()[]{}";
     
     private CPairMatcher _matcher;
+    private IASTTranslationUnit _ast;
 
     public BracketeerCdtProcessor(IEditorPart part) 
     {
         super(part);
         
         _matcher = new CPairMatcher(BRACKETS);
+        _ast = null;
     }
    
     
@@ -108,8 +114,19 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
     {
         if(Activator.DEBUG)
             Activator.trace("starting process...");
+        
+        processBrackets(doc, container);
+        processAst(container);
+        
+        if(Activator.DEBUG)
+            Activator.trace("process ended (" + _cancelProcessing + ")");
+    }
+
+    private void processBrackets(IDocument doc,
+                                 IBracketeerProcessingContainer container)
+    {
         for(int i = 1; i < doc.getLength(); i++)
-        {           
+        {
             BracketsPair pair = getMatchingPair(doc, i);
             if(pair != null)
             {
@@ -126,9 +143,47 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
             if( _cancelProcessing )
                 break;
         }
-        if(Activator.DEBUG)
-            Activator.trace("process ended (" + _cancelProcessing + ")");
+    }
+    
+    private void processAst(IBracketeerProcessingContainer container)
+    {
+        makeAst();
+        if( _ast == null )
+            return;
+        
+        ClosingBracketHintVisitor visitor = new ClosingBracketHintVisitor(container, 
+                                                                          _cancelProcessing,
+                                                                          _hintConf);        
+        _ast.accept(visitor);
     }
 
 
+    private void makeAst()
+    {
+        if( _ast != null )
+            return;
+            
+        IResource resource = (IResource) _part.getEditorInput().getAdapter(IResource.class);
+        if( resource == null )
+            return;
+        ICElement celem = CoreModel.getDefault().create(resource);
+        if( celem == null )
+            return;
+        if (!(celem instanceof ITranslationUnit))
+            return;
+        
+        ITranslationUnit tu = (ITranslationUnit) celem;        
+        try
+        {
+            _ast = tu.getAST(null, ITranslationUnit.AST_SKIP_ALL_HEADERS |
+                                   ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT |
+                                   ITranslationUnit.AST_SKIP_TRIVIAL_EXPRESSIONS_IN_AGGREGATE_INITIALIZERS |
+                                   ITranslationUnit.AST_PARSE_INACTIVE_CODE);
+        }
+        catch (CoreException e)
+        {
+            Activator.log(e);
+            return;            
+        }
+    }
 }
