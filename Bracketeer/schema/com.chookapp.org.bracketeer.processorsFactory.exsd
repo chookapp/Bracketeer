@@ -17,7 +17,7 @@
          </appinfo>
       </annotation>
       <complexType>
-         <choice minOccurs="1" maxOccurs="unbounded">
+         <choice>
             <element ref="BracketeerProcessorsFactory"/>
          </choice>
          <attribute name="point" type="string" use="required">
@@ -48,7 +48,15 @@
    </element>
 
    <element name="BracketeerProcessorsFactory">
+      <annotation>
+         <documentation>
+            The factory used to create &quot;processors&quot;
+         </documentation>
+      </annotation>
       <complexType>
+         <choice minOccurs="0" maxOccurs="unbounded">
+            <element ref="Hint"/>
+         </choice>
          <attribute name="name" type="string" use="required">
             <annotation>
                <documentation>
@@ -70,6 +78,23 @@
             <annotation>
                <documentation>
                   This is a string representing the brackets supported by thie plugin. Valid string exmaples: &quot;()&quot;, &quot;()[]{}&quot;, etc...
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="Hint">
+      <annotation>
+         <documentation>
+            A hint (or tip) to be displayed in the editor (usually after a closing bracket)
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="type" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The hint type (such as &quot;function&quot;, &quot;for&quot;, etc...)
                </documentation>
             </annotation>
          </attribute>

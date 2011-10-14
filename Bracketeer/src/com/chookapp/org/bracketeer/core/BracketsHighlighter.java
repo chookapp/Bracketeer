@@ -42,6 +42,7 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorPart;
@@ -214,7 +215,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
             if(paintObj.getPosition().overlapsWith(startOfset, length))
                 paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
                                getWidgetRange(paintObj.getPosition().getOffset(), 
-                                              paintObj.getPosition().getLength()));
+                                              paintObj.getPosition().getLength()),
+                               null);
         }
 
 	    List<PaintableBracket> pairsToPaint;
@@ -227,10 +229,19 @@ public class BracketsHighlighter implements CaretListener, Listener,
         {
             if(paintObj.getPosition().overlapsWith(startOfset, length))
                 paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
-                               getWidgetRange(paintObj.getPosition().getOffset(), paintObj.getPosition().getLength()));
+                               getWidgetRange(paintObj.getPosition().getOffset(), 
+                                              paintObj.getPosition().getLength()),
+                               null);
         }
 	    
-	   
+	    for (PaintableHint paintObj : _hintsToPaint)
+        {
+	        IRegion widgetRange = getWidgetRange(paintObj.getPosition().getOffset(), 
+	                                             paintObj.getPosition().getLength());
+	        Rectangle rect = paintObj.getWidgetRect(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange);
+	        if( rect != null && rect.intersects(event.x, event.y, event.width, event.height) )
+	            paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange, rect );	        
+        }
 	}
 
 	public ITextViewer getTextViewer()
@@ -414,7 +425,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         ArrayList<PaintableHint> hintsToPaint = new ArrayList<PaintableHint>();
         for (Hint hint : cont.getHints())
-        {            
+        {   
+            if( !_conf.getHintConfiguration().isEnabled(hint.getType()) )
+                continue;
+            
             PaintableHint pHint = new PaintableHint(hint.getHintPositionRaw(),
                                                     _conf.getHintConfiguration().getColor(hint.getType(), true),
                                                     _conf.getHintConfiguration().getColor(hint.getType(), false), 
@@ -423,9 +437,15 @@ public class BracketsHighlighter implements CaretListener, Listener,
             hintsToPaint.add(pHint);
         }
         
-        // TODO: compare with what's in _hintsToPaint and replace if needed
+        if( _hintsToPaint.equals(hintsToPaint) )
+            return false;
         
-        return false;
+        synchronized (_hintsToPaint)
+        {
+            _hintsToPaint = hintsToPaint;
+        }
+        
+        return true;
     }
 
     private List<BracketsPair> sortPairs(List<BracketsPair> listOfPairs)
@@ -540,6 +560,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         return true;
     }
+       
     
     private void addPaintableObjectsPairs(List<BracketsPair> listOfPairs,
                                           int colorCode, int colorCodeStep,

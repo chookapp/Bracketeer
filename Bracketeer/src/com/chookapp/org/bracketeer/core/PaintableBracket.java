@@ -8,6 +8,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 
 import com.chookapp.org.bracketeer.Activator;
 
@@ -21,7 +22,7 @@ public class PaintableBracket extends PaintableObject
 
     @Override
     protected void innerPaint(GC gc, StyledText st, IDocument doc,
-                              IRegion widgetRange)
+                              IRegion widgetRange, Rectangle rect)
     {
         
         int offset = widgetRange.getOffset();

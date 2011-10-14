@@ -454,8 +454,8 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
             
             _hints.add(new ObjectContainer<Hint>(hint));
             
-            addPosition(hint.getHintPosition());
-            addPosition(hint.getOriginPosition());
+            addPosition(hint.getHintPositionRaw());
+            addPosition(hint.getOriginPositionRaw());
         }
     }    
     

@@ -135,9 +135,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     
     public class HintConfiguration implements IHintConfiguration
     {
-        private static final String ENABLED = "enabled";
-        private static final String FG_COLOR = "fgColor";
-        private static final String BG_COLOR = "bgColor";
+
         
         private HashMap<String, HashMap<String, String>> _attrMaps;
         
@@ -151,6 +149,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             return Boolean.parseBoolean(getAttr(type,attr));
         }
         
+        public void setAttr(String type, String attr, boolean val)
+        {
+            setAttr(type, attr, Boolean.toString(val));
+        }
+        
         public String getAttr(String type, String attr)
         {
             HashMap<String, String> attrMap = _attrMaps.get(type);
@@ -158,20 +161,45 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                 return null;
             return attrMap.get(attr);
         }
+        
+        public void setAttr(String type, String attr, String val)
+        {
+            HashMap<String, String> attrMap = _attrMaps.get(type);
+            if( attrMap == null )
+            {
+                attrMap = new HashMap<String, String>();
+                _attrMaps.put(type, attrMap);
+            }
+            
+            attrMap.put(attr, val);
+        }
 
         public boolean isEnabled(String type)
         {
-            return getBoolAttr(type, ENABLED);
+            return getBoolAttr(type, PreferencesConstants.Hints.ENABLED);
         }
+        
+//        public void setEnbaled(String type, boolean en)
+//        {
+//            setAttr(type, PreferencesConstants.Hints.ENABLED, en);
+//        }
         
         public RGB getColor(String type, boolean foreground)
         {
-            String str = getAttr(type, foreground ? FG_COLOR : BG_COLOR );
+            String str = getAttr(type, foreground ? PreferencesConstants.Hints.FG_COLOR :
+                                                    PreferencesConstants.Hints.BG_COLOR );
             if( str == null )
                 return null;
             
             return StringConverter.asRGB(str);
         }
+        
+//        public void setColor(String type, boolean foreground, RGB color)
+//        {
+//            setAttr(type, foreground ? PreferencesConstants.Hints.FG_COLOR :
+//                                       PreferencesConstants.Hints.BG_COLOR, 
+//                    StringConverter.asString(color));
+//        }
     }
     
     private PairConfiguration _pairConf;
@@ -182,13 +210,22 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     private IPreferenceStore _prefStore;
     
     private List<IProcessorConfigurationListener> _listeners;
+    private List<String> _hintTypes;
     
     public ProcessorConfiguration(IConfigurationElement confElement)
     {
         _pairConf = new PairConfiguration();
         _singleConf = new SingleBracketConfiguration();
+        _hintConf = new HintConfiguration();
+        
+        _hintTypes = new ArrayList<String>();
         
         _name = confElement.getAttribute("name");
+        IConfigurationElement[] hints = confElement.getChildren("Hint");
+        for (IConfigurationElement hint : hints)
+        {
+            _hintTypes.add(hint.getAttribute("type"));            
+        }
         
         List<IPreferenceStore> stores= new ArrayList<IPreferenceStore>();        
         stores.add(Activator.getDefault().getPreferenceStore());
@@ -223,10 +260,47 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     
     private void updateConfiguartion()
     {
+        updateHighlightConf();
+        updateHintConf();
+        
+        /* notify listeners */
+        
+        for( IProcessorConfigurationListener listener : _listeners )
+        {
+            listener.configurationUpdated();
+        }
+    }
+
+    private void updateHintConf()
+    {
+        List<String> defaultAttrs = new ArrayList<String>();
+        defaultAttrs.add(PreferencesConstants.Hints.FG_COLOR);
+        defaultAttrs.add(PreferencesConstants.Hints.BG_COLOR);
+        defaultAttrs.add(PreferencesConstants.Hints.ENABLED);
+        
+        for (String hintType : _hintTypes)
+        {
+            String prefBase = PreferencesConstants.preferencePath(_name) +
+                    PreferencesConstants.Hints.preferencePath(hintType);
+            
+            for (String attr : defaultAttrs)
+            {
+                String val = _prefStore.getString(prefBase + attr);
+                if( val == null || val.isEmpty() )
+                    val = null;
+                _hintConf.setAttr(hintType, attr, val);
+            }
+        }
+    }
+
+    private void updateHighlightConf()
+    {
         RGB[] defColor = new RGB[2]; // 0 - BG, 1 - FG 
 
         defColor[0] = null;
         defColor[1] = null;
+        
+        String prefBase = PreferencesConstants.preferencePath(_name);
 
         for( int fgIndex = 0; fgIndex < 2; fgIndex++ )
         {
@@ -234,11 +308,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
 
             /* default */ 
             
-            if( !_prefStore.getBoolean( PreferencesConstants.preferencePath(_name) +
+            if( !_prefStore.getBoolean( prefBase +
                                         PreferencesConstants.Highlights.getAttrPath(0, foregound) +
                                         PreferencesConstants.Highlights.UseDefault ) )
             {
-                defColor[fgIndex] = PreferenceConverter.getColor(_prefStore, PreferencesConstants.preferencePath(_name) +
+                defColor[fgIndex] = PreferenceConverter.getColor(_prefStore, prefBase +
                                                                              PreferencesConstants.Highlights.getAttrPath(0, foregound) +
                                                                              PreferencesConstants.Highlights.Color );
             }
@@ -247,7 +321,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             
             for (int pairIdx = 0; pairIdx < PreferencesConstants.MAX_PAIRS; pairIdx++)
             {
-                if( _prefStore.getBoolean( PreferencesConstants.preferencePath(_name) +
+                if( _prefStore.getBoolean( prefBase +
                                            PreferencesConstants.Highlights.getAttrPath(pairIdx+1, foregound) +
                                            PreferencesConstants.Highlights.UseDefault ) )
                 {
@@ -256,26 +330,26 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                 else
                 {
                     _pairConf.setColor(foregound, pairIdx, 
-                                       PreferenceConverter.getColor( _prefStore, PreferencesConstants.preferencePath(_name) +
+                                       PreferenceConverter.getColor( _prefStore, prefBase +
                                                                                  PreferencesConstants.Highlights.getAttrPath(pairIdx+1, foregound) +
                                                                                  PreferencesConstants.Highlights.Color ) );
                 }
             }
             
-            _pairConf.setEnableSurrounding(_prefStore.getBoolean(PreferencesConstants.preferencePath(_name) +
+            _pairConf.setEnableSurrounding(_prefStore.getBoolean(prefBase +
                                                                  PreferencesConstants.Surrounding.Enable));
-            _pairConf.setEnableHovering(_prefStore.getBoolean(PreferencesConstants.preferencePath(_name) +
+            _pairConf.setEnableHovering(_prefStore.getBoolean(prefBase +
                                                               PreferencesConstants.Hovering.Enable));
-            _pairConf.setSurroundingPairsCount(_prefStore.getInt(PreferencesConstants.preferencePath(_name) +
+            _pairConf.setSurroundingPairsCount(_prefStore.getInt(prefBase +
                                                                  PreferencesConstants.Surrounding.NumBracketsToShow));
-            _pairConf.setSurroundingPairsToInclude(_prefStore.getString(PreferencesConstants.preferencePath(_name) +
+            _pairConf.setSurroundingPairsToInclude(_prefStore.getString(prefBase +
                                                                         PreferencesConstants.Surrounding.ShowBrackets));
             
             /* single */ 
             
             int pairIdx = PreferencesConstants.MAX_PAIRS + 1;
             
-            if( _prefStore.getBoolean( PreferencesConstants.preferencePath(_name) +
+            if( _prefStore.getBoolean( prefBase +
                                        PreferencesConstants.Highlights.getAttrPath(pairIdx, foregound) +
                                        PreferencesConstants.Highlights.UseDefault ) )
             {
@@ -284,19 +358,10 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             else
             {
                 _singleConf.setColor(foregound, 
-                                     PreferenceConverter.getColor( _prefStore, PreferencesConstants.preferencePath(_name) +
+                                     PreferenceConverter.getColor( _prefStore, prefBase +
                                                                                PreferencesConstants.Highlights.getAttrPath(pairIdx, foregound) +
                                                                                PreferencesConstants.Highlights.Color ) );
             }
-        }
-        
-        
-        
-        /* notify listeners */
-        
-        for( IProcessorConfigurationListener listener : _listeners )
-        {
-            listener.configurationUpdated();
         }
     }
 

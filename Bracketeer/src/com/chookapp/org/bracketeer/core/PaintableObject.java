@@ -8,6 +8,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
 
@@ -38,8 +39,33 @@ public abstract class PaintableObject
     {
         return _background;
     }
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+        if( !(obj instanceof PaintableObject))
+            return false;
+        
+        PaintableObject other = (PaintableObject) obj;
+        
+        boolean eq = true;
+        eq &= _position.equals(other._position);
+        eq &= equalNulls(_foreground, other._foreground);
+        eq &= equalNulls(_background, other._background);
+        
+        return  eq;
+    }
 
-    public void paint(GC gc, StyledText st, IDocument doc, IRegion widgetRange)
+    private boolean equalNulls(Object obj1, Object obj2)
+    {
+        if( (obj1 == null) ^ (obj2 == null) )
+            return false;
+        if( obj1 != null )
+            return obj1.equals(obj2);
+        return true;
+    }
+
+    public void paint(GC gc, StyledText st, IDocument doc, IRegion widgetRange, Rectangle rect)
     {
         if(_position.isDeleted || _position.length == 0)
             return;
@@ -64,7 +90,7 @@ public abstract class PaintableObject
             gc.setForeground(fg);
         }
         
-        innerPaint(gc, st, doc, widgetRange);
+        innerPaint(gc, st, doc, widgetRange, rect);
         
         if( _background != null )
         {
@@ -80,6 +106,6 @@ public abstract class PaintableObject
     }
 
     protected abstract void innerPaint(GC gc, StyledText st, IDocument doc,
-                                       IRegion widgetRange);    
+                                       IRegion widgetRange, Rectangle rect);    
    
 }
