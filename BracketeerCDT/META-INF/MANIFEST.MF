@@ -8,11 +8,11 @@ Bundle-Vendor: Gil Barash
 Require-Bundle: org.eclipse.core.runtime,
  com.chookapp.org.Bracketeer,
  org.eclipse.jface.text,
- org.eclipse.cdt.core
+ org.eclipse.cdt.core,
+ org.eclipse.cdt.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.cdt.ui.text,
  org.eclipse.core.resources,
  org.eclipse.jface.text,
- org.eclipse.ui,
- org.eclipse.ui.texteditor
+ org.eclipse.ui

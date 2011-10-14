@@ -48,13 +48,13 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 return shouldContinue();
             
             IASTFileLocation location = body.getFileLocation();
-            int endLoc = location.getNodeOffset()+location.getNodeLength();
+            int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
 
             IASTFunctionDeclarator declerator = ((ICPPASTFunctionDefinition) declaration).getDeclarator();
             int startLoc = declerator.getFileLocation().getNodeOffset();
             
             String hint = declerator.getRawSignature();            
-            // _container.add(new Hint("func", startLoc, endLoc, hint));
+            _container.add(new Hint("func", startLoc, endLoc, hint));
         }
         return shouldContinue();
     }
