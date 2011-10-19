@@ -4,13 +4,17 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 
 import com.chookapp.org.bracketeer.Activator;
 
@@ -18,12 +22,14 @@ public class PaintableHint extends PaintableObject
 {
 
     private String _txt;
+    private boolean _italic;
 
-    public PaintableHint(Position position, RGB foreground, RGB background, 
-                         String txt)
+    public PaintableHint(Position drawPosition, RGB foreground, RGB background, 
+                         boolean italic, String txt)
     {
-        super(position, foreground, background);
+        super(drawPosition, foreground, background);
         _txt = txt;
+        _italic = italic;
     }
 
     @Override
@@ -32,8 +38,11 @@ public class PaintableHint extends PaintableObject
         if( !(obj instanceof PaintableHint))
             return false;
         
-        if( !_txt.equals(((PaintableHint)obj)._txt))
+        PaintableHint other = (PaintableHint)obj;
+        if( (!_txt.equals(other._txt)) || (_italic != other._italic) )
+        {
             return false;
+        }        
         
         return super.equals(obj);
     }
@@ -42,7 +51,33 @@ public class PaintableHint extends PaintableObject
     protected void innerPaint(GC gc, StyledText st, IDocument doc,
                               IRegion widgetRange, Rectangle rect)
     {
+        Font oldFont = null;
+        Font newFont = null;
+        if(_italic)
+        {
+             oldFont = gc.getFont();
+             FontData[] oldDatas = oldFont.getFontData();
+             FontData[] newDatas = new FontData[oldDatas.length];
+             for (int i = 0; i < oldDatas.length; i++)
+             {
+                 FontData oldData = oldDatas[i];
+                 FontData fontData = new FontData(oldData.getName(), 
+                                                  oldData.getHeight(), 
+                                                  SWT.ITALIC);
+                 fontData.setLocale(oldData.getLocale());
+                 newDatas[i] = fontData;
+             }
+             newFont = new Font(Display.getDefault(), newDatas);
+             gc.setFont(newFont); 
+        }
+        
         gc.drawText(_txt, rect.x, rect.y);
+        
+        if( newFont != null )
+        {
+            gc.setFont(oldFont);
+            newFont.dispose();
+        }
     }
 
     private boolean check(IDocument doc) throws BadLocationException

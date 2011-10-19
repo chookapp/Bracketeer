@@ -22,6 +22,12 @@
             id="Bracketeer.preferencePages.Main"
             name="Bracketeer">
       </page>
+      <page
+            category="Bracketeer.preferencePages.Main"
+            class="com.chookapp.org.bracketeer.preferences.HintsPrefPage"
+            id="Bracketeer.preferencePages.Main.Hint"
+            name="Hints">
+      </page>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">

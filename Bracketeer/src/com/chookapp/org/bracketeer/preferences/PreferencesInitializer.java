@@ -32,17 +32,54 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
     private void defualtHints(IPreferenceStore store,
                               IConfigurationElement element, String pluginName)
     {
+        String hintType = PreferencesConstants.Hints.DEFAULT_TYPE;
+        String prefBase = PreferencesConstants.preferencePath(pluginName) +
+                PreferencesConstants.Hints.preferencePath(hintType);
+        
+        store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.Criteria.ATTR, 
+                         PreferencesConstants.Hints.WhenToShow.Criteria.VAL_ALWAYS );
+        store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
+                         5);
+        
+        store.setDefault(prefBase + PreferencesConstants.Hints.Font.FG_DEFAULT, false);
+        PreferenceConverter.setDefault(store, 
+                                       prefBase + PreferencesConstants.Hints.Font.FG_COLOR, 
+                                       new RGB(160,160,160));
+        store.setDefault(prefBase + PreferencesConstants.Hints.Font.BG_DEFAULT, true);
+        
+        store.setDefault(prefBase + PreferencesConstants.Hints.Display.Ellipsis.ATTR,
+                         PreferencesConstants.Hints.Display.Ellipsis.VAL_MID);
+        store.setDefault(prefBase + PreferencesConstants.Hints.Display.MAX_LENGTH,
+                         10);
+        store.setDefault(prefBase + PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
+                         true);
+        
+        String[] prefsToCopyFromDef = {PreferencesConstants.Hints.WhenToShow.Criteria.ATTR,
+                                       PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
+                                       PreferencesConstants.Hints.Font.FG_DEFAULT,
+                                       PreferencesConstants.Hints.Font.FG_COLOR,
+                                       PreferencesConstants.Hints.Font.BG_DEFAULT,
+                                       PreferencesConstants.Hints.Display.Ellipsis.ATTR,
+                                       PreferencesConstants.Hints.Display.MAX_LENGTH,
+                                       PreferencesConstants.Hints.Display.STRIP_WHITESPACE};
+        
         IConfigurationElement[] hints = element.getChildren("Hint");
         for (IConfigurationElement hint : hints)
         {
-            String hintType = hint.getAttribute("type");
-            String prefBase = PreferencesConstants.preferencePath(pluginName) +
+            hintType = hint.getAttribute("type");
+            prefBase = PreferencesConstants.preferencePath(pluginName) +
                     PreferencesConstants.Hints.preferencePath(hintType);
+            String defBase = PreferencesConstants.preferencePath(pluginName) +
+                        PreferencesConstants.Hints.preferencePath(PreferencesConstants.Hints.DEFAULT_TYPE);
             
-            store.setDefault(prefBase + PreferencesConstants.Hints.ENABLED, true );
-            PreferenceConverter.setDefault(store, 
-                                           prefBase + PreferencesConstants.Hints.FG_COLOR, 
-                                           new RGB(100,100,100));
+            store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.USE_DEFAULT, true );
+            store.setDefault(prefBase + PreferencesConstants.Hints.Font.USE_DEFAULT, true );
+            store.setDefault(prefBase + PreferencesConstants.Hints.Display.USE_DEFAULT, true );
+            
+            for (String pref : prefsToCopyFromDef)
+            {
+                store.setDefault(prefBase + pref, store.getDefaultString(defBase + pref));
+            }
         }
     }
 

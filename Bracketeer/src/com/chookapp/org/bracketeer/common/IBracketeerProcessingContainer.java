@@ -1,5 +1,7 @@
 package com.chookapp.org.bracketeer.common;
 
+import java.util.List;
+
 public interface IBracketeerProcessingContainer
 {
     /**
@@ -33,4 +35,9 @@ public interface IBracketeerProcessingContainer
      */
     public BracketsPair getMatchingPair(int openOffset, int closeOffset);
      
+    
+    /**
+     * Returns all the hints in the container
+     */
+    public List<Hint> getHints();
 }

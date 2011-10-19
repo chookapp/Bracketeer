@@ -135,71 +135,122 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     
     public class HintConfiguration implements IHintConfiguration
     {
-
-        
-        private HashMap<String, HashMap<String, String>> _attrMaps;
+        private HashMap<String, HashMap<String, Object>> _attrMaps; // the "Object" is either a String or a RGB
         
         public HintConfiguration()
         {
-            _attrMaps = new HashMap<String, HashMap<String,String>>();
+            _attrMaps = new HashMap<String, HashMap<String, Object>>();
         }
 
         public boolean getBoolAttr(String type, String attr)
         {
-            return Boolean.parseBoolean(getAttr(type,attr));
+            return Boolean.parseBoolean(getStringAttr(type,attr));
         }
         
-        public void setAttr(String type, String attr, boolean val)
+        public int getIntAttr(String type, String attr)
         {
-            setAttr(type, attr, Boolean.toString(val));
+            return Integer.parseInt(getStringAttr(type,attr));
         }
         
-        public String getAttr(String type, String attr)
+        public String getStringAttr(String type, String attr)
         {
-            HashMap<String, String> attrMap = _attrMaps.get(type);
+            return (String) getAttr(type,attr);
+        }
+        
+        public Object getAttr(String type, String attr)
+        {
+            HashMap<String, Object> attrMap = _attrMaps.get(type);
             if( attrMap == null )
                 return null;
             return attrMap.get(attr);
         }
         
-        public void setAttr(String type, String attr, String val)
+        public void setAttr(String type, String attr, Object val)
         {
-            HashMap<String, String> attrMap = _attrMaps.get(type);
+            HashMap<String,Object> attrMap = _attrMaps.get(type);
             if( attrMap == null )
             {
-                attrMap = new HashMap<String, String>();
+                attrMap = new HashMap<String, Object>();
                 _attrMaps.put(type, attrMap);
             }
             
             attrMap.put(attr, val);
         }
 
-        public boolean isEnabled(String type)
+        public boolean isShowAlways(String type)
         {
-            return getBoolAttr(type, PreferencesConstants.Hints.ENABLED);
+            return (getAttr(type, PreferencesConstants.Hints.WhenToShow.Criteria.ATTR) ==
+                    PreferencesConstants.Hints.WhenToShow.Criteria.VAL_ALWAYS);
         }
         
-//        public void setEnbaled(String type, boolean en)
-//        {
-//            setAttr(type, PreferencesConstants.Hints.ENABLED, en);
-//        }
+        public boolean isShowOnlyOnHover(String type)
+        {
+            return (getAttr(type, PreferencesConstants.Hints.WhenToShow.Criteria.ATTR) ==
+                    PreferencesConstants.Hints.WhenToShow.Criteria.VAL_HOVER);
+        }
         
         public RGB getColor(String type, boolean foreground)
         {
-            String str = getAttr(type, foreground ? PreferencesConstants.Hints.FG_COLOR :
-                                                    PreferencesConstants.Hints.BG_COLOR );
-            if( str == null )
-                return null;
-            
-            return StringConverter.asRGB(str);
+            return (RGB) getAttr(type, foreground ? PreferencesConstants.Hints.Font.FG_COLOR :
+                                                    PreferencesConstants.Hints.Font.BG_COLOR );
         }
         
-//        public void setColor(String type, boolean foreground, RGB color)
-//        {
-//            setAttr(type, foreground ? PreferencesConstants.Hints.FG_COLOR :
-//                                       PreferencesConstants.Hints.BG_COLOR, 
-//                    StringConverter.asString(color));
-//        }
+        public void setColor(String type, boolean foreground, RGB color)
+        {
+            setAttr(type, foreground ? PreferencesConstants.Hints.Font.FG_COLOR :
+                                       PreferencesConstants.Hints.Font.BG_COLOR, 
+                    color);
+        }
+
+        public String formatText(String type, String txt)
+        {
+            if( getBoolAttr(type, PreferencesConstants.Hints.Display.STRIP_WHITESPACE) )
+                txt = txt.replaceAll("[\\t ]+", "");
+            txt = performEllipsis(type, txt);
+            txt = " /* " + txt + " */";
+            return txt;
+        }
+        
+        public boolean isItalic(String type)
+        {
+            return getBoolAttr(type, PreferencesConstants.Hints.Font.ITALIC);
+        }
+        
+
+        public int getMinLineDistance(String type)
+        {
+            return getIntAttr(type, PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE);
+        }
+
+        
+        private String performEllipsis(String type, String txt)
+        {
+            String elip = getStringAttr(type, PreferencesConstants.Hints.Display.Ellipsis.ATTR);
+            int maxLen = getIntAttr(type, PreferencesConstants.Hints.Display.MAX_LENGTH);
+
+            if( txt.length() <= maxLen )
+                return txt;
+            
+            if( elip.equals(PreferencesConstants.Hints.Display.Ellipsis.VAL_END))
+            {
+                txt = txt.substring(0, maxLen-3);
+                txt = txt + "...";
+            }
+            else if( elip.equals(PreferencesConstants.Hints.Display.Ellipsis.VAL_MID))
+            {
+                int partLen = (maxLen-3)/2;
+                txt = txt.substring(0, partLen) + "..." + txt.substring(txt.length()-(partLen+1));
+            }
+            else
+            {
+                throw new IllegalArgumentException("Unknown ellipsis function: " + elip);
+            }
+            
+            return txt;
+        }
+
+      
+
     }
     
     private PairConfiguration _pairConf;
@@ -273,24 +324,72 @@ public class ProcessorConfiguration implements IPropertyChangeListener
 
     private void updateHintConf()
     {
-        List<String> defaultAttrs = new ArrayList<String>();
-        defaultAttrs.add(PreferencesConstants.Hints.FG_COLOR);
-        defaultAttrs.add(PreferencesConstants.Hints.BG_COLOR);
-        defaultAttrs.add(PreferencesConstants.Hints.ENABLED);
+       
+        String defaultBase = PreferencesConstants.preferencePath(_name) +
+                PreferencesConstants.Hints.preferencePath(PreferencesConstants.Hints.DEFAULT_TYPE);
         
         for (String hintType : _hintTypes)
         {
             String prefBase = PreferencesConstants.preferencePath(_name) +
                     PreferencesConstants.Hints.preferencePath(hintType);
             
-            for (String attr : defaultAttrs)
+            /* When to show */
+            
+            String[] listOfAttrs = {PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
+                                    PreferencesConstants.Hints.WhenToShow.Criteria.ATTR};
+            String baseToUse = prefBase;
+            if( _prefStore.getBoolean( prefBase + PreferencesConstants.Hints.WhenToShow.USE_DEFAULT ) )
+                baseToUse = defaultBase;
+            
+            for (String attr : listOfAttrs)
             {
-                String val = _prefStore.getString(prefBase + attr);
-                if( val == null || val.isEmpty() )
-                    val = null;
-                _hintConf.setAttr(hintType, attr, val);
+                _hintConf.setAttr(hintType, attr, _prefStore.getString(baseToUse + attr));
+            }
+            
+            /* Font */ 
+            
+            listOfAttrs = new String[] {PreferencesConstants.Hints.Font.ITALIC};
+            baseToUse = prefBase;
+            String typeToUse = hintType;
+            if( _prefStore.getBoolean( prefBase + PreferencesConstants.Hints.Font.USE_DEFAULT ) )
+            {
+                typeToUse = PreferencesConstants.Hints.DEFAULT_TYPE;
+                baseToUse = defaultBase;
+            }
+          
+            _hintConf.setColor(hintType, true, getHintColor(typeToUse, true));
+            _hintConf.setColor(hintType, false, getHintColor(typeToUse, false));
+            for (String attr : listOfAttrs)
+            {
+                _hintConf.setAttr(hintType, attr, _prefStore.getString(baseToUse + attr));
+            }
+            
+            /* Display */
+            
+            listOfAttrs = new String[] {PreferencesConstants.Hints.Display.MAX_LENGTH,
+                                        PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
+                                        PreferencesConstants.Hints.Display.Ellipsis.ATTR};
+            baseToUse = prefBase;
+            if( _prefStore.getBoolean( prefBase + PreferencesConstants.Hints.Display.USE_DEFAULT ) )
+            {
+                baseToUse = defaultBase;
+            }
+            for (String attr : listOfAttrs)
+            {
+                _hintConf.setAttr(hintType, attr, _prefStore.getString(baseToUse + attr));
             }
         }
+    }
+
+    private RGB getHintColor(String type, boolean foreground)
+    {
+        String prefBase = PreferencesConstants.Hints.preferencePath(_name, type);
+        String suffix = foreground ? PreferencesConstants.Hints.Font.FG_DEFAULT : PreferencesConstants.Hints.Font.BG_DEFAULT;
+        if( _prefStore.getBoolean(prefBase + suffix) )
+            return null;
+        
+        suffix = foreground ? PreferencesConstants.Hints.Font.FG_COLOR : PreferencesConstants.Hints.Font.BG_COLOR;
+        return PreferenceConverter.getColor(_prefStore, prefBase + suffix);
     }
 
     private void updateHighlightConf()
@@ -381,6 +480,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         if( !_listeners.remove(listener) )
             Activator.log("listener was not found");
     }
+
 
   
 }

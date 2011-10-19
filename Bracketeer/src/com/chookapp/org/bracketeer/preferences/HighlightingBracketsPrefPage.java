@@ -1,6 +1,5 @@
 package com.chookapp.org.bracketeer.preferences;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
@@ -9,8 +8,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.wb.swt.FieldLayoutPreferencePage;
-import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabItem;
@@ -22,19 +19,15 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
-import org.eclipse.jface.preference.FieldEditor;
-import org.eclipse.jface.preference.IPersistentPreferenceStore;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.core.ProcessorsRegistry;
 
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
 
-public class HighlightingBracketsPrefPage extends FieldLayoutPreferencePage 
+public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage 
                                           implements IWorkbenchPreferencePage
 {  
     
@@ -56,9 +49,7 @@ public class HighlightingBracketsPrefPage extends FieldLayoutPreferencePage
         }
     }
    
-    private IPreferenceStore _tempPrefs;
-    private IPreferenceStore _realPrefs;
-    private ArrayList<String> _prefNames;
+
     private java.util.List<TabInfo> _tabInfos;
 
     /**
@@ -67,10 +58,6 @@ public class HighlightingBracketsPrefPage extends FieldLayoutPreferencePage
     public HighlightingBracketsPrefPage()
     {
         _tabInfos = new ArrayList<TabInfo>();
-        _prefNames = new ArrayList<String>();
-        _tempPrefs = new NonPersistantPreferencesStore();
-        _realPrefs = Activator.getDefault().getPreferenceStore();
-        setPreferenceStore(_tempPrefs);
         setDescription("Configuring brackets highlighting");
     }
 
@@ -237,14 +224,7 @@ public class HighlightingBracketsPrefPage extends FieldLayoutPreferencePage
         }
         
         return container;
-    }
-
-    @Override
-    protected void addField(FieldEditor editor)
-    {
-        super.addField(editor);
-        _prefNames.add(editor.getPreferenceName());
-    }
+    } 
     
     /**
      * Initialize the preference page.
@@ -277,56 +257,17 @@ public class HighlightingBracketsPrefPage extends FieldLayoutPreferencePage
                     _prefNames.add(attr);
                 }
             }
-        }
-        
-        for(String attr : _prefNames)
-        {
-            _tempPrefs.setDefault(attr, _realPrefs.getDefaultString(attr));
-            _tempPrefs.setValue(attr, _realPrefs.getString(attr));
-        }
+        }        
         
         super.initialize();
         updateAll();
     }
     
-    private void updateAll()
+    @Override
+    protected void updateAll()
     {
         updateHihglightFieldEditors();
         updateSurroundingEnable();
-    }
-
-    @Override
-    public boolean performOk()
-    {
-        super.performOk();
-        
-        for(String attr : _prefNames)
-        {
-            _realPrefs.setValue(attr, _tempPrefs.getString(attr));
-        }
-
-        if (_realPrefs.needsSaving()
-                && _realPrefs instanceof IPersistentPreferenceStore) {
-            try {
-                ((IPersistentPreferenceStore) _realPrefs).save();
-            } catch (IOException e) {
-                Activator.log(e);
-            }
-        }
-
-        return true;
-    }
-        
-    
-    @Override
-    protected void performDefaults()
-    {        
-        super.performDefaults();
-        for(String attr : _prefNames)
-        {
-            _tempPrefs.setValue(attr, _realPrefs.getDefaultString(attr));
-        }
-        updateAll();
     }
     
     private void updateHihglightFieldEditors()
@@ -363,26 +304,10 @@ public class HighlightingBracketsPrefPage extends FieldLayoutPreferencePage
     {
         for (TabInfo tabInfo : _tabInfos)
         {
-            //tabInfo._surroundingComposite.setEnabled(tabInfo._surroundingEnableFE.getBooleanValue());
             setEnable(tabInfo._surroundingComposite, 
                       tabInfo._surroundingEnableFE.getBooleanValue());
         }
-    }
-    
-    private void setEnable(Composite comp, boolean enable)
-    {
-        Control[] controls = comp.getChildren();
-        if( controls == null )
-            return;
-        
-        for (Control c : controls)
-        {
-            if( c instanceof Composite && !(c instanceof Spinner))
-                setEnable((Composite)c, enable);
-            else
-                c.setEnabled(enable);
-        }
-    }
+    }  
     
     @Override
     public void propertyChange(PropertyChangeEvent event)

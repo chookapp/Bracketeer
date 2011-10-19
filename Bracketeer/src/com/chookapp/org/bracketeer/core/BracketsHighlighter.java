@@ -52,6 +52,7 @@ import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.BracketsPair;
 import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.SingleBracket;
+import com.chookapp.org.bracketeer.core.ProcessorConfiguration.HintConfiguration;
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 
 
@@ -424,15 +425,35 @@ public class BracketsHighlighter implements CaretListener, Listener,
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
         
         ArrayList<PaintableHint> hintsToPaint = new ArrayList<PaintableHint>();
+        HintConfiguration conf = _conf.getHintConfiguration();
+        IDocument doc = _sourceViewer.getDocument();
+        
         for (Hint hint : cont.getHints())
-        {   
-            if( !_conf.getHintConfiguration().isEnabled(hint.getType()) )
+        {
+            String type = hint.getType();
+            if( !_conf.getHintConfiguration().isShowAlways(type) )
+                continue;
+            
+            int originLine, drawLine;
+            try
+            {
+                originLine = doc.getLineOfOffset(hint.getOriginPositionRaw().getOffset());
+                drawLine = doc.getLineOfOffset(hint.getHintPositionRaw().getOffset());
+            }
+            catch (BadLocationException e)
+            {
+                Activator.log(e);
+                continue;
+            }
+            
+            if( drawLine - originLine < conf.getMinLineDistance(type) )
                 continue;
             
             PaintableHint pHint = new PaintableHint(hint.getHintPositionRaw(),
-                                                    _conf.getHintConfiguration().getColor(hint.getType(), true),
-                                                    _conf.getHintConfiguration().getColor(hint.getType(), false), 
-                                                    hint.getTxt());
+                                                    conf.getColor(type, true),
+                                                    conf.getColor(type, false), 
+                                                    conf.isItalic(type),
+                                                    conf.formatText(type, hint.getTxt()));
             
             hintsToPaint.add(pHint);
         }

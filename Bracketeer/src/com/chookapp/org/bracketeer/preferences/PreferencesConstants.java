@@ -67,16 +67,63 @@ public final class PreferencesConstants
     
     public final static class Hints
     {
-        public static final String ENABLED = "enabled";
-        public static final String FG_COLOR = "fgColor";
-        public static final String BG_COLOR = "bgColor";
+        public final static class WhenToShow
+        {
+            private static final String PATH = "WhenToShow.";
+            
+            public static final String USE_DEFAULT = PATH + "UseDefault";
+            public static final String MIN_LINES_DISTANCE = PATH + "MinLinesDistance";
+            
+            public final static class Criteria
+            {   
+                public static final String ATTR = PATH + "Criteria";
+                public static final String VAL_NEVER = "never";
+                public static final String VAL_HOVER = "hover";
+                public static final String VAL_ALWAYS = "always";
+            }
+        }
+        
+        public final static class Font
+        {
+            private static final String PATH = "Font.";
+            
+            public static final String USE_DEFAULT = PATH + "UseDefault";
+            public static final String FG_DEFAULT = PATH + "FgSysDefault";
+            public static final String FG_COLOR = PATH + "FgColor";
+            public static final String BG_DEFAULT = PATH + "BgSysDefault";
+            public static final String BG_COLOR = PATH + "BgColor";
+            public static final String ITALIC = PATH + "Italic";
+        }
+        
+        public final static class Display
+        {
+            private static final String PATH = "Display.";
+            
+            public static final String USE_DEFAULT = PATH + "UseDefault";
+            public static final String MAX_LENGTH = PATH + "MaxLength";
+            public static final String STRIP_WHITESPACE = PATH + "StripWhiteSpaces";
+            
+            public final static class Ellipsis
+            {   
+                public static final String ATTR = PATH + "Ellipsis";
+                public static final String VAL_END = "end";
+                public static final String VAL_MID = "mid";
+            }
+        }
+
+        public static final String DEFAULT_TYPE = "default";
+        
+        // public static final String ENABLED = "enabled";
         
         public static String preferencePath(String hintType)
         {
             return "Hints." + hintType + ".";
         }
         
-        
+        public static String preferencePath(String pluginName, String hintType)
+        {
+            return PreferencesConstants.preferencePath(pluginName) + preferencePath(hintType);
+        }
     }
     
     public static String preferencePath(String pluginName)

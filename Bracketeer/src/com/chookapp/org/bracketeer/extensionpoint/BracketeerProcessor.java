@@ -61,9 +61,7 @@ public abstract class BracketeerProcessor implements IDocumentListener
 
     private void postProcess(IDocument doc,
                              IBracketeerProcessingContainer container)
-    {
-        // TODO: remove hints which are NA (there is something behind them)
-        // TODO: use _hintConf to update the hints in the container (elipsis, etc...)
+    {        
     }
 
     @Override
