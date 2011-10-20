@@ -3,12 +3,6 @@
 <plugin>
    <extension-point id="com.chookapp.org.bracketeer.processorsFactory" name="BracketeerProcessorsFactory" schema="schema/com.chookapp.org.bracketeer.processorsFactory.exsd"/>
    <extension
-         point="org.eclipse.ui.startup">
-      <startup
-            class="com.chookapp.org.bracketeer.core.Startup">
-      </startup>
-   </extension>
-   <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="Bracketeer.preferencePages.Main"
@@ -34,6 +28,11 @@
       <initializer
             class="com.chookapp.org.bracketeer.preferences.PreferencesInitializer">
       </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="com.chookapp.org.bracketeer.core.Startup"></startup>
    </extension>
 
 </plugin>

@@ -63,7 +63,6 @@ public class BracketsHighlighter implements CaretListener, Listener,
 
     private ISourceViewer _sourceViewer;
     private StyledText _textWidget;
-    private IEditorPart _part;
 	private ProcessingThread _processingThread;
 	private ProcessorConfiguration _conf;
 	private IPaintPositionManager _positionManager;	
@@ -110,6 +109,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		    _processingThread.dispose();
 		    _processingThread = null;
 		}
+		
+		_sourceViewer = null;
+		_textWidget = null;
 	}
 	
 	/************************************************************
@@ -117,21 +119,20 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	 * @param part 
 	 ************************************************************/
 	
-	public void Init(BracketeerProcessor processor, IEditorPart part, 
+	public void Init(BracketeerProcessor processor, IDocument doc, 
 	                 ITextViewer textViewer, ProcessorConfiguration conf) 
 	{
 		
 		_sourceViewer = (ISourceViewer) textViewer;
-		_part = part;
 		_textWidget = _sourceViewer.getTextWidget();
 		_conf = conf;
 		processor.setHintConf(conf.getHintConfiguration());
 		
-        _processingThread = new ProcessingThread(part, processor);
+        _processingThread = new ProcessingThread(doc, processor);
         _processingThread.getBracketContainer().addListener(this);
         _conf.addListener(this);
         
-        ITextViewerExtension2 extension= (ITextViewerExtension2) textViewer;
+        ITextViewerExtension2 extension = (ITextViewerExtension2) textViewer;
         extension.addPainter(this);
 	}	
 	

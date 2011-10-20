@@ -15,23 +15,21 @@ package com.chookapp.org.bracketeer.extensionpoint;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.ui.IEditorPart;
 
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.IHintConfiguration;
-import com.chookapp.org.bracketeer.common.Utils;
 
 public abstract class BracketeerProcessor implements IDocumentListener
 {
     
     protected Boolean _cancelProcessing;
-    protected IEditorPart _part;
+    protected IDocument _doc;
     protected IHintConfiguration _hintConf;
     
-    protected BracketeerProcessor(IEditorPart part)
+    protected BracketeerProcessor(IDocument doc)
     {
-        _part = part;
+        _doc = doc;
     }
     
     public void setHintConf(IHintConfiguration conf)
@@ -42,16 +40,13 @@ public abstract class BracketeerProcessor implements IDocumentListener
     public boolean process(IBracketeerProcessingContainer container)
     {
         _cancelProcessing = false;
-        IDocument doc = Utils.getPartDocument(_part);
-        if( doc == null )
-            return false;
         
-        doc.addDocumentListener(this);
+        _doc.addDocumentListener(this);
         
-        processDocument(doc, container);        
-        postProcess(doc, container);
+        processDocument(_doc, container);        
+        postProcess(_doc, container);
         
-        doc.removeDocumentListener(this);
+        _doc.removeDocumentListener(this);
                
         return !_cancelProcessing;
     }        

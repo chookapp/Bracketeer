@@ -6,11 +6,9 @@ import java.util.List;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.services.IDisposable;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.common.Utils;
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 
 public class ProcessingThread implements Runnable, IDocumentListener, IDisposable
@@ -29,12 +27,12 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
     private Object _docChangedLock = new Object();
     private boolean _docIsChanging;
     
-    public ProcessingThread(IEditorPart part, BracketeerProcessor processor)
+    public ProcessingThread(IDocument doc, BracketeerProcessor processor)
     {
         _processor = processor;
         _documentChanged = false;
         _docIsChanging = false;
-        _doc = Utils.getPartDocument(part);
+        _doc = doc;
         _bracketContainer = new BracketeerProcessingContainer(_doc);
 //        _isProcessing = false;        
         

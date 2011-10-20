@@ -13,11 +13,12 @@
 
 package com.chookapp.org.bracketeer.extensionpoint;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
 
 public interface IBracketeerProcessorsFactory
 {
 
-    BracketeerProcessor createProcessorFor(IEditorPart part);
+    BracketeerProcessor createProcessorFor(IEditorPart part, IDocument doc);
 
 }

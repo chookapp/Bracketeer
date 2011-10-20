@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorPart;
 
 import com.chookapp.org.bracketeer.Activator;
@@ -51,31 +52,32 @@ public class ProcessorsRegistry
 		}
 	}
 	
-	public static List<String> getPluginNames()
-	{
-	    List<String> ret = new LinkedList<String>();
-	    
-	    IConfigurationElement[] config = Platform.getExtensionRegistry()
-                .getConfigurationElementsFor(PROC_FACTORY_ID);
-        
-        for (IConfigurationElement element : config) {
-            try {                
-                String name = element.getAttribute("name");
-                ret.add(name);
-            } catch (Exception e) {
-                Activator.log(e);
-            }           
-        }
-        
-        return ret;
-	}
+//	public static List<String> getPluginNames()
+//	{
+//	    List<String> ret = new LinkedList<String>();
+//	    
+//	    IConfigurationElement[] config = Platform.getExtensionRegistry()
+//                .getConfigurationElementsFor(PROC_FACTORY_ID);
+//        
+//        for (IConfigurationElement element : config) {
+//            try {                
+//                String name = element.getAttribute("name");
+//                ret.add(name);
+//            } catch (Exception e) {
+//                Activator.log(e);
+//            }           
+//        }
+//        
+//        return ret;
+//	}
 
-	public BracketeerProcessorInfo findProcessorFor(IEditorPart part) {
+	public BracketeerProcessorInfo findProcessorFor(IEditorPart part, IDocument doc) 
+	{
 	    BracketeerProcessorInfo processorInfoFound = null;
 		
 		for (int i = 0; i < _processorFactories.size(); i++)
         {
-			BracketeerProcessor processor = _processorFactories.get(i).createProcessorFor(part);
+			BracketeerProcessor processor = _processorFactories.get(i).createProcessorFor(part, doc);
 			if( processor != null )
 			{
 				if( processorInfoFound != null )

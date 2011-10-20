@@ -478,7 +478,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     public void removeListener(IProcessorConfigurationListener listener)
     {
         if( !_listeners.remove(listener) )
-            Activator.log("listener was not found");
+            Activator.log("listener for ProcessorConfiguration was not found");
     }
 
 

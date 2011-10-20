@@ -118,7 +118,7 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
     public void removeListener(IProcessingContainerListener listener)
     {
         if( !_listeners.remove(listener) )
-            Activator.log("listener was not found");        
+            Activator.log("listener for BracketeerProcessor was not found");        
     }
     
     public BracketsPair getMatchingPair(int openOffset, int closeOffset)
