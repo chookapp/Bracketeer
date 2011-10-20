@@ -12,8 +12,6 @@
 
 package com.chookapp.org.bracketeer.extensionpoint;
 
-import java.util.concurrent.Semaphore;
-
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -27,7 +25,6 @@ import com.chookapp.org.bracketeer.common.Utils;
 public abstract class BracketeerProcessor implements IDocumentListener
 {
     
-    private Semaphore _processingCanceled = new Semaphore(0);
     protected Boolean _cancelProcessing;
     protected IEditorPart _part;
     protected IHintConfiguration _hintConf;
@@ -46,16 +43,16 @@ public abstract class BracketeerProcessor implements IDocumentListener
     {
         _cancelProcessing = false;
         IDocument doc = Utils.getPartDocument(_part);
+        if( doc == null )
+            return false;
+        
         doc.addDocumentListener(this);
         
         processDocument(doc, container);        
         postProcess(doc, container);
         
         doc.removeDocumentListener(this);
-        
-        if( _cancelProcessing )            
-            _processingCanceled.release();
-        
+               
         return !_cancelProcessing;
     }        
 
@@ -67,16 +64,8 @@ public abstract class BracketeerProcessor implements IDocumentListener
     @Override
     public void documentAboutToBeChanged(DocumentEvent event)
     {
-        try
-        {
-            Activator.log("doc about to be chnaged");
-            _cancelProcessing = true;        
-            _processingCanceled.acquire();
-        }
-        catch (InterruptedException e)
-        {
-            Activator.log(e);
-        }
+        Activator.log("doc about to be changed");
+        _cancelProcessing = true;
     }
 
     @Override

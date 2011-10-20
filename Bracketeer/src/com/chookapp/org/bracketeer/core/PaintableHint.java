@@ -110,6 +110,9 @@ public class PaintableHint extends PaintableObject
     {
         try
         {
+            if( widgetRange == null )
+                return null;
+            
             if( !check(doc) )
                 return null;
             

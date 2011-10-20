@@ -331,8 +331,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
        }
        if( singleBracketsTouched )
            update |= updateSingleBrackets();
-       if( hintsTouched )
-           update |= updateHints();                
+       
+       // I'm ignoring 'hintsTouched' because the "line distance" might have been modified
+       update |= updateHints();                
 
        if(update)
        {
