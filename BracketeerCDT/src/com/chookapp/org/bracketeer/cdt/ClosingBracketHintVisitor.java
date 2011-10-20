@@ -85,7 +85,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 IASTFileLocation location = elseClause.getFileLocation();
                 endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                 int startLoc = location.getNodeOffset();
-                _container.add(new Hint("if", startLoc, endLoc, "switch("+hint+")"));
+                _container.add(new Hint("if", startLoc, endLoc, "else_of_if("+hint+")"));
             }
         }
         
@@ -95,7 +95,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             IASTFileLocation location = ((IASTSwitchStatement) statement).getBody().getFileLocation();
             int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
             int startLoc = statement.getFileLocation().getNodeOffset();
-            _container.add(new Hint("switch", startLoc, endLoc, "else_of_if("+hint+")"));
+            _container.add(new Hint("switch", startLoc, endLoc, "switch("+hint+")"));
         }
         
         if( statement instanceof IASTForStatement )

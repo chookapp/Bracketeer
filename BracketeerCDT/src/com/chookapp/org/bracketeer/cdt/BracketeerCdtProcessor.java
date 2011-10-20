@@ -74,12 +74,12 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
 //        
 //    }
     
-    public BracketeerCdtProcessor(IEditorPart part) 
+    public BracketeerCdtProcessor(IEditorPart part, IDocument doc) 
     {
-        super(part);
+        super(doc);
         
+        _celem = CDTUITools.getEditorInputCElement(part.getEditorInput());
         _matcher = new CPairMatcher(BRACKETS);
-        _celem = null;
     }
    
     
@@ -178,7 +178,6 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
     @SuppressWarnings("restriction")
     private void processAst(IBracketeerProcessingContainer container)
     {
-        makeCelem();
         if( _celem == null )
             return;
         
@@ -209,23 +208,5 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         }
     }
 
-
-    private void makeCelem()
-    {        
-        if( _celem != null )
-            return;
-        
-        
-//        
-//        IResource resource = (IResource) _part.getEditorInput().getAdapter(IResource.class);
-//        if( resource == null )
-//            return;
-//        _celem = CoreModel.getDefault().create(resource);
-//        if( _celem == null )
-//            return;
-//        if (!(_celem instanceof ITranslationUnit))
-//            _celem = null;
-        
-        _celem = CDTUITools.getEditorInputCElement(_part.getEditorInput());
-    }
+  
 }
