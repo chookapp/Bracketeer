@@ -10,6 +10,21 @@
          <Hint
                type="func">
          </Hint>
+         <Hint
+               type="type">
+         </Hint>
+         <Hint
+               type="if">
+         </Hint>
+         <Hint
+               type="switch">
+         </Hint>
+         <Hint
+               type="for">
+         </Hint>
+         <Hint
+               type="while">
+         </Hint>
       </BracketeerProcessorsFactory>
    </extension> 
 
