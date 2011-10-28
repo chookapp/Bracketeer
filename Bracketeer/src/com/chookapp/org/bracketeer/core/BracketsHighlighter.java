@@ -141,6 +141,11 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		return _sourceViewer;
 	}
 	
+    public ProcessorConfiguration getConfiguration()
+    {
+        return _conf;
+    }
+	
 	/************************************************************
 	 * listeners
 	 ************************************************************/
@@ -833,5 +838,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         caret -= 1;
         return caret;
     }
+
+
    
 }

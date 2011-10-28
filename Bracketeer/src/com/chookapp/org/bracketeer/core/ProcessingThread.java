@@ -142,7 +142,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
     @Override
     public void documentChanged(DocumentEvent event)
     {
-        // TODO put the event in an events list so that the processor could parse only part of the file
+        // TODO: optimize - put the event in an events list so that the processor could parse only part of the file
 
         _docIsChanging = false;
         synchronized (_docChangedLock)

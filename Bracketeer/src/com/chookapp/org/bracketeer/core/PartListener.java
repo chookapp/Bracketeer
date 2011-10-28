@@ -1,16 +1,21 @@
 package com.chookapp.org.bracketeer.core;
 
+import java.io.Console;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.eclipse.core.commands.Command;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.ISourceProvider;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -18,11 +23,16 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.services.ISourceProviderService;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.chookapp.org.bracketeer.Activator;
+import com.chookapp.org.bracketeer.commands.BracketeerToggleState;
+import com.chookapp.org.bracketeer.commands.SourceProvider;
 
 public class PartListener implements IWindowListener, IPartListener2
 {
@@ -30,10 +40,12 @@ public class PartListener implements IWindowListener, IPartListener2
     private Collection<IWorkbenchWindow> fWindows= new HashSet<IWorkbenchWindow>();
     private HashMap<IWorkbenchPart, BracketsHighlighter> _activeMap;
     private ProcessorsRegistry _processorsRegistry;
+    private List<IActiveProcessorListener> m_listeners;
     
     PartListener()
     {
         _activeMap = new HashMap<IWorkbenchPart, BracketsHighlighter>();
+        m_listeners = new LinkedList<IActiveProcessorListener>();
         _processorsRegistry = new ProcessorsRegistry();        
     }
     
@@ -45,28 +57,36 @@ public class PartListener implements IWindowListener, IPartListener2
     public void install() 
     {
         IWorkbench workbench = PlatformUI.getWorkbench();
-        if (workbench != null) 
+        if (workbench == null)
         {
-            // listen for new windows
-            workbench.addWindowListener(this);
-            IWorkbenchWindow[] wnds= workbench.getWorkbenchWindows();
-            for (int i = 0; i < wnds.length; i++) 
-            {
-                IWorkbenchWindow window = wnds[i];
-                register(window);
-            }
-            // register open windows
-//            IWorkbenchWindow ww= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-//            if (ww != null) {
-//                IWorkbenchPage activePage = ww.getActivePage();
-//                if (activePage != null) {
-//                    IWorkbenchPartReference part= activePage.getActivePartReference();
-//                    if (part != null) {
-//                        partActivated(part);
-//                    }
-//                }
-//            }
+            Activator.log("can't find workbanch");
+            return;
         }
+
+        ISourceProviderService srcService = (ISourceProviderService) workbench.getService(ISourceProviderService.class);
+        ISourceProvider src = srcService.getSourceProvider(SourceProvider.PLUGIN_NAME);
+        m_listeners.add((IActiveProcessorListener) src);
+
+        // listen for new windows
+        workbench.addWindowListener(this);
+        IWorkbenchWindow[] wnds= workbench.getWorkbenchWindows();
+        for (int i = 0; i < wnds.length; i++) 
+        {
+            IWorkbenchWindow window = wnds[i];
+            register(window);
+        }
+        // register open windows
+        //            IWorkbenchWindow ww= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        //            if (ww != null) {
+        //                IWorkbenchPage activePage = ww.getActivePage();
+        //                if (activePage != null) {
+        //                    IWorkbenchPartReference part= activePage.getActivePartReference();
+        //                    if (part != null) {
+        //                        partActivated(part);
+        //                    }
+        //                }
+        //            }
+
     }
 
     public void uninstall() 
@@ -90,6 +110,12 @@ public class PartListener implements IWindowListener, IPartListener2
             {
                 partActivated(editorRef);
             }
+        }
+        
+        IWorkbenchPage page = wnd.getActivePage();
+        if( page != null )
+        {
+            activated(page.getActivePartReference());
         }
     }
     
@@ -135,8 +161,9 @@ public class PartListener implements IWindowListener, IPartListener2
     @Override
     public void partActivated(IWorkbenchPartReference partRef)
     {
+        created(partRef);
         activated(partRef);
-    }
+    }   
 
     @Override
     public void partBroughtToTop(IWorkbenchPartReference partRef)
@@ -146,19 +173,19 @@ public class PartListener implements IWindowListener, IPartListener2
     @Override
     public void partClosed(IWorkbenchPartReference partRef)
     {
-        deactivated(partRef);
+        destroyed(partRef);
     }
 
     @Override
     public void partDeactivated(IWorkbenchPartReference partRef)
     {
-        // The part might be activated again...
+        deactivated(partRef);
     }
 
     @Override
     public void partOpened(IWorkbenchPartReference partRef)
     {
-        activated(partRef);
+        created(partRef);
     }
 
     @Override
@@ -174,11 +201,11 @@ public class PartListener implements IWindowListener, IPartListener2
     @Override
     public void partInputChanged(IWorkbenchPartReference partRef)
     {
-        deactivated(partRef);
-        activated(partRef);
+        destroyed(partRef);
+        created(partRef);
     }
 
-    private void activated(IWorkbenchPartReference partRef) 
+    private void created(IWorkbenchPartReference partRef) 
     {
         IWorkbenchPart part= partRef.getPart(false);
         try {
@@ -196,7 +223,7 @@ public class PartListener implements IWindowListener, IPartListener2
         }
     }
     
-    private void deactivated(IWorkbenchPartReference partRef) 
+    private void destroyed(IWorkbenchPartReference partRef) 
     {
         IWorkbenchPart part= partRef.getPart(false);
         try {
@@ -207,6 +234,50 @@ public class PartListener implements IWindowListener, IPartListener2
         } catch (Exception err) {
             err.printStackTrace();
         }
+    }
+    
+    private void activated(IWorkbenchPartReference partRef)
+    {
+        System.out.println("activated");
+        if( partRef == null )
+        {
+            deactivated(partRef);
+            return;
+        }
+        IWorkbenchPart part = partRef.getPart(false);
+        if( part == null )
+        {
+            deactivated(partRef);
+            return;
+        }
+
+        BracketsHighlighter bracketsHighlighter;
+        synchronized (_activeMap) 
+        { 
+            bracketsHighlighter = _activeMap.get(part); 
+        }
+        if( bracketsHighlighter == null )
+        {
+            deactivated(partRef);
+            return;
+        }
+        
+        String name = bracketsHighlighter.getConfiguration().getName();
+
+        Activator.trace("PluginName: " + name);
+        for (IActiveProcessorListener listener : m_listeners)
+        {
+            listener.activeProcessorChanged(name);
+        }
+    }
+    
+    private void deactivated(IWorkbenchPartReference partRef)
+    {
+        System.out.println("deActivated");
+        for (IActiveProcessorListener listener : m_listeners)
+        {
+            listener.activeProcessorChanged(null);
+        }   
     }
     
     private void hook(final IEditorPart part, final ITextViewer textViewer) 
