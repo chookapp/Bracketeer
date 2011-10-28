@@ -36,7 +36,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
         public String _name;
         public List _hintsList;
         public BooleanFieldEditor _whenToShowUseDef;
-        public Composite _whenToShowCriteria;
+        public BooleanFieldEditor _showInEditor;    
         public Composite _whenToShowMinLines;
         public BooleanFieldEditor _fontUseDef;
         public Composite _fontGrp;
@@ -46,7 +46,10 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
         public Composite _fontFgColor;
         public BooleanFieldEditor _fontBgDef;
         public Composite _fontBgColor;
-        public RadioGroupFieldEditor _whenToShowCriteriaButtons;    
+        public Composite _showInEditorParent;
+        public Composite _displayUseDefParnet;
+        public Composite _fontUseDefParent;
+        public Composite _whenToShowUseDefParent;
     }
     
     class FEInfo
@@ -92,7 +95,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                 .getConfigurationElementsFor(ProcessorsRegistry.PROC_FACTORY_ID);
 
         // If we want to re-enable design mode, we should comment out this "for", and comment in this stub
-        //         IConfigurationElement element = null; // stub
+//                 IConfigurationElement element = null; // stub
         for (IConfigurationElement element : config) 
         {
             String pluginName = element.getAttribute("name");
@@ -109,10 +112,12 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             composite.setLayout(new GridLayout(1, false));
 
             Composite composite_2 = new Composite(composite, SWT.NONE);
-            addField(new BooleanFieldEditor("id", "Enable always displaying hints", BooleanFieldEditor.DEFAULT, composite_2));
+            addField(new BooleanFieldEditor(PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR,
+                                            "Display hints in editor", BooleanFieldEditor.DEFAULT, composite_2));
 
-            Composite composite_3 = new Composite(composite, SWT.NONE);
-            addField(new BooleanFieldEditor("id", "Enable displaying hints on hover", BooleanFieldEditor.DEFAULT, composite_3));
+//            Composite composite_3 = new Composite(composite, SWT.NONE);
+//            addField(new BooleanFieldEditor(PreferencesConstants.Hints.Globals.SHOW_ON_HOVER,
+//                                            "Display tooltip on hover", BooleanFieldEditor.DEFAULT, composite_3));
 
             Composite composite_1 = new Composite(composite, SWT.NONE);
             composite_1.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true, 1, 1));
@@ -159,26 +164,20 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.WhenToShow.USE_DEFAULT);
             tabInfo._whenToShowUseDef = bfe;
+            tabInfo._whenToShowUseDefParent = composite_6;
 
             Composite composite_15 = new Composite(grpWhenToShow, SWT.NONE);
             GridLayout gl_composite_15 = new GridLayout(1, false);
             gl_composite_15.marginLeft = 10;
             composite_15.setLayout(gl_composite_15);
-
+            
             Composite composite_7 = new Composite(composite_15, SWT.NONE);
-            {
-                RadioGroupFieldEditor radioGroupFieldEditor = new RadioGroupFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.Criteria.ATTR, "Show:", 3, 
-                                                                                        new String[][]{{"Never", PreferencesConstants.Hints.WhenToShow.Criteria.VAL_NEVER}, 
-                                                                                                       {"On hover", PreferencesConstants.Hints.WhenToShow.Criteria.VAL_HOVER},
-                                                                                                       {"Always", PreferencesConstants.Hints.WhenToShow.Criteria.VAL_ALWAYS}},
-                                                                                                       composite_7);
-                radioGroupFieldEditor.setIndent(0);
-                addField(radioGroupFieldEditor);
-                addDynamicFE(radioGroupFieldEditor, 
-                             PreferencesConstants.Hints.WhenToShow.Criteria.ATTR);
-                tabInfo._whenToShowCriteria = composite_7;
-                tabInfo._whenToShowCriteriaButtons = radioGroupFieldEditor;
-            }
+            bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR,
+                                         "Show hints in editor", BooleanFieldEditor.DEFAULT, composite_7);
+            addField(bfe);
+            addDynamicFE(bfe, PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR);
+            tabInfo._showInEditor = bfe;
+            tabInfo._showInEditorParent = composite_7;
 
             Composite composite_14 = new Composite(composite_15, SWT.NONE);
             SpinnerFieldEditor spinner = new SpinnerFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
@@ -202,6 +201,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.Font.USE_DEFAULT);
             tabInfo._fontUseDef = bfe;
+            tabInfo._fontUseDefParent = composite_8;
 
             Composite composite_9 = new Composite(grpFont, SWT.NONE);
             composite_9.setBounds(0, 0, 64, 64);
@@ -266,6 +266,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.Display.USE_DEFAULT);
             tabInfo._displayUseDef = bfe;
+            tabInfo._displayUseDefParnet = composite_13;
 
             Composite composite_18 = new Composite(grpShow, SWT.NONE);
             GridLayout gl_composite_18 = new GridLayout(1, false);
@@ -358,7 +359,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                     event.getSource() == tabInfo._whenToShowUseDef ||
                     event.getSource() == tabInfo._fontBgDef ||
                     event.getSource() == tabInfo._fontFgDef ||
-                    event.getSource() == tabInfo._whenToShowCriteriaButtons)
+                    event.getSource() == tabInfo._showInEditor)
             {
                 updateAll();
             }
@@ -391,7 +392,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                 feInfo._fe.load();
             }
             
-            setEnable(tabInfo._whenToShowCriteria, !tabInfo._whenToShowUseDef.getBooleanValue());
+            setEnable(tabInfo._showInEditorParent, !tabInfo._whenToShowUseDef.getBooleanValue());
             
             boolean disableAll;
             {
@@ -401,9 +402,9 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                 else
                     typeToCheck = type;
                 String prefToCheck = PreferencesConstants.Hints.preferencePath(tabInfo._name, typeToCheck) + 
-                        PreferencesConstants.Hints.WhenToShow.Criteria.ATTR;
+                        PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR;
                 
-                disableAll = getPreferenceStore().getString(prefToCheck).equals(PreferencesConstants.Hints.WhenToShow.Criteria.VAL_NEVER);
+                disableAll = !getPreferenceStore().getBoolean(prefToCheck);
                 
                 setEnable( tabInfo._fontGrp.getParent(), !disableAll);
                 setEnable( tabInfo._displayGrp.getParent(), !disableAll);
@@ -420,6 +421,9 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             
             setEnable(tabInfo._displayGrp, !tabInfo._displayUseDef.getBooleanValue() && !disableAll);
            
+            setEnable(tabInfo._whenToShowUseDefParent, idx != 0);
+            setEnable(tabInfo._fontUseDefParent, idx != 0 && !disableAll);
+            setEnable(tabInfo._displayUseDefParnet, idx != 0 && !disableAll);
         }
         
     }

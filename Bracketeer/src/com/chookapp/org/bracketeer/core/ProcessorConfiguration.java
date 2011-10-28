@@ -136,6 +136,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     public class HintConfiguration implements IHintConfiguration
     {
         private HashMap<String, HashMap<String, Object>> _attrMaps; // the "Object" is either a String or a RGB
+        private boolean _showOnHover;
         
         public HintConfiguration()
         {
@@ -177,16 +178,14 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             attrMap.put(attr, val);
         }
 
-        public boolean isShowAlways(String type)
+        public boolean isShowInEditor(String type)
         {
-            return (getAttr(type, PreferencesConstants.Hints.WhenToShow.Criteria.ATTR) ==
-                    PreferencesConstants.Hints.WhenToShow.Criteria.VAL_ALWAYS);
+            return (getBoolAttr(type, PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR));
         }
         
-        public boolean isShowOnlyOnHover(String type)
+        public boolean isShowOnHover(String type)
         {
-            return (getAttr(type, PreferencesConstants.Hints.WhenToShow.Criteria.ATTR) ==
-                    PreferencesConstants.Hints.WhenToShow.Criteria.VAL_HOVER);
+            return _showOnHover;
         }
         
         public RGB getColor(String type, boolean foreground)
@@ -323,8 +322,10 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     }
 
     private void updateHintConf()
-    {
-       
+    {       
+        _hintConf._showOnHover = _prefStore.getBoolean( PreferencesConstants.Hints.Globals.SHOW_ON_HOVER );
+        boolean showInEditor = _prefStore.getBoolean( PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR );
+        
         String defaultBase = PreferencesConstants.preferencePath(_name) +
                 PreferencesConstants.Hints.preferencePath(PreferencesConstants.Hints.DEFAULT_TYPE);
         
@@ -335,8 +336,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             
             /* When to show */
             
-            String[] listOfAttrs = {PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
-                                    PreferencesConstants.Hints.WhenToShow.Criteria.ATTR};
+            String[] listOfAttrs = {PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE};
             String baseToUse = prefBase;
             if( _prefStore.getBoolean( prefBase + PreferencesConstants.Hints.WhenToShow.USE_DEFAULT ) )
                 baseToUse = defaultBase;
@@ -345,6 +345,10 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             {
                 _hintConf.setAttr(hintType, attr, _prefStore.getString(baseToUse + attr));
             }
+            
+            String whenToShowAttr = PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR;
+            _hintConf.setAttr(hintType, whenToShowAttr, 
+                              showInEditor ? _prefStore.getString(baseToUse + whenToShowAttr) : Boolean.FALSE.toString());
             
             /* Font */ 
             

@@ -72,15 +72,8 @@ public final class PreferencesConstants
             private static final String PATH = "WhenToShow.";
             
             public static final String USE_DEFAULT = PATH + "UseDefault";
+            public static final String SHOW_IN_EDITOR = PATH + "ShowInEditor";
             public static final String MIN_LINES_DISTANCE = PATH + "MinLinesDistance";
-            
-            public final static class Criteria
-            {   
-                public static final String ATTR = PATH + "Criteria";
-                public static final String VAL_NEVER = "never";
-                public static final String VAL_HOVER = "hover";
-                public static final String VAL_ALWAYS = "always";
-            }
         }
         
         public final static class Font
@@ -112,6 +105,13 @@ public final class PreferencesConstants
         }
 
         public static final String DEFAULT_TYPE = "default";
+        
+        public final static class Globals
+        {
+            private static final String PATH = "Globals.";
+            public static final String SHOW_ON_HOVER = PATH + "ShowOnHover";
+            public static final String SHOW_IN_EDITOR = PATH + "ShowInEditor";            
+        }
         
         // public static final String ENABLED = "enabled";
         

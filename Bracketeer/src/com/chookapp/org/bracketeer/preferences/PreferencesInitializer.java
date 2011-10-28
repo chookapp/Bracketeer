@@ -32,12 +32,14 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
     private void defualtHints(IPreferenceStore store,
                               IConfigurationElement element, String pluginName)
     {
+        store.setDefault(PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR, true );
+        store.setDefault(PreferencesConstants.Hints.Globals.SHOW_ON_HOVER, true );
+        
         String hintType = PreferencesConstants.Hints.DEFAULT_TYPE;
         String prefBase = PreferencesConstants.preferencePath(pluginName) +
                 PreferencesConstants.Hints.preferencePath(hintType);
         
-        store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.Criteria.ATTR, 
-                         PreferencesConstants.Hints.WhenToShow.Criteria.VAL_ALWAYS );
+        store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR, true );
         store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
                          5);
         
@@ -54,7 +56,7 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
                          true);
         
-        String[] prefsToCopyFromDef = {PreferencesConstants.Hints.WhenToShow.Criteria.ATTR,
+        String[] prefsToCopyFromDef = {PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR,
                                        PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
                                        PreferencesConstants.Hints.Font.FG_DEFAULT,
                                        PreferencesConstants.Hints.Font.FG_COLOR,

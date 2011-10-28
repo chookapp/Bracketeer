@@ -216,6 +216,22 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         return ret;
     }
     
+    public Hint getHint(int startOffset)
+    {
+        synchronized(_hints)
+        {
+            for (ObjectContainer<Hint> objCont : _hints)
+            {
+                Hint hint = objCont.getObject();
+                
+                Position pos = hint.getHintPosition();
+                if( pos != null && pos.overlapsWith(startOffset, 1) )
+                    return hint;
+            }
+        }        
+        return null;
+    }
+    
     public List<Hint> getHints()
     {
         List<Hint> ret = new LinkedList<Hint>();

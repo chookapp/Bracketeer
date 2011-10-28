@@ -438,7 +438,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         for (Hint hint : cont.getHints())
         {
             String type = hint.getType();
-            if( !_conf.getHintConfiguration().isShowAlways(type) )
+            if( !_conf.getHintConfiguration().isShowInEditor(type) )
                 continue;
             
             int originLine, drawLine;
@@ -503,41 +503,59 @@ public class BracketsHighlighter implements CaretListener, Listener,
      */
     private boolean mouseHoverAt(StyledText st, int origCaret)
     {
-
-//        int startPoint = Math.max(0, origCaret - 2);
-//        int endPoint = Math.min(_sourceViewer.getDocument().getLength(),
-//                                origCaret + 2);
-
-        if( !_conf.getPairConfiguration().isHoveredPairsEnabled() )
-            return false;
-        
-        int length = 4;
-        int startPoint = origCaret-2;
-        
-        BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
-        List<BracketsPair> listOfPairs = cont.getMatchingPairs(startPoint, length);
-        listOfPairs = sortPairs(listOfPairs);
-        
-        if(listOfPairs.isEmpty())
-            return false;        
-        
-        // do nothing if _hoveredPairsToPaint is equal to listOfPairs
-        if(areEqualPairs(listOfPairs, _hoveredPairsToPaint))
-            return true;
-        
-        clearHoveredPairsToPaint();        
-        synchronized (_hoveredPairsToPaint)
-        {           
-            addPaintableObjectsPairs(listOfPairs, 0, 1, _hoveredPairsToPaint);
-        }
-        
-        // TODO: optimize? (redraw only the needed sections)
-        _textWidget.redraw();
-                
-        //drawHighlights();
-        return true;
+        return markHoveredBrackets(origCaret) || showToolTip(origCaret, true);
     }
 
+    private boolean markHoveredBrackets(int origCaret)
+    {
+
+//      int startPoint = Math.max(0, origCaret - 2);
+//      int endPoint = Math.min(_sourceViewer.getDocument().getLength(),
+//                              origCaret + 2);
+
+      if( !_conf.getPairConfiguration().isHoveredPairsEnabled() )
+          return false;
+      
+      int length = 4;
+      int startPoint = origCaret-2;
+      
+      BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
+      List<BracketsPair> listOfPairs = cont.getMatchingPairs(startPoint, length);
+      listOfPairs = sortPairs(listOfPairs);
+      
+      if(listOfPairs.isEmpty())
+          return false;        
+      
+      // do nothing if _hoveredPairsToPaint is equal to listOfPairs
+      if(areEqualPairs(listOfPairs, _hoveredPairsToPaint))
+          return true;
+      
+      clearHoveredPairsToPaint();        
+      synchronized (_hoveredPairsToPaint)
+      {           
+          addPaintableObjectsPairs(listOfPairs, 0, 1, _hoveredPairsToPaint);
+      }
+      
+      // TODO: optimize? (redraw only the needed sections)
+      _textWidget.redraw();
+              
+      //drawHighlights();
+      return true;        
+    }
+    
+    private boolean showToolTip(int origCaret, boolean hover)
+    {
+//        BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
+//        Hint hint = cont.getHint(origCaret);
+//        if( hint == null )
+//            return false;
+//        
+//        if( hover && !_conf.getHintConfiguration().isShowOnHover(hint.getType()) )
+//            return false;
+        
+        return false;
+    }
+    
     private boolean areEqualPairs(List<BracketsPair> listOfPairs,
                                   List<PaintableBracket> pairsToPaint)    
     {
