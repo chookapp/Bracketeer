@@ -238,7 +238,6 @@ public class PartListener implements IWindowListener, IPartListener2
     
     private void activated(IWorkbenchPartReference partRef)
     {
-        System.out.println("activated");
         if( partRef == null )
         {
             deactivated(partRef);
@@ -273,7 +272,6 @@ public class PartListener implements IWindowListener, IPartListener2
     
     private void deactivated(IWorkbenchPartReference partRef)
     {
-        System.out.println("deActivated");
         for (IActiveProcessorListener listener : m_listeners)
         {
             listener.activeProcessorChanged(null);

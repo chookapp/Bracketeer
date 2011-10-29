@@ -23,6 +23,7 @@ public class PaintableHint extends PaintableObject
 
     private String _txt;
     private boolean _italic;
+    private boolean _underline;
 
     public PaintableHint(Position drawPosition, RGB foreground, RGB background, 
                          boolean italic, String txt)
@@ -30,6 +31,7 @@ public class PaintableHint extends PaintableObject
         super(drawPosition, foreground, background);
         _txt = txt;
         _italic = italic;
+        _underline = false;
     }
 
     @Override
@@ -71,7 +73,10 @@ public class PaintableHint extends PaintableObject
              gc.setFont(newFont); 
         }
         
-        gc.drawText(_txt, rect.x, rect.y);
+        gc.drawText(_txt, rect.x, rect.y, _background == null);
+        if(_underline )
+            gc.drawLine(rect.x - 1, rect.y + rect.height - 1, 
+                        rect.x + rect.width + 1, rect.y + rect.height - 1);
         
         if( newFont != null )
         {
@@ -121,10 +126,8 @@ public class PaintableHint extends PaintableObject
             Point p = st.getLocationAtOffset(offset);
             p.x += gc.getAdvanceWidth(doc.getChar(_position.getOffset()));
             
-            FontMetrics metrics = gc.getFontMetrics();
-            Rectangle rect = new Rectangle(p.x, p.y, 
-                                           metrics.getAverageCharWidth() *(_txt.length()),
-                                           metrics.getHeight());
+            Point metrics = gc.textExtent(_txt);
+            Rectangle rect = new Rectangle(p.x, p.y, metrics.x, metrics.y);
             return rect;
         }
         catch (BadLocationException e)
@@ -132,6 +135,11 @@ public class PaintableHint extends PaintableObject
             Activator.log(e);
         }
         return null;
+    }
+
+    public void setUnderline(boolean underline)
+    {
+        _underline = underline;        
     }
 
 }

@@ -34,7 +34,7 @@ public class PaintableBracket extends PaintableObject
         
         try
         {
-            gc.drawText(doc.get(_position.getOffset(), 1), p.x, p.y);
+            gc.drawText(doc.get(_position.getOffset(), 1), p.x, p.y, _background == null);
         }
         catch (BadLocationException e)
         {
