@@ -367,8 +367,11 @@ public class PartListener implements IWindowListener, IPartListener2
      */
     private static ITextViewer callGetSourceViewer(IEditorPart editor) 
     {
+        if( editor == null || !(editor instanceof AbstractTextEditor) )
+            return null;
+
         try 
-        {
+        {            
             Method method = AbstractTextEditor.class.getDeclaredMethod("getSourceViewer"); //$NON-NLS-1$
             method.setAccessible(true);
 
