@@ -112,7 +112,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             composite.setLayout(new GridLayout(1, false));
 
             Composite composite_2 = new Composite(composite, SWT.NONE);
-            addField(new BooleanFieldEditor(PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR,
+            addField(new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName)+PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR,
                                             "Display hints in editor", BooleanFieldEditor.DEFAULT, composite_2));
 
 //            Composite composite_3 = new Composite(composite, SWT.NONE);

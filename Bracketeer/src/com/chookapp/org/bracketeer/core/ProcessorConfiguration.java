@@ -322,16 +322,17 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     }
 
     private void updateHintConf()
-    {       
-        _hintConf._showOnHover = _prefStore.getBoolean( PreferencesConstants.Hints.Globals.SHOW_ON_HOVER );
-        boolean showInEditor = _prefStore.getBoolean( PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR );
+    {   
+        String prefBase = PreferencesConstants.preferencePath(_name);
+        _hintConf._showOnHover = _prefStore.getBoolean( prefBase+PreferencesConstants.Hints.Globals.SHOW_ON_HOVER );
+        boolean showInEditor = _prefStore.getBoolean( prefBase+PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR );
         
         String defaultBase = PreferencesConstants.preferencePath(_name) +
                 PreferencesConstants.Hints.preferencePath(PreferencesConstants.Hints.DEFAULT_TYPE);
         
         for (String hintType : _hintTypes)
         {
-            String prefBase = PreferencesConstants.preferencePath(_name) +
+            prefBase = PreferencesConstants.preferencePath(_name) +
                     PreferencesConstants.Hints.preferencePath(hintType);
             
             /* When to show */

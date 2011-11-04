@@ -108,7 +108,7 @@ public final class PreferencesConstants
         
         public final static class Globals
         {
-            private static final String PATH = "Globals.";
+            private static final String PATH = "Hints.Globals.";
             public static final String SHOW_ON_HOVER = PATH + "ShowOnHover";
             public static final String SHOW_IN_EDITOR = PATH + "ShowInEditor";            
         }

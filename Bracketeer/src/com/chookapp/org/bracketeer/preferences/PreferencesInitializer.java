@@ -32,11 +32,12 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
     private void defualtHints(IPreferenceStore store,
                               IConfigurationElement element, String pluginName)
     {
-        store.setDefault(PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR, true );
-        store.setDefault(PreferencesConstants.Hints.Globals.SHOW_ON_HOVER, true );
+        String prefBase = PreferencesConstants.preferencePath(pluginName);
+        store.setDefault(prefBase+PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR, true );
+        store.setDefault(prefBase+PreferencesConstants.Hints.Globals.SHOW_ON_HOVER, true );
         
         String hintType = PreferencesConstants.Hints.DEFAULT_TYPE;
-        String prefBase = PreferencesConstants.preferencePath(pluginName) +
+        prefBase = PreferencesConstants.preferencePath(pluginName) +
                 PreferencesConstants.Hints.preferencePath(hintType);
         
         store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR, true );
