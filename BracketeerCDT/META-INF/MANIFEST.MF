@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
-Bundle-SymbolicName: BracketeerCDT;singleton:=true
+Bundle-SymbolicName: com.chookapp.org.BracketeerCDT;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.chookapp.org.bracketeer.cdt.Activator
 Bundle-Vendor: %Bundle-Vendor
