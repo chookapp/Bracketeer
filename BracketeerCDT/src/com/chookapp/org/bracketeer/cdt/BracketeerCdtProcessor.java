@@ -46,7 +46,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
     
     /* Lonely brackets is different from BRACKETS because matching an 
      * angular bracket is heuristic. So I don't want to have false positives */
-    protected final static String LONELY_BRACKETS = "()[]{}";
+    protected final static String LONELY_BRACKETS = "()[]{}"; //$NON-NLS-1$
     
     private CPairMatcher _matcher;
 
@@ -90,7 +90,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
             return null;
         
         if( region.getLength() < 1 )
-            throw new RuntimeException("length is less than 1");
+            throw new RuntimeException(Messages.BracketeerCdtProcessor_ErrLength);
 
         boolean isAnchorOpening = (ICharacterPairMatcher.LEFT == _matcher.getAnchor());        
         int targetOffset =  isAnchorOpening ? region.getOffset() + region.getLength() : region.getOffset() + 1;
@@ -143,13 +143,13 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
                                    IBracketeerProcessingContainer container)
     {
         if(Activator.DEBUG)
-            Activator.trace("starting process...");
+            Activator.trace("starting process..."); //$NON-NLS-1$
         
         processBrackets(doc, container);
         processAst(container);
         
         if(Activator.DEBUG)
-            Activator.trace("process ended (" + _cancelProcessing + ")");
+            Activator.trace("process ended (" + _cancelProcessing + ")"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private void processBrackets(IDocument doc,
@@ -161,7 +161,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
             if(pair != null)
             {
                 if(Activator.DEBUG)
-                    Activator.trace("matching pair added: " + pair.toString());
+                    Activator.trace("matching pair added: " + pair.toString()); //$NON-NLS-1$
                 container.add(pair);
                 continue;
             }

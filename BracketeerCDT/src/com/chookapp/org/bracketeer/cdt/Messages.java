@@ -1,0 +1,18 @@
+package com.chookapp.org.bracketeer.cdt;
+
+import org.eclipse.osgi.util.NLS;
+
+public class Messages extends NLS
+{
+    private static final String BUNDLE_NAME = "com.chookapp.org.bracketeer.cdt.messages"; //$NON-NLS-1$
+    public static String BracketeerCdtProcessor_ErrLength;
+    static
+    {
+        // initialize resource bundle
+        NLS.initializeMessages(BUNDLE_NAME, Messages.class);
+    }
+
+    private Messages()
+    {
+    }
+}

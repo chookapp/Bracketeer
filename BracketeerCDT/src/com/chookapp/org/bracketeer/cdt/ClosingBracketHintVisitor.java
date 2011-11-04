@@ -76,7 +76,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 if( endLoc == -1 )
                     endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                 int startLoc = statement.getFileLocation().getNodeOffset();
-                _container.add(new Hint("if", startLoc, endLoc, "if("+hint+")"));
+                _container.add(new Hint("if", startLoc, endLoc, "if("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             } 
 
             if( elseClause != null && !(elseClause instanceof ICPPASTIfStatement) && 
@@ -85,7 +85,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 IASTFileLocation location = elseClause.getFileLocation();
                 endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                 int startLoc = location.getNodeOffset();
-                _container.add(new Hint("if", startLoc, endLoc, "else_of_if("+hint+")"));
+                _container.add(new Hint("if", startLoc, endLoc, "else_of_if("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
         }
         
@@ -95,7 +95,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             IASTFileLocation location = ((IASTSwitchStatement) statement).getBody().getFileLocation();
             int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
             int startLoc = statement.getFileLocation().getNodeOffset();
-            _container.add(new Hint("switch", startLoc, endLoc, "switch("+hint+")"));
+            _container.add(new Hint("switch", startLoc, endLoc, "switch("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
         
         if( statement instanceof IASTForStatement )
@@ -109,7 +109,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 IASTFileLocation location = body.getFileLocation();
                 int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                 int startLoc = statement.getFileLocation().getNodeOffset();
-                _container.add(new Hint("for", startLoc, endLoc, "for("+hint+")"));
+                _container.add(new Hint("for", startLoc, endLoc, "for("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
         }
         
@@ -122,7 +122,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 String hint = ((IASTWhileStatement)statement).getCondition().getRawSignature();
                 int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                 int startLoc = statement.getFileLocation().getNodeOffset();
-                _container.add(new Hint("while", startLoc, endLoc, "while("+hint+")"));
+                _container.add(new Hint("while", startLoc, endLoc, "while("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             }
         }
         
@@ -147,7 +147,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             int startLoc = declerator.getFileLocation().getNodeOffset();
             
             String hint = declerator.getRawSignature();            
-            _container.add(new Hint("func", startLoc, endLoc, hint));
+            _container.add(new Hint("func", startLoc, endLoc, hint)); //$NON-NLS-1$
         }
         
         if( declaration instanceof IASTSimpleDeclaration)
@@ -164,7 +164,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 IASTFileLocation location = declaration.getFileLocation();
                 int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                 int startLoc = location.getNodeOffset();
-                _container.add(new Hint("type", startLoc, endLoc, hint));
+                _container.add(new Hint("type", startLoc, endLoc, hint)); //$NON-NLS-1$
             }
         }
         
