@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="com.chookapp.org.Bracketeer"
+      label="Bracketeer"
+      version="1.0.0.qualifier"
+      provider-name="Chookapp">
+
+   <description url="https://github.com/chookapp/Bracketeer">
+      Bracketeer is a multi-language brackets assistant.
+- Coloring matching bracket
+- Telling you what statement this bracket closes (class, function, if, etc...)
+- See website for more details
+
+After you starts using it, you can&apos;t understand how you managed without it.
+   </description>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <url>
+      <update url="http://chookapp.github.com/ChookappUpdateSite/"/>
+   </url>
+
+   <plugin
+         id="com.chookapp.org.Bracketeer"
+         download-size="0"
+         install-size="0"
+         version="1.0.0.qualifier"
+         unpack="false"/>
+
+</feature>
