@@ -1,15 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Bracketeer
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: com.chookapp.org.Bracketeer;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.chookapp.org.bracketeer.Activator
-Bundle-Vendor: Gil Barash
+Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ActivationPolicy: lazy
 Export-Package: com.chookapp.org.bracketeer.common,
  com.chookapp.org.bracketeer.extensionpoint
 Import-Package: org.eclipse.jface.text,
@@ -18,3 +17,4 @@ Import-Package: org.eclipse.jface.text,
  org.eclipse.ui.editors.text,
  org.eclipse.ui.texteditor
 Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy

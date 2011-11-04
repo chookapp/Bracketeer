@@ -1,6 +1,5 @@
 package com.chookapp.org.bracketeer.core;
 
-import java.io.Console;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,7 +8,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.core.commands.Command;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.ui.IEditorPart;
@@ -23,15 +21,12 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
-import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.services.ISourceProviderService;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.commands.BracketeerToggleState;
 import com.chookapp.org.bracketeer.commands.SourceProvider;
 
 public class PartListener implements IWindowListener, IPartListener2
@@ -59,7 +54,7 @@ public class PartListener implements IWindowListener, IPartListener2
         IWorkbench workbench = PlatformUI.getWorkbench();
         if (workbench == null)
         {
-            Activator.log("can't find workbanch");
+            Activator.log(Messages.PartListener_ErrWorkbanch);
             return;
         }
 
@@ -263,7 +258,7 @@ public class PartListener implements IWindowListener, IPartListener2
         
         String name = bracketsHighlighter.getConfiguration().getName();
 
-        Activator.trace("PluginName: " + name);
+        Activator.trace("PluginName: " + name); //$NON-NLS-1$
         for (IActiveProcessorListener listener : m_listeners)
         {
             listener.activeProcessorChanged(name);
@@ -293,7 +288,7 @@ public class PartListener implements IWindowListener, IPartListener2
         {
             if( oldBracketsHighlighter.getTextViewer() != textViewer )
             {
-                Activator.log("Part viewer changed");
+                Activator.log("Part viewer changed"); //$NON-NLS-1$
                 unhook(part);
             }
             else
@@ -330,7 +325,7 @@ public class PartListener implements IWindowListener, IPartListener2
             _activeMap.put(part, bracketsHighlighter);
             
             if( Activator.DEBUG )
-                Activator.trace(String.format("Parts active = %1$d", _activeMap.size()));
+                Activator.trace(String.format("Parts active = %1$d", _activeMap.size())); //$NON-NLS-1$
         }
     }
     
@@ -347,7 +342,7 @@ public class PartListener implements IWindowListener, IPartListener2
             _activeMap.remove(part);
             
             if( Activator.DEBUG )
-                Activator.trace(String.format("Parts active = %1$d", _activeMap.size()));
+                Activator.trace(String.format("Parts active = %1$d", _activeMap.size())); //$NON-NLS-1$
         }
     }
     
@@ -374,7 +369,7 @@ public class PartListener implements IWindowListener, IPartListener2
     {
         try 
         {
-            Method method = AbstractTextEditor.class.getDeclaredMethod("getSourceViewer");
+            Method method = AbstractTextEditor.class.getDeclaredMethod("getSourceViewer"); //$NON-NLS-1$
             method.setAccessible(true);
 
             return (ITextViewer) method.invoke(editor);

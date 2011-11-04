@@ -28,7 +28,7 @@ public class PaintableBracket extends PaintableObject
         int offset = widgetRange.getOffset();
         int length = widgetRange.getLength();
         if (length != 1)
-            throw new IllegalArgumentException(String.format("length %1$d != 1", length));
+            throw new IllegalArgumentException(String.format("length %1$d != 1", length)); //$NON-NLS-1$
         
         Point p = st.getLocationAtOffset(offset);
         

@@ -8,7 +8,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.RGB;
@@ -204,9 +203,9 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         public String formatText(String type, String txt)
         {
             if( getBoolAttr(type, PreferencesConstants.Hints.Display.STRIP_WHITESPACE) )
-                txt = txt.replaceAll("[\\t ]+", "");
+                txt = txt.replaceAll("[\\t ]+", ""); //$NON-NLS-1$ //$NON-NLS-2$
             txt = performEllipsis(type, txt);
-            txt = " /* " + txt + " */";
+            txt = " /* " + txt + " */"; //$NON-NLS-1$ //$NON-NLS-2$
             return txt;
         }
         
@@ -233,16 +232,16 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             if( elip.equals(PreferencesConstants.Hints.Display.Ellipsis.VAL_END))
             {
                 txt = txt.substring(0, maxLen-3);
-                txt = txt + "...";
+                txt = txt + "..."; //$NON-NLS-1$
             }
             else if( elip.equals(PreferencesConstants.Hints.Display.Ellipsis.VAL_MID))
             {
                 int partLen = (maxLen-3)/2;
-                txt = txt.substring(0, partLen) + "..." + txt.substring(txt.length()-(partLen+1));
+                txt = txt.substring(0, partLen) + "..." + txt.substring(txt.length()-(partLen+1)); //$NON-NLS-1$
             }
             else
             {
-                throw new IllegalArgumentException("Unknown ellipsis function: " + elip);
+                throw new IllegalArgumentException(Messages.ProcessorConfiguration_ErrUnkEllipsis + elip);
             }
             
             return txt;
@@ -270,11 +269,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         
         _hintTypes = new ArrayList<String>();
         
-        _name = confElement.getAttribute("name");
-        IConfigurationElement[] hints = confElement.getChildren("Hint");
+        _name = confElement.getAttribute("name"); //$NON-NLS-1$
+        IConfigurationElement[] hints = confElement.getChildren("Hint"); //$NON-NLS-1$
         for (IConfigurationElement hint : hints)
         {
-            _hintTypes.add(hint.getAttribute("type"));            
+            _hintTypes.add(hint.getAttribute("type"));             //$NON-NLS-1$
         }
         
         List<IPreferenceStore> stores= new ArrayList<IPreferenceStore>();        
@@ -483,7 +482,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     public void removeListener(IProcessorConfigurationListener listener)
     {
         if( !_listeners.remove(listener) )
-            Activator.log("listener for ProcessorConfiguration was not found");
+            Activator.log(Messages.ProcessorConfiguration_ErrListenerNotFound);
     }
 
 

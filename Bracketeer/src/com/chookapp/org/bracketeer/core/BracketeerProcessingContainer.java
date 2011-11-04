@@ -85,7 +85,7 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         
         _doc = doc;
         
-        _positionCategory = "bracketeerPosition";
+        _positionCategory = "bracketeerPosition"; //$NON-NLS-1$
         
         _doc.addPositionCategory(_positionCategory);
         _positionUpdater = new DefaultPositionUpdater(_positionCategory);
@@ -118,7 +118,7 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
     public void removeListener(IProcessingContainerListener listener)
     {
         if( !_listeners.remove(listener) )
-            Activator.log("listener for BracketeerProcessor was not found");        
+            Activator.log(Messages.BracketeerProcessingContainer_listsnerNotFound);        
     }
     
     public BracketsPair getMatchingPair(int openOffset, int closeOffset)
@@ -138,7 +138,7 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
                     if(closePos != null && closePos.getOffset() == closeOffset )
                         return pair;
                     
-                    Activator.log(String.format("[%1$d,%2$d] paritally found - %3$s", 
+                    Activator.log(String.format("[%1$d,%2$d] paritally found - %3$s",  //$NON-NLS-1$
                                                 openOffset, closeOffset, pair.toString()));
                     return null;
                 }
@@ -349,15 +349,15 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         {
             try
             {
-                Activator.trace("Positions tracked = " + _doc.getPositions(_positionCategory).length);
+                Activator.trace("Positions tracked = " + _doc.getPositions(_positionCategory).length); //$NON-NLS-1$
             }
             catch (BadPositionCategoryException e)
             {
                 Activator.log(e);
             }
-            Activator.trace("Pairs = " + _bracketsPairList.size());
-            Activator.trace("Singles = " + _singleBrackets.size());
-            Activator.trace("Hints = " + _hints.size());
+            Activator.trace("Pairs = " + _bracketsPairList.size()); //$NON-NLS-1$
+            Activator.trace("Singles = " + _singleBrackets.size()); //$NON-NLS-1$
+            Activator.trace("Hints = " + _hints.size()); //$NON-NLS-1$
         }
     }
 

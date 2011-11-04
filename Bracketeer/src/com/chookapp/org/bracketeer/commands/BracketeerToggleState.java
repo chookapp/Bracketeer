@@ -2,7 +2,6 @@ package com.chookapp.org.bracketeer.commands;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.commands.State;
@@ -18,7 +17,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.services.ISourceProviderService;
 
 import com.chookapp.org.bracketeer.Activator;
-import com.chookapp.org.bracketeer.core.IActiveProcessorListener;
 import com.chookapp.org.bracketeer.preferences.PreferencesConstants;
 
 public class BracketeerToggleState extends State implements 
@@ -28,7 +26,7 @@ public class BracketeerToggleState extends State implements
     private String _attrSuffix;
     private IPreferenceStore _store;
     
-    public final static String STATE_ID = "org.eclipse.ui.commands.toggleState";
+    public final static String STATE_ID = "org.eclipse.ui.commands.toggleState"; //$NON-NLS-1$
     
     public BracketeerToggleState()
     {
@@ -66,7 +64,7 @@ public class BracketeerToggleState extends State implements
         }
         
         if( _attrName == null )
-            throw new IllegalStateException("Attr name was not set");
+            throw new IllegalStateException(Messages.BracketeerToggleState_ErrAttrName);
         
         _store.setValue(_attrName, (Boolean) value);
         
@@ -78,7 +76,7 @@ public class BracketeerToggleState extends State implements
                                       String propertyName, Object data) throws CoreException
     {
         if( data == null || !(data instanceof String))
-            throw new IllegalArgumentException("must specify attr suffix");
+            throw new IllegalArgumentException(Messages.BracketeerToggleState_ErrAttrSuffix);
         
         _attrSuffix = (String) data;
     }  
@@ -90,7 +88,7 @@ public class BracketeerToggleState extends State implements
         Set set = sourceValuesByName.entrySet();
         for (Iterator it = set.iterator(); it.hasNext();)
         {
-            Map.Entry<String, Object> entry = (Entry<String, Object>) it.next();
+            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) it.next();
             sourceChanged(sourcePriority, entry.getKey(), entry.getValue());
         }
     }

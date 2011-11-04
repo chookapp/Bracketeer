@@ -41,7 +41,7 @@ public class SingleBracket
     @Override
     public String toString()
     {
-        return String.format("[offset=%1$d, isOpening=%2$b]", _position.offset, _isOpening);
+        return String.format("[offset=%1$d, isOpening=%2$b]", _position.offset, _isOpening); //$NON-NLS-1$
     }
     
     @Override

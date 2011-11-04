@@ -26,8 +26,8 @@ import com.chookapp.org.bracketeer.extensionpoint.IBracketeerProcessorsFactory;
 
 public class ProcessorsRegistry 
 {	
-	public static final String PROC_FACTORY_ID = "com.chookapp.org.bracketeer.processorsFactory";
-	public static final String SUPPORTED_BRACKETS_ATTR = "supportedBrackets";
+	public static final String PROC_FACTORY_ID = "com.chookapp.org.bracketeer.processorsFactory"; //$NON-NLS-1$
+	public static final String SUPPORTED_BRACKETS_ATTR = "supportedBrackets"; //$NON-NLS-1$
 
 	private List<IBracketeerProcessorsFactory> _processorFactories;
 	private List<ProcessorConfiguration> _processorConfigurations;
@@ -42,7 +42,7 @@ public class ProcessorsRegistry
 		
 		for (IConfigurationElement element : config) {
 			try {
-				final Object o = element.createExecutableExtension("class");
+				final Object o = element.createExecutableExtension("class"); //$NON-NLS-1$
 				_processorFactories.add((IBracketeerProcessorsFactory) o);
 				
 				_processorConfigurations.add( new ProcessorConfiguration(element) );
@@ -81,7 +81,7 @@ public class ProcessorsRegistry
 			if( processor != null )
 			{
 				if( processorInfoFound != null )
-					throw new RuntimeException("processor already exists");
+					throw new RuntimeException(Messages.ProcessorsRegistry_ErrProcExists);
 				
 				processorInfoFound = new BracketeerProcessorInfo( processor,
 				                                                  _processorConfigurations.get(i) );

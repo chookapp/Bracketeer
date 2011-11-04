@@ -10,13 +10,13 @@ import com.chookapp.org.bracketeer.core.IActiveProcessorListener;
 
 public class SourceProvider extends AbstractSourceProvider implements IActiveProcessorListener
 {
-    public final static String PLUGIN_NAME = "com.chookapp.org.bracketeer.pluginName";
+    public final static String PLUGIN_NAME = "com.chookapp.org.bracketeer.pluginName"; //$NON-NLS-1$
     
     private String _pluginName; 
     
     public SourceProvider()
     {
-        _pluginName = "";
+        _pluginName = ""; //$NON-NLS-1$
     }
 
     @Override
@@ -24,6 +24,7 @@ public class SourceProvider extends AbstractSourceProvider implements IActivePro
     {
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Map getCurrentState()
     {
@@ -42,7 +43,7 @@ public class SourceProvider extends AbstractSourceProvider implements IActivePro
     public void activeProcessorChanged(String processorName)
     {
         if( processorName == null ) 
-            processorName = "";
+            processorName = ""; //$NON-NLS-1$
         
         if( _pluginName.equals(processorName) )
             return;

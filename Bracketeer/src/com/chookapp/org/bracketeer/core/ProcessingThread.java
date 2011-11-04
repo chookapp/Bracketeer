@@ -1,8 +1,5 @@
 package com.chookapp.org.bracketeer.core;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -150,7 +147,7 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
             _documentChanged = true;
             if( _thread == null)
             {
-                _thread = new Thread(this, "ProcessingThread");
+                _thread = new Thread(this, "ProcessingThread"); //$NON-NLS-1$
                 _thread.start();
             }
         }

@@ -228,7 +228,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	            Hint hint = _processingThread.getBracketContainer().getHint(_mousePointingAtHint.getPosition().getOffset());
 	            if( hint == null )
 	            {
-	                Activator.log("hint not found");
+	                Activator.log(Messages.BracketsHighlighter_ErrHintNotFound);
 	                break;
 	            }
 	            jumpToPosition(hint.getOriginPosition());
@@ -238,7 +238,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	            List<BracketsPair> pairs = _processingThread.getBracketContainer().getMatchingPairs(_mousePointingAtBracket.getPosition().getOffset(), 1);
 	            if( pairs.size() == 0 || pairs.size() > 1 )
 	            {
-	                Activator.log("pair not found");
+	                Activator.log(Messages.BracketsHighlighter_ErrPairNotFound);
 	                break;
 	            }
 	            BracketsPair pair = pairs.get(0);
@@ -281,7 +281,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	        break;
 	        
 	    default:
-	        Assert.isTrue(false, "unexpected event " + event.type);
+	        Assert.isTrue(false, Messages.BracketsHighlighter_ErrUnexpectedEvent + event.type);
 	    }
 	}
 
@@ -585,7 +585,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         if( _mousePointingAtBracket == null )
         {
-            Activator.log("bracket not found");
+            Activator.log(Messages.BracketsHighlighter_ErrBracketNotFound);
             return;
         }
         

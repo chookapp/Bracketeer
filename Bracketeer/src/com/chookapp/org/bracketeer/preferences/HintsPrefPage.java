@@ -10,9 +10,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.wb.swt.FieldLayoutPreferencePage;
 import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.List;
@@ -20,7 +18,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
@@ -75,7 +72,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
     {
         _tabInfos = new ArrayList<TabInfo>();
         _dynamicFe = new ArrayList<FEInfo>();
-        setDescription("Configuring hints");
+        setDescription(Messages.HintsPrefPage_Description);
     }
 
     /**
@@ -98,7 +95,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
 //                 IConfigurationElement element = null; // stub
         for (IConfigurationElement element : config) 
         {
-            String pluginName = element.getAttribute("name");
+            String pluginName = element.getAttribute("name"); //$NON-NLS-1$
             TabInfo tabInfo = new TabInfo();
             _tabInfos.add(tabInfo);
             tabInfo._name = pluginName;
@@ -113,7 +110,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
 
             Composite composite_2 = new Composite(composite, SWT.NONE);
             addField(new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName)+PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR,
-                                            "Display hints in editor", BooleanFieldEditor.DEFAULT, composite_2));
+                                            Messages.HintsPrefPage_DisplayHintsInEditor, BooleanFieldEditor.DEFAULT, composite_2));
 
 //            Composite composite_3 = new Composite(composite, SWT.NONE);
 //            addField(new BooleanFieldEditor(PreferencesConstants.Hints.Globals.SHOW_ON_HOVER,
@@ -140,11 +137,11 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                     updateHintFieldEditors();
                 }
             });
-            list.add("- Default -");
-            IConfigurationElement[] hints = element.getChildren("Hint");
+            list.add(Messages.HintsPrefPage_DefaultEntry);
+            IConfigurationElement[] hints = element.getChildren("Hint"); //$NON-NLS-1$
             for (IConfigurationElement hint : hints)
             {
-                String hintType = hint.getAttribute("type");
+                String hintType = hint.getAttribute("type"); //$NON-NLS-1$
                 list.add(hintType);
             }
             list.setSelection(0);
@@ -155,12 +152,12 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             composite_5.setBounds(0, 0, 64, 64);
 
             Group grpWhenToShow = new Group(composite_5, SWT.NONE);
-            grpWhenToShow.setText("When to show");
+            grpWhenToShow.setText(Messages.HintsPrefPage_WhenToShow);
             grpWhenToShow.setLayout(new GridLayout(1, false));
 
             Composite composite_6 = new Composite(grpWhenToShow, SWT.NONE);
             BooleanFieldEditor bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.USE_DEFAULT, 
-                                                            "Use default", BooleanFieldEditor.DEFAULT, composite_6);
+                                                            Messages.HintsPrefPage_UseDef, BooleanFieldEditor.DEFAULT, composite_6);
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.WhenToShow.USE_DEFAULT);
             tabInfo._whenToShowUseDef = bfe;
@@ -173,7 +170,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             
             Composite composite_7 = new Composite(composite_15, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR,
-                                         "Show hints in editor", BooleanFieldEditor.DEFAULT, composite_7);
+                                         Messages.HintsPrefPage_DisplayHintsInEditor, BooleanFieldEditor.DEFAULT, composite_7);
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR);
             tabInfo._showInEditor = bfe;
@@ -181,7 +178,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
 
             Composite composite_14 = new Composite(composite_15, SWT.NONE);
             SpinnerFieldEditor spinner = new SpinnerFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
-                                                                "Min lines between brackets", composite_14);
+                                                                Messages.HintsPrefPage_MinLines, composite_14);
             addField(spinner);
             addDynamicFE(spinner, PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE);
             tabInfo._whenToShowMinLines = composite_14;
@@ -191,13 +188,13 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
 
             Group grpFont = new Group(composite_20, SWT.NONE);
             grpFont.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
-            grpFont.setText("Font");
+            grpFont.setText(Messages.HintsPrefPage_Font);
             grpFont.setBounds(0, 0, 209, 147);
             grpFont.setLayout(new GridLayout(1, false));
 
             Composite composite_8 = new Composite(grpFont, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Font.USE_DEFAULT,
-                                         "Use default", BooleanFieldEditor.DEFAULT, composite_8);
+                                         Messages.HintsPrefPage_UseDef, BooleanFieldEditor.DEFAULT, composite_8);
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.Font.USE_DEFAULT);
             tabInfo._fontUseDef = bfe;
@@ -211,58 +208,56 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             tabInfo._fontGrp = composite_9;
 
             Group grpForegroundColor = new Group(composite_9, SWT.NONE);
-            grpForegroundColor.setText("Foreground color");
+            grpForegroundColor.setText(Messages.HintsPrefPage_FgColor);
             grpForegroundColor.setLayout(new GridLayout(1, false));
 
             Composite composite_21 = new Composite(grpForegroundColor, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Font.FG_DEFAULT, 
-                                         "Use system default", BooleanFieldEditor.DEFAULT, composite_21);
+                                         Messages.HintsPrefPage_UseSysDef, BooleanFieldEditor.DEFAULT, composite_21);
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.Font.FG_DEFAULT);
             tabInfo._fontFgDef = bfe;
 
             Composite composite_10 = new Composite(grpForegroundColor, SWT.NONE);
             ColorFieldEditor cfe = new ColorFieldEditor(basePref + PreferencesConstants.Hints.Font.FG_COLOR,
-                                                        "color", composite_10);
-            cfe.getLabelControl(composite_10).setText("Color:");
+                                                        Messages.HintsPrefPage_Color, composite_10);
             addField(cfe);
             addDynamicFE(cfe, PreferencesConstants.Hints.Font.FG_COLOR);
             tabInfo._fontFgColor = composite_10;
 
             Group grpBackgroundColor = new Group(composite_9, SWT.NONE);
-            grpBackgroundColor.setText("Background color");
+            grpBackgroundColor.setText(Messages.HintsPrefPage_BgColor);
             grpBackgroundColor.setLayout(new GridLayout(1, false));
 
             Composite composite_22 = new Composite(grpBackgroundColor, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Font.BG_DEFAULT, 
-                                         "Use system default", BooleanFieldEditor.DEFAULT, composite_22);
+                                         Messages.HintsPrefPage_UseSysDef, BooleanFieldEditor.DEFAULT, composite_22);
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.Font.BG_DEFAULT);
             tabInfo._fontBgDef = bfe;
 
             Composite composite_11 = new Composite(grpBackgroundColor, SWT.NONE);
             cfe = new ColorFieldEditor(basePref + PreferencesConstants.Hints.Font.BG_COLOR,
-                                         "color", composite_11);
-            cfe.getLabelControl(composite_11).setText("Color:");
+                                         Messages.HintsPrefPage_Color, composite_11);
             addField(cfe);
             addDynamicFE(cfe, PreferencesConstants.Hints.Font.BG_COLOR);
             tabInfo._fontBgColor = composite_11;
 
             Composite composite_12 = new Composite(composite_9, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Font.ITALIC,
-                                         "Italic", BooleanFieldEditor.DEFAULT, composite_12);
+                                         Messages.HintsPrefPage_Italic, BooleanFieldEditor.DEFAULT, composite_12);
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.Font.ITALIC);
 
             Group grpShow = new Group(composite_20, SWT.NONE);
             grpShow.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
             grpShow.setSize(160, 183);
-            grpShow.setText("Display");
+            grpShow.setText(Messages.HintsPrefPage_Display);
             grpShow.setLayout(new GridLayout(1, false));
 
             Composite composite_13 = new Composite(grpShow, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Display.USE_DEFAULT,
-                                         "Use default", BooleanFieldEditor.DEFAULT, composite_13);
+                                         Messages.HintsPrefPage_UseDef, BooleanFieldEditor.DEFAULT, composite_13);
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.Display.USE_DEFAULT);
             tabInfo._displayUseDef = bfe;
@@ -276,22 +271,22 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
 
             Composite composite_19 = new Composite(composite_18, SWT.NONE);
             spinner = new SpinnerFieldEditor(basePref + PreferencesConstants.Hints.Display.MAX_LENGTH,
-                                             "Max length", composite_19);
+                                             Messages.HintsPrefPage_MaxLen, composite_19);
             addField(spinner);
             addDynamicFE(spinner, PreferencesConstants.Hints.Display.MAX_LENGTH);
 
             Composite composite_17 = new Composite(composite_18, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
-                                         "Strip whitespaces", BooleanFieldEditor.DEFAULT, composite_17);
+                                         Messages.HintsPrefPage_StipWhitespace, BooleanFieldEditor.DEFAULT, composite_17);
             addField(bfe);
             addDynamicFE(bfe, PreferencesConstants.Hints.Display.STRIP_WHITESPACE);
 
             Composite composite_16 = new Composite(composite_18, SWT.NONE);
             {
                 RadioGroupFieldEditor radioGroupFieldEditor = new RadioGroupFieldEditor(basePref + PreferencesConstants.Hints.Display.Ellipsis.ATTR, 
-                                                                                        "Ellipsis:", 1, 
-                                                                                        new String[][]{{"In the middle", PreferencesConstants.Hints.Display.Ellipsis.VAL_MID},
-                                                                                                       {"At the end", PreferencesConstants.Hints.Display.Ellipsis.VAL_END}},
+                                                                                        Messages.HintsPrefPage_Ellipsis, 1, 
+                                                                                        new String[][]{{Messages.HintsPrefPage_Mid, PreferencesConstants.Hints.Display.Ellipsis.VAL_MID},
+                                                                                                       {Messages.HintsPrefPage_End, PreferencesConstants.Hints.Display.Ellipsis.VAL_END}},
                                                                                                        composite_16, false);
                 radioGroupFieldEditor.setIndent(0);
                 addField(radioGroupFieldEditor);

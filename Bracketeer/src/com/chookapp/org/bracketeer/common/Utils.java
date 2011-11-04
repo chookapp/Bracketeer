@@ -17,7 +17,7 @@ package com.chookapp.org.bracketeer.common;
 
 public class Utils {
 	
-    private static final String _openingBrackets = "([{<";
+    private static final String _openingBrackets = "([{<"; //$NON-NLS-1$
 
     public static boolean isOpenningBracket(char prevChar)
     {

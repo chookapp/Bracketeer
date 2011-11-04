@@ -13,7 +13,7 @@ public class MainPrefPage extends FieldEditorPreferencePage
     public MainPrefPage()
     {
         setPreferenceStore(Activator.getDefault().getPreferenceStore());
-        setDescription("Bracketeer main");
+        setDescription(Messages.MainPrefPage_Description);
     }
 
     @Override

@@ -21,7 +21,7 @@ public class StringPartCheckBoxes extends FieldEditor
     {
         setPreferenceName(name);
         if( bracketsString == null )
-            bracketsString = "";
+            bracketsString = ""; //$NON-NLS-1$
         _bracketsString = bracketsString;
         _parent = parent;
         _pairsList = new ArrayList<Button>();
@@ -44,7 +44,7 @@ public class StringPartCheckBoxes extends FieldEditor
         griddata.horizontalSpan = numColumns;
         parent.setLayoutData(griddata);
         
-        Assert.isTrue(_bracketsString.length() % 2 == 0, "supported brackets is not an even numbered char sequence");
+        Assert.isTrue(_bracketsString.length() % 2 == 0, Messages.StringPartCheckBoxes_ErrSupportedBrackets);
         for( int i = 0; i < _bracketsString.length(); i += 2 )
         {
             String pair = _bracketsString.substring(i, i+2);

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="com.chookapp.org.bracketeer.processorsFactory" name="BracketeerProcessorsFactory" schema="schema/com.chookapp.org.bracketeer.processorsFactory.exsd"/>
+   <extension-point id="com.chookapp.org.bracketeer.processorsFactory" name="%processorFactory.extension-point.name" schema="schema/com.chookapp.org.bracketeer.processorsFactory.exsd"/>
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="Bracketeer.preferencePages.Main"
             class="com.chookapp.org.bracketeer.preferences.HighlightingBracketsPrefPage"
             id="Bracketeer.preferencePages.Main.BracketHighlighting"
-            name="Bracket Highlighting">
+            name="%page.highlight">
          <keywordReference
                id="com.chookapp.org.keywords.bracketHighlighting">
          </keywordReference>
@@ -17,13 +17,13 @@
             category="org.eclipse.ui.preferencePages.Editors"
             class="com.chookapp.org.bracketeer.preferences.MainPrefPage"
             id="Bracketeer.preferencePages.Main"
-            name="Bracketeer">
+            name="%page.main">
       </page>
       <page
             category="Bracketeer.preferencePages.Main"
             class="com.chookapp.org.bracketeer.preferences.HintsPrefPage"
             id="Bracketeer.preferencePages.Main.Hint"
-            name="Hints">
+            name="%page.hints">
          <keywordReference
                id="com.chookapp.org.keywords.hints">
          </keywordReference>
@@ -48,27 +48,27 @@
         
          <toolbar
                id="com.chookapp.org.bracketeer.toolbar"
-               label="Bracketeer toolbar buttons">
+               label="%toolbar.label">
             <command
-                  commandId="bracketeer.Commands.EnableSurroundingBrackets"
+                  commandId="com.chookapp.org.bracketeer.commands.EnableSurroundingBrackets"
                   icon="icons/surrounding.gif"
-                  label="Enable surrounding brackets"
+                  label="%command.surrounding.name"
                   style="toggle"
-                  tooltip="Enable showing the brackets surrounding the cursor">
+                  tooltip="%command.surrounding.description">
             </command>
             <command
-                  commandId="bracketeer.Commands.EnableHoveredBrackets"
+                  commandId="com.chookapp.org.bracketeer.commands.EnableHoveredBrackets"
                   icon="icons/hoveredBrackets.gif"
-                  label="Enable hovered brackets"
+                  label="%command.hoveredBrackets.name"
                   style="toggle"
-                  tooltip="Enable showing matching brackets when hovering">
+                  tooltip="%command.hoveredBrackets.description">
             </command>
             <command
-                  commandId="bracketeer.Commands.EnableHintsInEditor"
+                  commandId="com.chookapp.org.bracketeer.commands.EnableHintsInEditor"
                   icon="icons/hint.gif"
-                  label="Enable hints in editor"
+                  label="%command.editorHints.name"
                   style="toggle"
-                  tooltip="Enable showing hints in the editor">
+                  tooltip="%command.editorHints.description">
             </command>
          </toolbar>
       </menuContribution>
@@ -77,9 +77,9 @@
          point="org.eclipse.ui.commands">
       <command
             categoryId="com.chookapp.org.bracketeer.category"
-            description="Enable showing the brackets surrounding the cursor"
-            id="bracketeer.Commands.EnableSurroundingBrackets"
-            name="Enable surrounding brackets">
+            description="%command.surrounding.description"
+            id="com.chookapp.org.bracketeer.commands.EnableSurroundingBrackets"
+            name="%command.surrounding.name">
          <state
                class="com.chookapp.org.bracketeer.commands.BracketeerToggleState:Surrounding.Enable"
                id="org.eclipse.ui.commands.toggleState">
@@ -87,9 +87,9 @@
       </command>
       <command
             categoryId="com.chookapp.org.bracketeer.category"
-            description="Enable showing matching brackets when hovering"
-            id="bracketeer.Commands.EnableHoveredBrackets"
-            name="Enable hovered brackets">
+            description="%command.hoveredBrackets.description"
+            id="com.chookapp.org.bracketeer.commands.EnableHoveredBrackets"
+            name="%command.hoveredBrackets.name">
          <state
                class="com.chookapp.org.bracketeer.commands.BracketeerToggleState:Hovering.Enable"
                id="org.eclipse.ui.commands.toggleState">
@@ -97,9 +97,9 @@
       </command>
       <command
             categoryId="com.chookapp.org.bracketeer.category"
-            description="Enable showing hints in the editor"
-            id="bracketeer.Commands.EnableHintsInEditor"
-            name="Enable hints in editor">
+            description="%command.editorHints.description"
+            id="com.chookapp.org.bracketeer.commands.EnableHintsInEditor"
+            name="%command.editorHints.name">
          <state
                class="com.chookapp.org.bracketeer.commands.BracketeerToggleState:Hints.Globals.ShowInEditor"
                id="org.eclipse.ui.commands.toggleState">
@@ -107,14 +107,14 @@
       </command>
       <category
             id="com.chookapp.org.bracketeer.category"
-            name="Bracketeer">
+            name="%category.name">
       </category>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
             class="com.chookapp.org.bracketeer.commands.BracketeerToggleCommandHendler"
-            commandId="bracketeer.Commands.EnableSurroundingBrackets">
+            commandId="com.chookapp.org.bracketeer.commands.EnableSurroundingBrackets">
          <activeWhen>
             <with
                   variable="com.chookapp.org.bracketeer.pluginName">
@@ -128,7 +128,7 @@
       </handler>
       <handler
             class="com.chookapp.org.bracketeer.commands.BracketeerToggleCommandHendler"
-            commandId="bracketeer.Commands.EnableHoveredBrackets">
+            commandId="com.chookapp.org.bracketeer.commands.EnableHoveredBrackets">
          <activeWhen>
             <with
                   variable="com.chookapp.org.bracketeer.pluginName">
@@ -142,7 +142,7 @@
       </handler>
       <handler
             class="com.chookapp.org.bracketeer.commands.BracketeerToggleCommandHendler"
-            commandId="bracketeer.Commands.EnableHintsInEditor">
+            commandId="com.chookapp.org.bracketeer.commands.EnableHintsInEditor">
          <activeWhen>
             <with
                   variable="com.chookapp.org.bracketeer.pluginName">
@@ -169,23 +169,23 @@
          point="org.eclipse.ui.keywords">
       <keyword
             id="com.chookapp.org.keywords.bracketHighlighting"
-            label="brackets matching highlights">
+            label="%page.highlight.keyword">
       </keyword>
       <keyword
             id="com.chookapp.org.keywords.hints"
-            label="hints matchs">
+            label="%page.hints.keyword">
       </keyword>
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
       <key
-            commandId="bracketeer.Commands.EnableSurroundingBrackets"
+            commandId="com.chookapp.org.bracketeer.commands.EnableSurroundingBrackets"
             contextId="org.eclipse.ui.textEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="CTRL+B CTRL+S">
       </key>
       <key
-            commandId="bracketeer.Commands.EnableHintsInEditor"
+            commandId="com.chookapp.org.bracketeer.commands.EnableHintsInEditor"
             contextId="org.eclipse.ui.textEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="CTRL+B CTRL+H">

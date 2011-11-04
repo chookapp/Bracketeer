@@ -22,7 +22,7 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         
         for (IConfigurationElement element : config) 
         {
-            String pluginName = element.getAttribute("name");
+            String pluginName = element.getAttribute("name"); //$NON-NLS-1$
 
             defualtHighlights(store, element, pluginName);
             defualtHints(store, element, pluginName);
@@ -66,10 +66,10 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
                                        PreferencesConstants.Hints.Display.MAX_LENGTH,
                                        PreferencesConstants.Hints.Display.STRIP_WHITESPACE};
         
-        IConfigurationElement[] hints = element.getChildren("Hint");
+        IConfigurationElement[] hints = element.getChildren("Hint"); //$NON-NLS-1$
         for (IConfigurationElement hint : hints)
         {
-            hintType = hint.getAttribute("type");
+            hintType = hint.getAttribute("type"); //$NON-NLS-1$
             prefBase = PreferencesConstants.preferencePath(pluginName) +
                     PreferencesConstants.Hints.preferencePath(hintType);
             String defBase = PreferencesConstants.preferencePath(pluginName) +
