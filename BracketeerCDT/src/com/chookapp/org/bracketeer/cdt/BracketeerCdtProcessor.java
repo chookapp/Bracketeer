@@ -13,19 +13,13 @@
 package com.chookapp.org.bracketeer.cdt;
 
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.ICElement;
-import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.core.model.ITranslationUnit;
 //import org.eclipse.cdt.internal.core.model.ASTCache;
 //import org.eclipse.cdt.internal.ui.editor.ASTProvider;
 import org.eclipse.cdt.ui.CDTUITools;
-import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.cdt.ui.text.ICPartitions;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -175,7 +169,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         }
     }
     
-    @SuppressWarnings("restriction")
+//    @SuppressWarnings("restriction")
     private void processAst(IBracketeerProcessingContainer container)
     {
         if( _celem == null )
