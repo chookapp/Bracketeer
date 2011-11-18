@@ -29,7 +29,7 @@ public class BracketeerProcessorsFactory implements
 	@Override
 	public BracketeerProcessor createProcessorFor(IEditorPart part, IDocument doc) 
 	{
-		if( part.getClass().getName().contains("CEditor") ) //$NON-NLS-1$
+		if( part.getClass().getName().equals("org.eclipse.cdt.internal.ui.editor.CEditor") ) //$NON-NLS-1$
 		    return new BracketeerCdtProcessor(part, doc);
 		
 		return null;

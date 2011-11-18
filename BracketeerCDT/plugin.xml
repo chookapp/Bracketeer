@@ -25,6 +25,9 @@
          <Hint
                type="while">
          </Hint>
+         <Hint
+               type="prep">
+         </Hint>
       </BracketeerProcessorsFactory>
    </extension> 
 

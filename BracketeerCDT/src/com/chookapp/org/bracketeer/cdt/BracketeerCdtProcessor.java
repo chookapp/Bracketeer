@@ -12,6 +12,7 @@
 
 package com.chookapp.org.bracketeer.cdt;
 
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.ITranslationUnit;
@@ -150,7 +151,10 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
                                  IBracketeerProcessingContainer container)
     {
         for(int i = 1; i < doc.getLength(); i++)
-        {
+        {            
+            if( _cancelProcessing )
+                break;
+            
             BracketsPair pair = getMatchingPair(doc, i);
             if(pair != null)
             {
@@ -163,9 +167,6 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
             SingleBracket single = getLonelyBracket(doc, i);
             if( single != null )
                 container.add(single);
-            
-            if( _cancelProcessing )
-                break;
         }
     }
     
@@ -189,11 +190,21 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
                                   ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT |
                                   ITranslationUnit.AST_SKIP_TRIVIAL_EXPRESSIONS_IN_AGGREGATE_INITIALIZERS |
                                   ITranslationUnit.AST_PARSE_INACTIVE_CODE);
+            if( ast == null )
+                return;
+
             ClosingBracketHintVisitor visitor = new ClosingBracketHintVisitor(container, 
-                                                                            _cancelProcessing,
-                                                                            _hintConf);        
+                                                                              _cancelProcessing,
+                                                                              _hintConf);
+            
             ast.accept(visitor);
             //runner.runOnAST(null, ast);
+            
+            IASTPreprocessorStatement[] stmts = ast.getAllPreprocessorStatements();
+            PreprocessorVisitor preVisotor = new PreprocessorVisitor(container, 
+                                                                     _cancelProcessing,
+                                                                     _hintConf);
+            preVisotor.visit(stmts);
         }
         catch (CoreException e)
         {
