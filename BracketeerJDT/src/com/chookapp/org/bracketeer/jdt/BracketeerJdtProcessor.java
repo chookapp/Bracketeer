@@ -1,5 +1,11 @@
 package com.chookapp.org.bracketeer.jdt;
 
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -32,11 +38,13 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
     };
     
 	private JavaPairMatcher _matcher;
+    private ITypeRoot _typeRoot;
 	
 	protected BracketeerJdtProcessor(IEditorPart part, IDocument doc) 
 	{
 		super(doc);
 		_matcher = new JavaPairMatcher(BRACKETS);
+		_typeRoot = JavaUI.getEditorInputTypeRoot(part.getEditorInput());
 	}
 
 	@Override
@@ -47,17 +55,36 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
             Activator.trace("starting process..."); //$NON-NLS-1$
         
         processBrackets(doc, container);
-        //processAst(container); // TODO ...
+        processAst(container);
         
         if(Activator.DEBUG)
             Activator.trace("process ended (" + _cancelProcessing + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private void processBrackets(IDocument doc,
+	private void processAst(IBracketeerProcessingContainer container)
+    {
+        if( _typeRoot == null )
+            return;
+        
+        ASTParser astp = ASTParser.newParser(AST.JLS3);
+        astp.setSource(_typeRoot);
+        astp.setResolveBindings(false);
+        CompilationUnit cu = (CompilationUnit) astp.createAST(null);
+        
+        ClosingBracketHintVisitor visitor = new ClosingBracketHintVisitor(container, 
+                                                                          _cancelProcessing, 
+                                                                          _hintConf);        
+        cu.accept(visitor);
+    }
+
+    private void processBrackets(IDocument doc,
 			IBracketeerProcessingContainer container) 
 	{
 		for(int i = 1; i < doc.getLength(); i++)
         {
+            if( _cancelProcessing )
+                break;
+		    
             BracketsPair pair = getMatchingPair(doc, i);
             if(pair != null)
             {
@@ -70,9 +97,6 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
             SingleBracket single = getLonelyBracket(doc, i);
             if( single != null )
                 container.add(single);
-            
-            if( _cancelProcessing )
-                break;
         }
 	}
 

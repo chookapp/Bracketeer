@@ -7,6 +7,9 @@
             class="com.chookapp.org.bracketeer.jdt.BracketeerProcessorsFactory"
             name="JDT"
             supportedBrackets="()[]&lt;&gt;{}">
+         <Hint
+               type="type">
+         </Hint>
       </BracketeerProcessorsFactory>
    </extension>
 
