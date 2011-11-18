@@ -12,9 +12,11 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -91,6 +93,14 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
         IConfigurationElement[] config = Platform.getExtensionRegistry()
                 .getConfigurationElementsFor(ProcessorsRegistry.PROC_FACTORY_ID);
 
+        if( config.length == 0 )
+        {
+            Text txtNoBracketeerEditor = new Text(container, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.MULTI);
+            txtNoBracketeerEditor.setText(Messages.MainPrefPage_txtNoBracketeerEditor_text);
+            
+            return container; 
+        }
+        
         // If we want to re-enable design mode, we should comment out this "for", and comment in this stub
 //                 IConfigurationElement element = null; // stub
         for (IConfigurationElement element : config) 
@@ -99,14 +109,24 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             TabInfo tabInfo = new TabInfo();
             _tabInfos.add(tabInfo);
             tabInfo._name = pluginName;
-            String basePref = PreferencesConstants.Hints.preferencePath(pluginName, PreferencesConstants.Hints.DEFAULT_TYPE);
-
+            String basePref = PreferencesConstants.Hints.preferencePath(pluginName, PreferencesConstants.Hints.DEFAULT_TYPE);           
+            
             TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
             tbtmNewItem.setText(pluginName);
 
             Composite composite = new Composite(tabFolder, SWT.NONE);
             tbtmNewItem.setControl(composite);
             composite.setLayout(new GridLayout(1, false));
+            
+            IConfigurationElement[] hints = element.getChildren("Hint"); //$NON-NLS-1$
+            if( hints.length == 0 )
+            {
+                Label lable = new Label(composite, NONE);
+                lable.setText("Hints are not supported on this editor");
+                
+                tabInfo._hintsList = null;
+                continue;
+            }
 
             Composite composite_2 = new Composite(composite, SWT.NONE);
             addField(new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName)+PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR,
@@ -138,7 +158,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                 }
             });
             list.add(Messages.HintsPrefPage_DefaultEntry);
-            IConfigurationElement[] hints = element.getChildren("Hint"); //$NON-NLS-1$
+            
             for (IConfigurationElement hint : hints)
             {
                 String hintType = hint.getAttribute("type"); //$NON-NLS-1$
@@ -314,6 +334,9 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
     {
         for (TabInfo tabInfo : _tabInfos)
         {
+            if( tabInfo._hintsList == null )
+                continue;
+            
             for(String type : tabInfo._hintsList.getItems())
             {
                 String basePref = PreferencesConstants.Hints.preferencePath(tabInfo._name, type);
@@ -371,6 +394,9 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
     {
         for (TabInfo tabInfo : _tabInfos)
         {
+            if( tabInfo._hintsList == null )
+                continue;
+            
             int idx = tabInfo._hintsList.getSelectionIndex();
             String type;
             if(idx == 0 )

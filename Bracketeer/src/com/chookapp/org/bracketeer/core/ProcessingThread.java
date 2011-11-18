@@ -65,7 +65,15 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
             } // waiting for document to stop changing
             
             _bracketContainer.markAllToBeDeleted();
-            boolean reRun = !_processor.process(_bracketContainer);
+            boolean reRun = true;
+            try
+            {
+                reRun = !_processor.process(_bracketContainer);
+            }
+            catch (Exception e)
+            {
+                Activator.log(e);
+            }
             
             synchronized (_docChangedLock)
             {

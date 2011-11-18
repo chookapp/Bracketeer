@@ -44,6 +44,8 @@ public class Messages extends NLS
     public static String HintsPrefPage_WhenToShow;
     public static String MainPrefPage_Description;
     public static String StringPartCheckBoxes_ErrSupportedBrackets;
+    public static String MainPrefPage_lblNoBracketeerEditor_text;
+    public static String MainPrefPage_txtNoBracketeerEditor_text;
     static
     {
         // initialize resource bundle

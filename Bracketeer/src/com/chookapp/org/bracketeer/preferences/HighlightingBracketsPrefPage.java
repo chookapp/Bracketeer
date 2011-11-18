@@ -11,6 +11,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Group;
@@ -75,7 +76,15 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
         
         IConfigurationElement[] config = Platform.getExtensionRegistry()
                 .getConfigurationElementsFor(ProcessorsRegistry.PROC_FACTORY_ID);
-       
+
+        if( config.length == 0 )
+        {
+            Text txtNoBracketeerEditor = new Text(container, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.MULTI);
+            txtNoBracketeerEditor.setText(Messages.MainPrefPage_txtNoBracketeerEditor_text);
+            
+            return container; 
+        }
+        
         // If we want to re-enable design mode, we should comment out this "for", and comment in this stub
 //         IConfigurationElement element = null; // stub
         for (IConfigurationElement element : config) 
@@ -108,7 +117,12 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
                     updateHihglightFieldEditors();
                 }
             });
-            list.setItems(new String[] {Messages.HighlightingBracketsPrefPage_DefaultItem, Messages.HighlightingBracketsPrefPage_Pair1, Messages.HighlightingBracketsPrefPage_Pair2, Messages.HighlightingBracketsPrefPage_Pair3, Messages.HighlightingBracketsPrefPage_Pair4, Messages.HighlightingBracketsPrefPage_MissingPair});
+            list.setItems(new String[] {Messages.HighlightingBracketsPrefPage_DefaultItem, 
+                                        Messages.HighlightingBracketsPrefPage_Pair1, 
+                                        Messages.HighlightingBracketsPrefPage_Pair2, 
+                                        Messages.HighlightingBracketsPrefPage_Pair3, 
+                                        Messages.HighlightingBracketsPrefPage_Pair4, 
+                                        Messages.HighlightingBracketsPrefPage_MissingPair});
             GridData gd_list = new GridData(SWT.LEFT, SWT.FILL, false, true, 1, 1);
             gd_list.widthHint = 119;
             list.setLayoutData(gd_list);
