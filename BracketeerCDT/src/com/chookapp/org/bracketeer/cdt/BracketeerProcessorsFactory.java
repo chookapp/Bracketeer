@@ -9,7 +9,6 @@
  *    Gil Barash - initial API and implementation
  *    
  *******************************************************************************/
-
 package com.chookapp.org.bracketeer.cdt;
 
 import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;

@@ -9,7 +9,6 @@
  *    Gil Barash - initial API and implementation
  *    
  *******************************************************************************/
-
 package com.chookapp.org.bracketeer.extensionpoint;
 
 import org.eclipse.jface.text.DocumentEvent;

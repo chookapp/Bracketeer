@@ -9,7 +9,6 @@
  *    Gil Barash - initial API and implementation
  *    
  *******************************************************************************/
-
 package com.chookapp.org.bracketeer.cdt;
 
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;

@@ -9,7 +9,6 @@
  *    Gil Barash - initial API and implementation
  *    
  *******************************************************************************/
-
 package com.chookapp.org.bracketeer.common;
 
 import java.util.ArrayList;

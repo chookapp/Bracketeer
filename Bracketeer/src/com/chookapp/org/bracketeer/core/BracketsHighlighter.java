@@ -12,7 +12,6 @@
  *    emil.crumhorn@gmail.com - Some of the code was copied from the 
  *    "eclipsemissingfeatrues" plugin. 
  *******************************************************************************/
-
 package com.chookapp.org.bracketeer.core;
 
 import java.util.ArrayList;
