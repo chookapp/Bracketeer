@@ -8,14 +8,19 @@
    <description url="https://github.com/chookapp/Bracketeer">
       Bracketeer is a multi-language brackets assistant.
 - Coloring matching bracket
-- Telling you what statement this bracket closes (class, function, if, etc...)
+- Telling you what statement this bracket closes (class, function,
+if, etc...)
 - See website for more details
-
-After you starts using it, you can&apos;t understand how you managed without it.
+After you starts using it, you can&apos;t understand how you managed
+without it.
    </description>
 
-   <license url="http://www.example.com/license">
-      [Enter License Description here.]
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="http://www.eclipse.org/legal/epl-v10.html">
+      %license
    </license>
 
    <url>
