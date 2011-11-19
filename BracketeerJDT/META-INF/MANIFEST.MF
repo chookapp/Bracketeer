@@ -1,17 +1,15 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: BracketeerJDT
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: com.chookapp.org.BracketeerJDT;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.chookapp.org.bracketeer.jdt.Activator
-Bundle-Vendor: Gil Barash
+Bundle-Vendor: %Bundle-Vendor
 Require-Bundle: org.eclipse.core.runtime,
  com.chookapp.org.Bracketeer,
  org.eclipse.jface.text,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.jdt.core,
- org.eclipse.jdt.core.dom,
- org.eclipse.jdt.ui,
- org.eclipse.jdt.ui.text
