@@ -10,6 +10,27 @@
          <Hint
                type="type">
          </Hint>
+         <Hint
+               type="function">
+         </Hint>
+         <Hint
+               type="for">
+         </Hint>
+         <Hint
+               type="switch">
+         </Hint>
+         <Hint
+               type="foreach">
+         </Hint>
+         <Hint
+               type="while">
+         </Hint>
+         <Hint
+               type="if">
+         </Hint>
+         <Hint
+               type="synchronized">
+         </Hint>
       </BracketeerProcessorsFactory>
    </extension>
 

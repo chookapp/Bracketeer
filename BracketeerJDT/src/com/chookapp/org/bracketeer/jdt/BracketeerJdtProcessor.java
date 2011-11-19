@@ -2,7 +2,6 @@ package com.chookapp.org.bracketeer.jdt;
 
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
@@ -55,13 +54,13 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
             Activator.trace("starting process..."); //$NON-NLS-1$
         
         processBrackets(doc, container);
-        processAst(container);
+        processAst(doc, container);
         
         if(Activator.DEBUG)
             Activator.trace("process ended (" + _cancelProcessing + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	private void processAst(IBracketeerProcessingContainer container)
+	private void processAst(IDocument doc, IBracketeerProcessingContainer container)
     {
         if( _typeRoot == null )
             return;
@@ -72,6 +71,7 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
         CompilationUnit cu = (CompilationUnit) astp.createAST(null);
         
         ClosingBracketHintVisitor visitor = new ClosingBracketHintVisitor(container, 
+                                                                          doc,
                                                                           _cancelProcessing, 
                                                                           _hintConf);        
         cu.accept(visitor);
