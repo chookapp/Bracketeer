@@ -8,7 +8,7 @@
             name="CDT"
             supportedBrackets="()[]&lt;&gt;{}">
          <Hint
-               type="func">
+               type="function">
          </Hint>
          <Hint
                type="type">
@@ -26,7 +26,7 @@
                type="while">
          </Hint>
          <Hint
-               type="prep">
+               type="preprocess">
          </Hint>
       </BracketeerProcessorsFactory>
    </extension> 

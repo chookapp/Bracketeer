@@ -4,9 +4,12 @@ import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
@@ -132,9 +135,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     public int visit(IASTDeclaration declaration)
     {
         if( declaration instanceof ICPPASTFunctionDefinition )
-        {
-            /* TODO: specific params: exclude function parameters (show only the name) */
-            
+        {            
             IASTStatement body = ((ICPPASTFunctionDefinition) declaration).getBody();
             if(!( body instanceof IASTCompoundStatement) )
                 return shouldContinue();
@@ -145,8 +146,28 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             IASTFunctionDeclarator declerator = ((ICPPASTFunctionDefinition) declaration).getDeclarator();
             int startLoc = declerator.getFileLocation().getNodeOffset();
             
-            String hint = declerator.getRawSignature();            
-            _container.add(new Hint("func", startLoc, endLoc, hint)); //$NON-NLS-1$
+            StringBuffer hint = new StringBuffer();
+            hint.append(declerator.getName().getRawSignature());            
+            /* TODO: specific params: exclude function parameters (show only the name) */
+            hint.append('(');
+            IASTNode[] decChildren = declerator.getChildren();
+            boolean firstParam = true;
+            for (int i = 0; i < decChildren.length; i++)
+            {
+                IASTNode node = decChildren[i];
+                if( node instanceof IASTParameterDeclaration)
+                {
+                    IASTParameterDeclaration param = (IASTParameterDeclaration) node;
+                    if( firstParam )
+                        firstParam = false;
+                    else
+                        hint.append(',');
+                    hint.append(param.getDeclarator().getName());                    
+                }
+            }
+            hint.append(')');
+            
+            _container.add(new Hint("function", startLoc, endLoc, hint.toString())); //$NON-NLS-1$
         }
         
         if( declaration instanceof IASTSimpleDeclaration)

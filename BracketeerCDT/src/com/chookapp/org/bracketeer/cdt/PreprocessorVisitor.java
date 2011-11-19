@@ -93,7 +93,7 @@ public class PreprocessorVisitor
                     IASTFileLocation location = stmt.getFileLocation();
                     int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                     int startLoc = cond._fileLoc.getNodeOffset();
-                    _container.add(new Hint("prep", startLoc, endLoc, cond._cond));
+                    _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond));
                 }
                 
                 StringBuffer str = new StringBuffer();
@@ -119,7 +119,7 @@ public class PreprocessorVisitor
                     IASTFileLocation location = stmt.getFileLocation();
                     int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                     int startLoc = cond._fileLoc.getNodeOffset();
-                    _container.add(new Hint("prep", startLoc, endLoc, cond._cond));
+                    _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond));
                     str.append(cond._cond);
                 }
                 
@@ -135,7 +135,7 @@ public class PreprocessorVisitor
                 IASTFileLocation location = stmt.getFileLocation();
                 int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                 int startLoc = cond._fileLoc.getNodeOffset();
-                _container.add(new Hint("prep", startLoc, endLoc, cond._cond));
+                _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond));
             }            
         }
     }
