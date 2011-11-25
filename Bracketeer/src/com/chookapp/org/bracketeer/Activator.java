@@ -26,7 +26,7 @@ public class Activator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "com.chookapp.org.Braketeer"; //$NON-NLS-1$
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
 	// The shared instance
 	private static Activator plugin;

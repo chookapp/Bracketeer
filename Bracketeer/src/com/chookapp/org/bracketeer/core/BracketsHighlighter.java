@@ -37,6 +37,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.GC;
@@ -58,7 +60,7 @@ import com.chookapp.org.bracketeer.extensionpoint.BracketeerProcessor;
 
 public class BracketsHighlighter implements CaretListener, Listener, 
     PaintListener, IDisposable, IPainter, IProcessingContainerListener,
-    IProcessorConfigurationListener
+    IProcessorConfigurationListener, FocusListener
 {
 
     private ISourceViewer _sourceViewer;
@@ -76,7 +78,6 @@ public class BracketsHighlighter implements CaretListener, Listener,
     
     private PaintableHint _mousePointingAtHint;
     private SingleBracket _mousePointingAtBracket;
-    private boolean _ctrlPressed;
     private boolean _mousePointerHand;
    
     private int _caretOffset;
@@ -98,7 +99,6 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    
 	    _mousePointingAtHint = null;
 	    _mousePointingAtBracket = null;
-	    _ctrlPressed = false;
 	    _mousePointerHand = false;
 	}
 	
@@ -170,6 +170,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	 * Events:
 	 * - MouseHover
 	 * - MouseMove
+	 * - MouseDown
+	 * - KeyDown
+	 * - KeyUp
 	 * 
 	 * (non-Javadoc)
 	 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
@@ -181,7 +184,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    case SWT.MouseHover:
 	        
 	        // hovering disabled when in "hyperlink mode"
-	        if( _ctrlPressed )
+	        if( (event.stateMask & SWT.MODIFIER_MASK) == SWT.CTRL )
 	            return;
 	        
     		try
@@ -204,12 +207,15 @@ public class BracketsHighlighter implements CaretListener, Listener,
     		break;
     		
 	    case SWT.MouseMove:
-	        if( _ctrlPressed )
+	        if( (event.stateMask & SWT.MODIFIER_MASK) == SWT.CTRL )
 	        {
-	            mousePointingAt(event.x, event.y);
-	            updateMousePointer();
+	            if( _textWidget.isFocusControl() )
+	            {
+    	            mousePointingAt(event.x, event.y);
+    	            updateMousePointer();
+	            }
 	        }
-	        
+	      
 	        if( m_hoverEntryPoint == null )
 	            break;
 	        
@@ -253,8 +259,6 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    case SWT.KeyDown:
 	        if( (event.keyCode & SWT.CTRL) > 0 )
 	        {
-	            _ctrlPressed = true;
-
 	            /* clearing hovered pairs */
 	            if( m_hoverEntryPoint != null )
 	            {
@@ -268,12 +272,16 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	            mousePointingAt(point.x, point.y);
 	            updateMousePointer();
 	        }
+	        else
+	        {
+	            clearHyperlink();
+                updateMousePointer();
+	        }
 	        break;
 	            
 	    case SWT.KeyUp:
 	        if( (event.keyCode & SWT.CTRL) > 0 )
 	        {
-	            _ctrlPressed = false;
 	            clearHyperlink();
 	            updateMousePointer();
 	        }
@@ -284,47 +292,66 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    }
 	}
 
+	@Override
+	public void focusGained(FocusEvent e)
+	{
+	}
+
+	@Override
+	public void focusLost(FocusEvent e)
+	{
+	     clearHyperlink();
+         updateMousePointer();
+	}
+	
     @Override
 	public void paintControl(PaintEvent event) 
 	{
-	    IRegion region = computeClippingRegion(event);
-	    if (region == null)
-	        return;
-
-	    int startOfset = region.getOffset();
-	    int length = region.getLength();
-
-	    for (PaintableObject paintObj : _singleBracketsToPaint)
+        try
         {
-            if(paintObj.getPosition().overlapsWith(startOfset, length))
-                paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
-                               getWidgetRange(paintObj.getPosition().getOffset(), 
-                                              paintObj.getPosition().getLength()),
-                               null);
-        }
-
-	    List<PaintableBracket> pairsToPaint;
-	    if( _hoveredPairsToPaint.isEmpty() )
-	        pairsToPaint = _surroundingPairsToPaint;
-	    else
-	        pairsToPaint = _hoveredPairsToPaint;
-	        
-	    for (PaintableObject paintObj : pairsToPaint)
+    	    IRegion region = computeClippingRegion(event);
+    	    if (region == null)
+    	        return;
+    
+    	    int startOfset = region.getOffset();
+    	    int length = region.getLength();
+    
+    	    for (PaintableObject paintObj : _singleBracketsToPaint)
+            {
+                if(paintObj.getPosition().overlapsWith(startOfset, length))
+                    paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
+                                   getWidgetRange(paintObj.getPosition().getOffset(), 
+                                                  paintObj.getPosition().getLength()),
+                                   null);
+            }
+    
+    	    List<PaintableBracket> pairsToPaint;
+    	    if( _hoveredPairsToPaint.isEmpty() )
+    	        pairsToPaint = _surroundingPairsToPaint;
+    	    else
+    	        pairsToPaint = _hoveredPairsToPaint;
+    	        
+    	    for (PaintableObject paintObj : pairsToPaint)
+            {
+                if(paintObj.getPosition().overlapsWith(startOfset, length))
+                    paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
+                                   getWidgetRange(paintObj.getPosition().getOffset(), 
+                                                  paintObj.getPosition().getLength()),
+                                   null);
+            }
+    	    
+    	    for (PaintableHint paintObj : _hintsToPaint)
+            {
+    	        IRegion widgetRange = getWidgetRange(paintObj.getPosition().getOffset(), 
+    	                                             paintObj.getPosition().getLength());
+    	        Rectangle rect = paintObj.getWidgetRect(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange);
+    	        if( rect != null && rect.intersects(event.x, event.y, event.width, event.height) )
+    	            paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange, rect );	        
+            }
+        } 
+        catch (Exception e)
         {
-            if(paintObj.getPosition().overlapsWith(startOfset, length))
-                paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(),
-                               getWidgetRange(paintObj.getPosition().getOffset(), 
-                                              paintObj.getPosition().getLength()),
-                               null);
-        }
-	    
-	    for (PaintableHint paintObj : _hintsToPaint)
-        {
-	        IRegion widgetRange = getWidgetRange(paintObj.getPosition().getOffset(), 
-	                                             paintObj.getPosition().getLength());
-	        Rectangle rect = paintObj.getWidgetRect(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange);
-	        if( rect != null && rect.intersects(event.x, event.y, event.width, event.height) )
-	            paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange, rect );	        
+            Activator.log(e);
         }
 	}
 
@@ -373,6 +400,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
             st.addListener(SWT.KeyDown, this);
             st.addListener(SWT.KeyUp, this);
             st.addPaintListener(this);
+            st.addFocusListener(this);
             
             _caretOffset = getCurrentCaretOffset();
         }

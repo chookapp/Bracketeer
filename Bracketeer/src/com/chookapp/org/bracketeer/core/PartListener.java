@@ -268,7 +268,8 @@ public class PartListener implements IWindowListener, IPartListener2
         
         String name = bracketsHighlighter.getConfiguration().getName();
 
-        Activator.trace("PluginName: " + name); //$NON-NLS-1$
+        if( Activator.DEBUG )
+            Activator.trace("PluginName: " + name); //$NON-NLS-1$
         for (IActiveProcessorListener listener : m_listeners)
         {
             listener.activeProcessorChanged(name);
