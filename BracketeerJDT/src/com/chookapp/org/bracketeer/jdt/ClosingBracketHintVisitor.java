@@ -193,6 +193,9 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     
     private String GetNodeText(ASTNode node)
     {
+        if( node == null )
+            return "";
+        
         try
         {
             return _doc.get(node.getStartPosition(), node.getLength());
