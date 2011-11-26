@@ -58,7 +58,8 @@ public abstract class BracketeerProcessor implements IDocumentListener
     @Override
     public void documentAboutToBeChanged(DocumentEvent event)
     {
-        Activator.log("doc about to be changed"); //$NON-NLS-1$
+        if( Activator.DEBUG )
+            Activator.trace("doc about to be changed"); //$NON-NLS-1$
         _cancelProcessing = true;
     }
 
