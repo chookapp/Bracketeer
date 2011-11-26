@@ -14,7 +14,6 @@ import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
@@ -79,7 +78,12 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     {
         /* TODO: specific params: don't show the if hint if there's an "else if" after it (by checking if the elseClause is an instance of ifstatment) */
         
-        String hint = statement.getConditionExpression().getRawSignature();
+        String hint = "";
+        if( statement.getConditionExpression() != null )
+            hint = statement.getConditionExpression().getRawSignature();
+        else if( statement.getConditionDeclaration() != null )
+            hint = statement.getConditionDeclaration().getRawSignature();
+            
         IASTStatement thenClause = statement.getThenClause();
         IASTStatement elseClause = statement.getElseClause();
         
