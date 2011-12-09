@@ -84,7 +84,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
     {
         _tabInfos = new ArrayList<TabInfo>();
         _dynamicFe = new ArrayList<FEInfo>();
-        setDescription(Messages.HintsPrefPage_Description);
+        // setDescription(Messages.HintsPrefPage_Description);
     }
 
     /**

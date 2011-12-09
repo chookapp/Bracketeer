@@ -136,6 +136,12 @@ public final class PreferencesConstants
         }
     }
     
+    public final static class General
+    {
+        private static final String PATH = "General.";
+        public static final String HYPERLINK_MODIFIERS = PATH + "HyperlinkModifiers";
+    }
+    
     public static String preferencePath(String pluginName)
     {
         return pluginName+"."; //$NON-NLS-1$

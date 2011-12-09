@@ -18,6 +18,9 @@
             class="com.chookapp.org.bracketeer.preferences.MainPrefPage"
             id="Bracketeer.preferencePages.Main"
             name="%page.main">
+         <keywordReference
+               id="com.chookapp.org.keywords.main">
+         </keywordReference>
       </page>
       <page
             category="Bracketeer.preferencePages.Main"
@@ -174,6 +177,10 @@
       <keyword
             id="com.chookapp.org.keywords.hints"
             label="%page.hints.keyword">
+      </keyword>
+      <keyword
+            id="com.chookapp.org.keywords.main"
+            label="%page.main.keyword">
       </keyword>
    </extension>
    <extension

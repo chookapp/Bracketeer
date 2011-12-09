@@ -69,7 +69,7 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
     public HighlightingBracketsPrefPage()
     {
         _tabInfos = new ArrayList<TabInfo>();
-        setDescription(Messages.HighlightingBracketsPrefPage_Description);
+        //setDescription(Messages.HighlightingBracketsPrefPage_Description);
     }
 
     /**

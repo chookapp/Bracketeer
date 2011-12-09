@@ -29,7 +29,20 @@ import com.chookapp.org.bracketeer.preferences.PreferencesConstants;
 
 public class ProcessorConfiguration implements IPropertyChangeListener
 {
-    
+    public class GeneralConfiguration
+    {
+        private int _hyperlinkModifiers;
+        
+        public int getHyperlinkModifiers()
+        {
+            return _hyperlinkModifiers;
+        }
+        
+        public void setHyperlinkModifiers(int modifiers)
+        {
+            _hyperlinkModifiers = modifiers;
+        }
+    }
 
     public class PairConfiguration
     {
@@ -264,6 +277,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     private PairConfiguration _pairConf;
     private SingleBracketConfiguration _singleConf;
     private HintConfiguration _hintConf;
+    private GeneralConfiguration _generalConf;
     private String _name;
     
     private IPreferenceStore _prefStore;
@@ -276,6 +290,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         _pairConf = new PairConfiguration();
         _singleConf = new SingleBracketConfiguration();
         _hintConf = new HintConfiguration();
+        _generalConf = new GeneralConfiguration();
         
         _hintTypes = new ArrayList<String>();
         
@@ -317,10 +332,16 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         return _hintConf; 
     }
     
+    public GeneralConfiguration getGeneralConfiguration()
+    {
+        return _generalConf;
+    }
+    
     private void updateConfiguartion()
     {
         updateHighlightConf();
         updateHintConf();
+        updateGeneralConf();
         
         /* notify listeners */
         
@@ -328,6 +349,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         {
             listener.configurationUpdated();
         }
+    }
+
+    private void updateGeneralConf()
+    {
+        _generalConf.setHyperlinkModifiers(_prefStore.getInt(PreferencesConstants.General.HYPERLINK_MODIFIERS));        
     }
 
     private void updateHintConf()

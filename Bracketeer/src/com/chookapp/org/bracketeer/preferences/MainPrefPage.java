@@ -24,6 +24,7 @@ import com.chookapp.org.bracketeer.core.ProcessorsRegistry;
 
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.jface.preference.StringFieldEditor;
 
 
 public class MainPrefPage extends FieldLayoutPreferencePage
@@ -32,7 +33,7 @@ public class MainPrefPage extends FieldLayoutPreferencePage
     public MainPrefPage()
     {
         setPreferenceStore(Activator.getDefault().getPreferenceStore());
-        setDescription(Messages.MainPrefPage_Description);
+        // setDescription(Messages.MainPrefPage_Description);
     }
 
   
@@ -47,7 +48,7 @@ public class MainPrefPage extends FieldLayoutPreferencePage
     {
         Composite container = new Composite(parent, SWT.NULL);
         container.setLayout(new GridLayout(1, false));
-        
+               
         IConfigurationElement[] config = Platform.getExtensionRegistry()
                 .getConfigurationElementsFor(ProcessorsRegistry.PROC_FACTORY_ID);
 
@@ -58,6 +59,11 @@ public class MainPrefPage extends FieldLayoutPreferencePage
             
             return container; 
         }
+        
+        Composite composite = new Composite(container, SWT.NONE);
+        ModifiersKeySequenceText mks = new ModifiersKeySequenceText(PreferencesConstants.General.HYPERLINK_MODIFIERS,
+                                                                    "Hyperlink modifier", composite);
+        addField(mks);
         
         return container;
     }    

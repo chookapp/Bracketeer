@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.core.ProcessorsRegistry;
@@ -37,6 +39,10 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
             defualtHighlights(store, element, pluginName);
             defualtHints(store, element, pluginName);
         }
+        
+        IPreferenceStore editorsStore = EditorsUI.getPreferenceStore();
+        store.setDefault(PreferencesConstants.General.HYPERLINK_MODIFIERS, 
+                         editorsStore.getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_HYPERLINK_KEY_MODIFIER_MASK));
     }
 
     private void defualtHints(IPreferenceStore store,

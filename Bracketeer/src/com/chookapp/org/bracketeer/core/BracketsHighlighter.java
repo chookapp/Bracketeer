@@ -81,6 +81,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     private boolean _mousePointerHand;
    
     private int _caretOffset;
+    private int m_hyperlinkModifiers;
 	
 	public BracketsHighlighter()
 	{
@@ -142,6 +143,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         ITextViewerExtension2 extension = (ITextViewerExtension2) textViewer;
         extension.addPainter(this);
+        
+        m_hyperlinkModifiers = _conf.getGeneralConfiguration().getHyperlinkModifiers();
 	}	
 	
 	public ISourceViewer getSourceViewer()
@@ -184,7 +187,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    case SWT.MouseHover:
 	        
 	        // hovering disabled when in "hyperlink mode"
-	        if( (event.stateMask & SWT.MODIFIER_MASK) == SWT.CTRL )
+	        if( (event.stateMask & SWT.MODIFIER_MASK) == m_hyperlinkModifiers )
 	            return;
 	        
     		try
@@ -207,7 +210,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     		break;
     		
 	    case SWT.MouseMove:
-	        if( (event.stateMask & SWT.MODIFIER_MASK) == SWT.CTRL )
+	        if( (event.stateMask & SWT.MODIFIER_MASK) == m_hyperlinkModifiers )
 	        {
 	            if( _textWidget.isFocusControl() )
 	            {
@@ -257,7 +260,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
             break;
             
 	    case SWT.KeyDown:
-	        if( (event.keyCode & SWT.CTRL) > 0 )
+	        if( (event.keyCode | event.stateMask) == m_hyperlinkModifiers )
 	        {
 	            /* clearing hovered pairs */
 	            if( m_hoverEntryPoint != null )
@@ -280,7 +283,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	        break;
 	            
 	    case SWT.KeyUp:
-	        if( (event.keyCode & SWT.CTRL) > 0 )
+	        if( (event.keyCode & m_hyperlinkModifiers) > 0 ) // is one of the modifiers being released?
 	        {
 	            clearHyperlink();
 	            updateMousePointer();
@@ -363,6 +366,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
     @Override
     public void configurationUpdated()
     {
+        m_hyperlinkModifiers = _conf.getGeneralConfiguration().getHyperlinkModifiers();
+        
         boolean updated = false;
         updated |= clearSurroundingPairsToPaint();
         updated |= clearSingleBracketsToPaint();
