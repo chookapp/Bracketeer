@@ -59,6 +59,8 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
         public Composite _displayUseDefParnet;
         public Composite _fontUseDefParent;
         public Composite _whenToShowUseDefParent;
+        
+        public java.util.List<FEInfo> _dynamicFe;
     }
     
     class FEInfo
@@ -74,16 +76,14 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
         
     }
     
-    private java.util.List<TabInfo> _tabInfos;
-    private java.util.List<FEInfo> _dynamicFe;
+    private java.util.List<TabInfo> _tabInfos;    
     
     /**
      * Create the preference page.
      */
     public HintsPrefPage()
     {
-        _tabInfos = new ArrayList<TabInfo>();
-        _dynamicFe = new ArrayList<FEInfo>();
+        _tabInfos = new ArrayList<TabInfo>();        
         // setDescription(Messages.HintsPrefPage_Description);
     }
 
@@ -119,6 +119,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             TabInfo tabInfo = new TabInfo();
             _tabInfos.add(tabInfo);
             tabInfo._name = pluginName;
+            tabInfo._dynamicFe = new ArrayList<FEInfo>();
             String basePref = PreferencesConstants.Hints.preferencePath(pluginName, PreferencesConstants.Hints.DEFAULT_TYPE);           
             
             TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
@@ -189,7 +190,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             BooleanFieldEditor bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.USE_DEFAULT, 
                                                             Messages.HintsPrefPage_UseDef, BooleanFieldEditor.DEFAULT, composite_6);
             addField(bfe);
-            addDynamicFE(bfe, PreferencesConstants.Hints.WhenToShow.USE_DEFAULT);
+            addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.WhenToShow.USE_DEFAULT);
             tabInfo._whenToShowUseDef = bfe;
             tabInfo._whenToShowUseDefParent = composite_6;
 
@@ -202,7 +203,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR,
                                          Messages.HintsPrefPage_DisplayHintsInEditor, BooleanFieldEditor.DEFAULT, composite_7);
             addField(bfe);
-            addDynamicFE(bfe, PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR);
+            addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR);
             tabInfo._showInEditor = bfe;
             tabInfo._showInEditorParent = composite_7;
 
@@ -210,7 +211,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             SpinnerFieldEditor spinner = new SpinnerFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
                                                                 Messages.HintsPrefPage_MinLines, composite_14);
             addField(spinner);
-            addDynamicFE(spinner, PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE);
+            addDynamicFE(tabInfo, spinner, PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE);
             tabInfo._whenToShowMinLines = composite_14;
 
             Composite composite_20 = new Composite(composite_5, SWT.NONE);
@@ -226,7 +227,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Font.USE_DEFAULT,
                                          Messages.HintsPrefPage_UseDef, BooleanFieldEditor.DEFAULT, composite_8);
             addField(bfe);
-            addDynamicFE(bfe, PreferencesConstants.Hints.Font.USE_DEFAULT);
+            addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.Font.USE_DEFAULT);
             tabInfo._fontUseDef = bfe;
             tabInfo._fontUseDefParent = composite_8;
 
@@ -245,14 +246,14 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Font.FG_DEFAULT, 
                                          Messages.HintsPrefPage_UseSysDef, BooleanFieldEditor.DEFAULT, composite_21);
             addField(bfe);
-            addDynamicFE(bfe, PreferencesConstants.Hints.Font.FG_DEFAULT);
+            addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.Font.FG_DEFAULT);
             tabInfo._fontFgDef = bfe;
 
             Composite composite_10 = new Composite(grpForegroundColor, SWT.NONE);
             ColorFieldEditor cfe = new ColorFieldEditor(basePref + PreferencesConstants.Hints.Font.FG_COLOR,
                                                         Messages.HintsPrefPage_Color, composite_10);
             addField(cfe);
-            addDynamicFE(cfe, PreferencesConstants.Hints.Font.FG_COLOR);
+            addDynamicFE(tabInfo, cfe, PreferencesConstants.Hints.Font.FG_COLOR);
             tabInfo._fontFgColor = composite_10;
 
             Group grpBackgroundColor = new Group(composite_9, SWT.NONE);
@@ -263,21 +264,21 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Font.BG_DEFAULT, 
                                          Messages.HintsPrefPage_UseSysDef, BooleanFieldEditor.DEFAULT, composite_22);
             addField(bfe);
-            addDynamicFE(bfe, PreferencesConstants.Hints.Font.BG_DEFAULT);
+            addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.Font.BG_DEFAULT);
             tabInfo._fontBgDef = bfe;
 
             Composite composite_11 = new Composite(grpBackgroundColor, SWT.NONE);
             cfe = new ColorFieldEditor(basePref + PreferencesConstants.Hints.Font.BG_COLOR,
                                          Messages.HintsPrefPage_Color, composite_11);
             addField(cfe);
-            addDynamicFE(cfe, PreferencesConstants.Hints.Font.BG_COLOR);
+            addDynamicFE(tabInfo, cfe, PreferencesConstants.Hints.Font.BG_COLOR);
             tabInfo._fontBgColor = composite_11;
 
             Composite composite_12 = new Composite(composite_9, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Font.ITALIC,
                                          Messages.HintsPrefPage_Italic, BooleanFieldEditor.DEFAULT, composite_12);
             addField(bfe);
-            addDynamicFE(bfe, PreferencesConstants.Hints.Font.ITALIC);
+            addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.Font.ITALIC);
 
             Group grpShow = new Group(composite_20, SWT.NONE);
             grpShow.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
@@ -289,7 +290,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Display.USE_DEFAULT,
                                          Messages.HintsPrefPage_UseDef, BooleanFieldEditor.DEFAULT, composite_13);
             addField(bfe);
-            addDynamicFE(bfe, PreferencesConstants.Hints.Display.USE_DEFAULT);
+            addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.Display.USE_DEFAULT);
             tabInfo._displayUseDef = bfe;
             tabInfo._displayUseDefParnet = composite_13;
 
@@ -303,13 +304,13 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             spinner = new SpinnerFieldEditor(basePref + PreferencesConstants.Hints.Display.MAX_LENGTH,
                                              Messages.HintsPrefPage_MaxLen, composite_19);
             addField(spinner);
-            addDynamicFE(spinner, PreferencesConstants.Hints.Display.MAX_LENGTH);
+            addDynamicFE(tabInfo, spinner, PreferencesConstants.Hints.Display.MAX_LENGTH);
 
             Composite composite_17 = new Composite(composite_18, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
                                          Messages.HintsPrefPage_StipWhitespace, BooleanFieldEditor.DEFAULT, composite_17);
             addField(bfe);
-            addDynamicFE(bfe, PreferencesConstants.Hints.Display.STRIP_WHITESPACE);
+            addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.Display.STRIP_WHITESPACE);
 
             Composite composite_16 = new Composite(composite_18, SWT.NONE);
             {
@@ -320,15 +321,15 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                                                                                                        composite_16, false);
                 radioGroupFieldEditor.setIndent(0);
                 addField(radioGroupFieldEditor);
-                addDynamicFE(radioGroupFieldEditor, PreferencesConstants.Hints.Display.Ellipsis.ATTR);
+                addDynamicFE(tabInfo, radioGroupFieldEditor, PreferencesConstants.Hints.Display.Ellipsis.ATTR);
             }
         }
         return container;
     }
 
-    private void addDynamicFE(FieldEditor fe, String attrSuffix)
+    private void addDynamicFE(TabInfo tabInfo, FieldEditor fe, String attrSuffix)
     {
-        _dynamicFe.add(new FEInfo(fe, attrSuffix));
+        tabInfo._dynamicFe.add(new FEInfo(fe, attrSuffix));
     }
 
     /**
@@ -365,7 +366,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
 //                _prefNames.add(basePref + PreferencesConstants.Hints.WhenToShow.USE_DEFAULT);
 //                _prefNames.add(basePref + PreferencesConstants.Hints.WhenToShow.Criteria.ATTR);
                 
-                for (FEInfo feInfo : _dynamicFe)
+                for (FEInfo feInfo : tabInfo._dynamicFe)
                 {
                     _prefNames.add(basePref + feInfo._attrSuffix);
                 }
@@ -416,7 +417,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             
             String basePref = PreferencesConstants.Hints.preferencePath(tabInfo._name, type);
             
-            for (FEInfo feInfo : _dynamicFe)
+            for (FEInfo feInfo : tabInfo._dynamicFe)
             {
                 feInfo._fe.store();
                 feInfo._fe.setPreferenceName(basePref + feInfo._attrSuffix);

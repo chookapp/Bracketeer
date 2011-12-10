@@ -24,7 +24,6 @@ import com.chookapp.org.bracketeer.core.ProcessorsRegistry;
 
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.jface.preference.StringFieldEditor;
 
 
 public class MainPrefPage extends FieldLayoutPreferencePage

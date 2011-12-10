@@ -87,6 +87,7 @@ public class ModifiersKeySequenceText extends FieldEditor implements KeyListener
         gd.grabExcessHorizontalSpace = true;
         
         _textField.setLayoutData(gd);
+        _textField.setToolTipText("Press the modifiers (Ctrl, Alt, etc...). 'del' to clear.");
     }
 
     @Override
