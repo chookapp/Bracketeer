@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabItem;
@@ -244,6 +245,7 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
                                             BooleanFieldEditor.DEFAULT, composite_9));
         }
         
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.highlight_pref");
         return container;
     } 
     

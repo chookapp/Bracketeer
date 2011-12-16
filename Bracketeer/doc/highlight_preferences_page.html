@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Highlight preferences page</title></head><body>
+  
+<h1>Highlighting preferences page</h1>
+In this page you can set the preferences of: <a href="#BracketsHighlighting">brackets highlighting
+colors</a>, <a href="#SurroundingBrackets">which cursor surrounding brackets are shown</a> and <a href="#MouseHover">whether to
+show the matching bracket on hover</a>.<br>
+<br>
+Notice that the configurations are per editor type (Java, C/C++, etc...) according to the tab selected.<br>
+<br>
+
+<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; width: 50%;">Brackets surrounding the cursor screen shot:<br>
+      <img style="width: 520px; height: 67px;" alt="Brackets surrounding the cursor screen shot" src="surrounding.JPG"><br>
+      </td>
+      <td style="vertical-align: top;">Missing brackets screen shot:<br>
+
+      <img style="width: 325px; height: 145px;" alt="Missing brackets screen shot" src="missing.JPG"></td>
+    </tr>
+  </tbody>
+</table>
+
+<br>
+<h2><a name="BracketsHighlighting"></a>Brackets highlighting<br>
+</h2>
+In this section you can choose the foreground and background colors for matching brackets and for brackets without a match.<br>
+<br>
+Select on of the "highlighting types", on the left, and then the colors, on the right.<br>
+<br>
+"<span style="font-weight: bold;">- Default -</span>" - This would be the configuration used if the "Use default" checkbox is checked in one of the other "highlighting types".<br>
+"<span style="font-weight: bold;">Pair 1 (closest)</span>", "<span style="font-weight: bold;">Pair 2</span>", "<span style="font-weight: bold;">Pair 3</span>", "<span style="font-weight: bold;">Pair 4 (farest)</span>"
+- The colors of the 4 closest bracket pairs surrounding the cursor (or
+hovered with the mouse). "Pair 1" is the 1st pair surrounding the
+cursor and "Pair 4" is the 4th pair.<br>
+"<span style="font-weight: bold;">Missing pair</span>" - This is the color of brackets which have no pair. All such brackets in the document would be highlighted.<br>
+<br>
+<h2><a name="SurroundingBrackets"></a>Surrounding brackets</h2>
+This section is dedicated for bracket pairs surrounding the cursor. <br>
+<br>
+The "Enable" checkbox can be used to enable/disable highlighting of
+surrounding brackets. You can do this also using the toolbar button <img style="width: 18px; height: 14px;" alt="" src="../icons/surrounding.gif"> or by pressing Ctrl+B, Ctrl+S (the "Enable surrounding brackets" command).<br>
+<br>
+You can choose which bracket pairs would highlighted ("{" , "[", etc..) and how many.<br>
+<br>
+<h2><a name="MouseHover"></a>Mouse hover</h2>
+When you hover over a bracket, the bracket pair can be highlighted automatically.<br>
+You can enable/disable this option using the "Enable" checkbox. You can do this also using the toolbar button <img style="width: 18px; height: 16px;" alt="" src="../icons/hoveredBrackets.gif"> or by using a key binding you define for the "Enable hovered brackets" command.<br>
+<br>
+<br>
+This is how the preferences page looks like:<br>
+<img style="width: 393px; height: 508px;" alt="This is how the preferences page looks like" src="BracketHighlightingPref.JPG"><br>
+</body></html>

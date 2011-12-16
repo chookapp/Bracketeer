@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Hints preferences page</title></head><body>
+<h1>Hints preferences page</h1>
+"Hints" are comments automatically added to the editor after "closing
+brackets" (mainly "}") to state which statement they are closing.<br>
+The hints are <span style="font-weight: bold;">not</span> stored in the file, and cannot be edited (they are automatically updated when the statement changes).<br>
+<br>
+<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top; width: 50%;">Some nested statements screen shot:<br>
+      <img style="width: 512px; height: 384px;" alt="Some nested statements screen shot" src="all.JPG"><br>
+      </td>
+      <td style="vertical-align: top;">"if-else" screen shot:<br>
+      <img style="width: 401px; height: 324px;" alt="if-else screen shot" src="if.JPG"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">Preprocessor (C/C++ only) screen shot:<br>
+      <img style="width: 356px; height: 304px;" alt="Preprocessot (C/C++ only) screen shot" src="preprocessor.JPG"><br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+In this page you can set the preferences for enabling hints, when to
+show each statement type, the font attributes for each statement type
+and the display attributes for each statement type.<br>
+<br>
+Notice that the configurations are per editor type (Java, C/C++, etc...) according to the tab selected.<br>
+<br>
+<a name="EnableHints"></a>The "Display hint in editor" checkbox can be used to enable/disable showing hint. You can do this also using the toolbar button <img style="border: 1px solid ; width: 16px; height: 15px;" alt="" src="../icons/hint.gif" hspace="0" vspace="0"> or by pressing Ctrl+B, Ctrl+H (the "Enable hints in editor" command).<br>
+<br>
+<h2>Using this preferences page</h2>
+First select the "statement type" on the left and then configure it on the right.<br>
+<br>
+The "- Default -" statement type is used to set the configuration used
+if the "Use default" checkbox is checked in one of the other "statement
+types".<br>
+<br>
+Each editor has it's own supported statements (only C/C++ has
+"preprocessor" and only Java has "synchronized") so the different
+statement types would not be listed here, but they should be
+self-explanatory.<br>
+<h2>When to show</h2>
+"<span style="font-weight: bold;">Display hints in editor</span>" - Disable/enable this statement hints.<br>
+"<span style="font-weight: bold;">Min lines between brackets</span>" -
+The minimal lines between the statement and it's closing bracket that
+would cause the hint to be shown (setting this to a low number, such as
+1, would cause a hint to be shown for every closing bracket, which
+might show a lot of unnecessary information).<br>
+<br>
+<h2>Font</h2>
+"<span style="font-weight: bold;">Foreground color</span>", "<span style="font-weight: bold;">Background color</span>" - The colors of the hint.<br>
+"<span style="font-weight: bold;">Italic</span>" - Should the hint font be "italic".<br>
+<br>
+<h2>Display</h2>
+"<span style="font-weight: bold;">Max length</span>" - The maximal
+length of the hint. If the hint exceeds the maximal length, it would be
+shortened using the selected ellipsis function.<br>
+"<span style="font-weight: bold;">Strip whitespaces</span>" - Strip whitespaces from the original statement when shown in the hint.<br>
+(Ellipsis) "<span style="font-weight: bold;">In the middle</span>" - Put "..." in the middle of the hint to shorten it.<br>
+(Ellipsis) "<span style="font-weight: bold;">At the end</span>" - Put "..." at the end of the hint to shorten it.<br>
+<br>
+<br>
+This is how the preferences page looks like:<br>
+<img style="width: 607px; height: 592px;" alt="This is how the preferences page looks like" src="hintsPref.JPG"><br>
+
+
+
+</body></html>

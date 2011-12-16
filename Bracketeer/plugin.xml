@@ -198,5 +198,12 @@
             sequence="CTRL+B CTRL+H">
       </key>
    </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="context.xml"
+            plugin="com.choockapp.org.bracketeer">
+      </contexts>
+   </extension>
 
 </plugin>

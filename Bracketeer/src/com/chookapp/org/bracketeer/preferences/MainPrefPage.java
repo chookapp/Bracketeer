@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.wb.swt.FieldLayoutPreferencePage;
 
 import com.chookapp.org.bracketeer.Activator;
@@ -31,8 +32,7 @@ public class MainPrefPage extends FieldLayoutPreferencePage
 {
     public MainPrefPage()
     {
-        setPreferenceStore(Activator.getDefault().getPreferenceStore());
-        // setDescription(Messages.MainPrefPage_Description);
+        setPreferenceStore(Activator.getDefault().getPreferenceStore());        
     }
 
   
@@ -63,7 +63,8 @@ public class MainPrefPage extends FieldLayoutPreferencePage
         ModifiersKeySequenceText mks = new ModifiersKeySequenceText(PreferencesConstants.General.HYPERLINK_MODIFIERS,
                                                                     "Hyperlink modifier", composite);
         addField(mks);
-        
+                
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.main_pref");
         return container;
     }    
 

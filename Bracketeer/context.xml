@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<contexts>
+   <context id="main_pref">
+      <description>Click below to see help.</description>
+      <topic href="doc/main_preferences_page.html" label="Bracketeer main preferences page"/>
+   </context>
+   <context id="highlight_pref">
+      <description>Click below to see help.</description>
+      <topic href="doc/highlight_preferences_page.html" label="Highlighting preferences page"/>
+   </context>
+   <context id="hints_pref">
+      <description>Click below to see help.</description>
+      <topic href="doc/hints_preferences_page.html" label="Hints preferences page"/>
+   </context>
+</contexts>

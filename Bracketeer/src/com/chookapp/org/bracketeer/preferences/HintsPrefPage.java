@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Label;
@@ -324,6 +325,8 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                 addDynamicFE(tabInfo, radioGroupFieldEditor, PreferencesConstants.Hints.Display.Ellipsis.ATTR);
             }
         }
+        
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.hints_pref");
         return container;
     }
 
