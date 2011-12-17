@@ -58,7 +58,7 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         
         store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR, true );
         store.setDefault(prefBase + PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
-                         5);
+                         15);
         
         store.setDefault(prefBase + PreferencesConstants.Hints.Font.FG_DEFAULT, false);
         PreferenceConverter.setDefault(store, 
@@ -69,7 +69,7 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.Ellipsis.ATTR,
                          PreferencesConstants.Hints.Display.Ellipsis.VAL_MID);
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.MAX_LENGTH,
-                         10);
+                         30);
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
                          true);
         
