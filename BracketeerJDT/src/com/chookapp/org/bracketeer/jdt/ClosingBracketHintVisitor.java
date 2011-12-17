@@ -54,8 +54,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     public boolean visit(TypeDeclaration node)
     {
         String hint = node.getName().getIdentifier();
-        int startLoc = node.getStartPosition();
-        int endLoc = startLoc + node.getLength() - 1;
+        int startLoc = node.getName().getStartPosition();
+        int endLoc = node.getStartPosition() + node.getLength() - 1;
         _container.add(new Hint("type", startLoc, endLoc, hint)); //$NON-NLS-1$
         return shouldContinue();
     }
@@ -75,8 +75,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 hint.append(',');
         }
         hint.append(')');
-        int startLoc = node.getStartPosition();
-        int endLoc = startLoc + node.getLength() - 1;
+        int startLoc = node.getName().getStartPosition();
+        int endLoc = node.getStartPosition() + node.getLength() - 1;
         _container.add(new Hint("function", startLoc, endLoc, hint.toString())); //$NON-NLS-1$
         return shouldContinue();
     }
