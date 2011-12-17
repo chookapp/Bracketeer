@@ -134,7 +134,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             if( hints.length == 0 )
             {
                 Label lable = new Label(composite, NONE);
-                lable.setText("Hints are not supported on this editor");
+                lable.setText(Messages.HintsPrefPage_NotSupported);
                 
                 tabInfo._hintsList = null;
                 continue;
@@ -326,7 +326,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             }
         }
         
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.hints_pref");
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.hints_pref"); //$NON-NLS-1$
         return container;
     }
 

@@ -138,8 +138,8 @@ public final class PreferencesConstants
     
     public final static class General
     {
-        private static final String PATH = "General.";
-        public static final String HYPERLINK_MODIFIERS = PATH + "HyperlinkModifiers";
+        private static final String PATH = "General."; //$NON-NLS-1$
+        public static final String HYPERLINK_MODIFIERS = PATH + "HyperlinkModifiers"; //$NON-NLS-1$
     }
     
     public static String preferencePath(String pluginName)

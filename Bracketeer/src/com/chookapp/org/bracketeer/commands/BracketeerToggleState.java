@@ -47,7 +47,10 @@ public class BracketeerToggleState extends State implements
         
         ISourceProviderService srcService = (ISourceProviderService) PlatformUI.getWorkbench().getService(ISourceProviderService.class);
         ISourceProvider src = srcService.getSourceProvider(SourceProvider.PLUGIN_NAME);
-        src.addSourceProviderListener(this);
+        if( src == null )
+            Activator.log(Messages.BracketeerToggleState_SrcProviderNotFound);
+        else
+            src.addSourceProviderListener(this);
         
         super.setValue(false);
     }

@@ -38,14 +38,17 @@ public class Messages extends NLS
     public static String HintsPrefPage_MaxLen;
     public static String HintsPrefPage_Mid;
     public static String HintsPrefPage_MinLines;
+    public static String HintsPrefPage_NotSupported;
     public static String HintsPrefPage_StipWhitespace;
     public static String HintsPrefPage_UseDef;
     public static String HintsPrefPage_UseSysDef;
     public static String HintsPrefPage_WhenToShow;
     public static String MainPrefPage_Description;
+    public static String MainPrefPage_HyperlinkModifier;
     public static String StringPartCheckBoxes_ErrSupportedBrackets;
     public static String MainPrefPage_lblNoBracketeerEditor_text;
     public static String MainPrefPage_txtNoBracketeerEditor_text;
+    public static String ModifiersKeySequenceText_ModifiersToolTip;
     static
     {
         // initialize resource bundle

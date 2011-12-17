@@ -61,10 +61,10 @@ public class MainPrefPage extends FieldLayoutPreferencePage
         
         Composite composite = new Composite(container, SWT.NONE);
         ModifiersKeySequenceText mks = new ModifiersKeySequenceText(PreferencesConstants.General.HYPERLINK_MODIFIERS,
-                                                                    "Hyperlink modifier", composite);
+                                                                    Messages.MainPrefPage_HyperlinkModifier, composite);
         addField(mks);
                 
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.main_pref");
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.main_pref"); //$NON-NLS-1$
         return container;
     }    
 

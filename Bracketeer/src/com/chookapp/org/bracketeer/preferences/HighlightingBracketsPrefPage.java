@@ -245,7 +245,7 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
                                             BooleanFieldEditor.DEFAULT, composite_9));
         }
         
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.highlight_pref");
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.highlight_pref"); //$NON-NLS-1$
         return container;
     } 
     

@@ -52,7 +52,7 @@ public class ModifiersKeySequenceText extends FieldEditor implements KeyListener
         KeyStroke stroke = SWTKeySupport
                 .convertAcceleratorToKeyStroke(_mask);
         String str = stroke.format();
-        if(str.endsWith("+"))
+        if(str.endsWith("+")) //$NON-NLS-1$
             str = str.substring(0, str.length()-1);
         _textField.setText(str);
     }
@@ -87,7 +87,7 @@ public class ModifiersKeySequenceText extends FieldEditor implements KeyListener
         gd.grabExcessHorizontalSpace = true;
         
         _textField.setLayoutData(gd);
-        _textField.setToolTipText("Press the modifiers (Ctrl, Alt, etc...). 'del' to clear.");
+        _textField.setToolTipText(Messages.ModifiersKeySequenceText_ModifiersToolTip);
     }
 
     @Override

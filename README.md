@@ -15,7 +15,7 @@ Bracketeer is a platform used to enrich the editors in Eclipse.
 
 Installation 
 ------------
-In you Eclipse, go to: Help->Install new software...  
+In your Eclipse, go to: Help->Install new software...  
 Enter the URL (in "Work with"): **http://chookapp.github.com/ChookappUpdateSite/**  
 From the chookapp category, choose any Bracketeer editor support you want (CDT - for C/C++, JDT - for java, etc...).  
 For example, choosing "Bracketeer CDT support" will install the Bracketeer infrastructure (if not already installed) and the CDT editor support. *It is not advised to install a Bracketeer support for an editor type which is not already installed in your Eclipse (although it shouldn't do any actual harm)*.

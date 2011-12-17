@@ -469,7 +469,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
                @Override
                public void run()
                {
-                   _textWidget.redraw();
+                   if( _textWidget != null )
+                       _textWidget.redraw();
                }
            });
        }        
