@@ -27,6 +27,4 @@ Screen shots
 
 ![screenshot](https://github.com/chookapp/Bracketeer/raw/master/Bracketeer/doc/all-surrounding-hyperlink.JPG)
 
-You can find more screen shots under [Bracketeer/doc](https://github.com/chookapp/Bracketeer/tree/master/Bracketeer/doc)
-
-You can also find more information and screenshots in the preferences help pages (after installing Bracketeer in Eclipse)
+You can find more information and screenshots in the [Wiki](https://github.com/chookapp/Bracketeer/wiki) or in the preferences help pages (after installing Bracketeer in Eclipse)
