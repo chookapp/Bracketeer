@@ -15,24 +15,32 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 
 import com.chookapp.org.bracketeer.Activator;
+import com.chookapp.org.bracketeer.preferences.PreferencesConstants;
 
 public class PaintableBracket extends PaintableObject
 {
-
-    public PaintableBracket(Position position, RGB foreground, RGB background)
+    String _highlightType;
+    RGB _outlineColor;
+    
+    public PaintableBracket(Position position, RGB foreground, RGB background, String highlightType)
     {
-        super(position, foreground, background);
+        super(position, foreground, 
+              (highlightType == PreferencesConstants.Highlights.HighlightTypeValSolid) ? background : null);
+        _highlightType = highlightType;
+        _outlineColor = background;
     }
 
     @Override
     protected void innerPaint(GC gc, StyledText st, IDocument doc,
-                              IRegion widgetRange, Rectangle rect)
+                              IRegion widgetRange, Rectangle widgetRect)
     {
         
         int offset = widgetRange.getOffset();
@@ -44,7 +52,32 @@ public class PaintableBracket extends PaintableObject
         
         try
         {
-            gc.drawText(doc.get(_position.getOffset(), 1), p.x, p.y, _background == null);
+            String txt = doc.get(_position.getOffset(), 1);
+            gc.drawText(txt, p.x, p.y, _background == null);
+            
+            if( _highlightType.equals(PreferencesConstants.Highlights.HighlightTypeValOutline) )
+            {
+                Color oldFg = gc.getForeground();
+                Color fg = null;
+                if( _outlineColor == null )
+                {
+                    gc.setForeground(gc.getBackground());
+                }
+                else
+                {
+                    fg = new Color(Display.getDefault(), _outlineColor);
+                    gc.setForeground(fg);
+                }
+                
+                Point metrics = gc.textExtent(txt);
+                Rectangle rect = new Rectangle(p.x, p.y, metrics.x, metrics.y);
+                
+                gc.drawRectangle(rect);
+                                
+                gc.setForeground(oldFg);
+                if( fg != null )
+                    fg.dispose();
+            }
         }
         catch (BadLocationException e)
         {

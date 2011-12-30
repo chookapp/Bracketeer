@@ -113,7 +113,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
         }
         
         // If we want to re-enable design mode, we should comment out this "for", and comment in this stub
-//                 IConfigurationElement element = null; // stub
+//        IConfigurationElement element = null; // stub
         for (IConfigurationElement element : config) 
         {
             String pluginName = element.getAttribute("name"); //$NON-NLS-1$
@@ -137,6 +137,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                 lable.setText(Messages.HintsPrefPage_NotSupported);
                 
                 tabInfo._hintsList = null;
+                // If we want to re-enable design mode, we should comment out this line
                 continue;
             }
 

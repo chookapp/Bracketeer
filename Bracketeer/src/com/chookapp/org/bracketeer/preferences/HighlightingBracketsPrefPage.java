@@ -37,6 +37,7 @@ import com.chookapp.org.bracketeer.core.ProcessorsRegistry;
 
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.jface.preference.ComboFieldEditor;
 
 
 public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage 
@@ -52,6 +53,8 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
         public String _name;
         public Composite _surroundingComposite;
         public BooleanFieldEditor _surroundingEnableFE;
+        public ComboFieldEditor _highlighStyleFE;
+        public Composite _highlighStyleFEparent;
         
         public TabInfo()
         {
@@ -156,7 +159,12 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             addField(bfe1);
             tabInfo._highlighUseDefualtFE.add(bfe1);
             
-            Composite composite_4 = new Composite(grpForegroundColor, SWT.NONE);
+            Composite composite_10 = new Composite(grpForegroundColor, SWT.NONE);
+            GridLayout gl_composite_10 = new GridLayout(1, false);
+            gl_composite_10.marginLeft = 10;
+            composite_10.setLayout(gl_composite_10);
+            
+            Composite composite_4 = new Composite(composite_10, SWT.NONE);
             ColorFieldEditor cfe = new ColorFieldEditor(PreferencesConstants.preferencePath(pluginName) +
                                                         PreferencesConstants.Highlights.getAttrPath(0, true) +
                                                         PreferencesConstants.Highlights.Color, Messages.HighlightingBracketsPrefPage_Color, composite_4);
@@ -176,13 +184,32 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             addField(bfe2);
             tabInfo._highlighUseDefualtFE.add(bfe2);
             
-            Composite composite_5 = new Composite(grpBackgroundColor, SWT.NONE);
+            Composite composite_14 = new Composite(grpBackgroundColor, SWT.NONE);
+            GridLayout gl_composite_14 = new GridLayout(1, false);
+            gl_composite_14.marginLeft = 10;
+            composite_14.setLayout(gl_composite_14);
+            
+            Composite composite_5 = new Composite(composite_14, SWT.NONE);
             cfe = new ColorFieldEditor(PreferencesConstants.preferencePath(pluginName) +
                                        PreferencesConstants.Highlights.getAttrPath(0, false) +
                                        PreferencesConstants.Highlights.Color, Messages.HighlightingBracketsPrefPage_Color, composite_5);
             addField(cfe);
             tabInfo._highlighColorFE.add(cfe);
             tabInfo._highlighColorFEparent.add(composite_5);
+            
+            Composite composite_15 = new Composite(composite_14, SWT.NONE);
+            composite_15.setSize(230, 25);
+            ComboFieldEditor cofe = new ComboFieldEditor(PreferencesConstants.preferencePath(tabInfo._name) +
+                                                         PreferencesConstants.Highlights.getAttrPath(0, false) +
+                                                         PreferencesConstants.Highlights.HighlightTypeAttr,
+                                                         Messages.HighlightingBracketsPrefPage_BgStyle, 
+                                                         new String[][]{{PreferencesConstants.Highlights.HighlightTypeValNone, "None"}, 
+                                                                        {PreferencesConstants.Highlights.HighlightTypeValSolid, "Solid"},
+                                                                        {PreferencesConstants.Highlights.HighlightTypeValOutline, "Outline"}}, 
+                                                         composite_15);
+            addField(cofe);
+            tabInfo._highlighStyleFE = cofe;
+            tabInfo._highlighStyleFEparent = composite_15;
             
             Group grpSurroundingBrackets = new Group(composite, SWT.NONE);
             grpSurroundingBrackets.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -197,11 +224,10 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             tabInfo._surroundingEnableFE = bfe3;          
             
             Composite composite_7 = new Composite(grpSurroundingBrackets, SWT.NONE);
-            composite_7.setLayout(new GridLayout(3, false));
+            GridLayout gl_composite_7 = new GridLayout(2, false);
+            gl_composite_7.marginLeft = 10;
+            composite_7.setLayout(gl_composite_7);
             tabInfo._surroundingComposite = composite_7;
-            
-            Composite composite_10 = new Composite(composite_7, SWT.NONE);
-            composite_10.setLayout(new GridLayout(1, false));
             
             Composite composite_8 = new Composite(composite_7, SWT.NONE);
             GridLayout gl_composite_8 = new GridLayout(1, false);
@@ -212,14 +238,16 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             grpPairsToShow.setText(Messages.HighlightingBracketsPrefPage_PairsToShow);
             grpPairsToShow.setLayout(new GridLayout(2, false));
             
+            Composite composite_16 = new Composite(composite_7, SWT.NONE);
+            composite_16.setLayout(new GridLayout(1, false));
+            
             // If we want to re-enable design mode, we should comment out this field addition
             addField(new StringPartCheckBoxes(PreferencesConstants.preferencePath(pluginName) +
                                               PreferencesConstants.Surrounding.ShowBrackets, 
                                               grpPairsToShow, 
                                               element.getAttribute(ProcessorsRegistry.SUPPORTED_BRACKETS_ATTR)));           
             
-            Composite composite_12 = new Composite(composite_7, SWT.NONE);
-            composite_12.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+            Composite composite_12 = new Composite(composite_16, SWT.NONE);
             composite_12.setLayout(new GridLayout(3, false));
             
             Composite composite_11 = new Composite(composite_12, SWT.NONE);
@@ -233,6 +261,22 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             Label lblNewLabel = new Label(composite_12, SWT.NONE);
             lblNewLabel.setAlignment(SWT.RIGHT);
             lblNewLabel.setText(Messages.HighlightingBracketsPrefPage_Pairs);
+            
+            
+            
+            Composite composite_17 = new Composite(composite_16, SWT.NONE);
+            composite_17.setLayout(new GridLayout(3, false));
+            
+            Composite composite_18 = new Composite(composite_17, SWT.NONE);
+            spinner = new SpinnerFieldEditor(PreferencesConstants.preferencePath(pluginName) +
+                                             PreferencesConstants.Surrounding.MinDistanceBetweenBrackets, 
+                                             "Show pairs which are at least ", composite_18);
+            addField(spinner);
+            lblNewLabel = new Label(composite_17, SWT.NONE);
+            lblNewLabel.setAlignment(SWT.RIGHT);
+            lblNewLabel.setText("characters apart");
+
+            
             
             Group grpHovering = new Group(composite, SWT.NONE);
             grpHovering.setLayout(new GridLayout(1, false));
@@ -260,6 +304,8 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
     @Override
     protected void initialize()
     {
+        String attr;
+        
         for (TabInfo tabInfo : _tabInfos)
         {
             // (idx 0 has already been added in the objects constructor)
@@ -267,7 +313,7 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    String attr = PreferencesConstants.preferencePath(tabInfo._name) +
+                    attr = PreferencesConstants.preferencePath(tabInfo._name) +
                             PreferencesConstants.Highlights.getAttrPath(idx, i == 0) +
                             PreferencesConstants.Highlights.UseDefault;
 
@@ -279,6 +325,12 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
 
                     _prefNames.add(attr);
                 }
+                
+                attr = PreferencesConstants.preferencePath(tabInfo._name) +
+                        PreferencesConstants.Highlights.getAttrPath(idx, false) +
+                        PreferencesConstants.Highlights.HighlightTypeAttr;
+
+                _prefNames.add(attr);
             }
         }        
         
@@ -319,7 +371,16 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
                 
                 tabInfo._highlighColorFE.get(i).setEnabled(!tabInfo._highlighUseDefualtFE.get(i).getBooleanValue(), 
                                                            tabInfo._highlighColorFEparent.get(i));
-            }        
+            }
+            
+            tabInfo._highlighStyleFE.store();
+            tabInfo._highlighStyleFE.setPreferenceName(PreferencesConstants.preferencePath(tabInfo._name) +
+                                                       PreferencesConstants.Highlights.getAttrPath(idx, false) +
+                                                       PreferencesConstants.Highlights.HighlightTypeAttr);
+            tabInfo._highlighStyleFE.load();
+            tabInfo._highlighStyleFE.setEnabled(!tabInfo._highlighUseDefualtFE.get(1).getBooleanValue(), 
+                                                tabInfo._highlighStyleFEparent);
+            
         }
     }
     

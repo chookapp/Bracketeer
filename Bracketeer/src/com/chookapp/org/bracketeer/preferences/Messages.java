@@ -49,6 +49,7 @@ public class Messages extends NLS
     public static String MainPrefPage_lblNoBracketeerEditor_text;
     public static String MainPrefPage_txtNoBracketeerEditor_text;
     public static String ModifiersKeySequenceText_ModifiersToolTip;
+    public static String HighlightingBracketsPrefPage_BgStyle;
     static
     {
         // initialize resource bundle

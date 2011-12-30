@@ -94,4 +94,10 @@ public class BracketsPair
         }
         return false;
     }
+
+    public int getDistanceBetweenBrackets()
+    {        
+        return (getClosingBracket().getPositionRaw().getOffset() -
+                getOpeningBracket().getPositionRaw().getOffset());
+    }
 }

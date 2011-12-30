@@ -347,9 +347,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
             {
     	        IRegion widgetRange = getWidgetRange(paintObj.getPosition().getOffset(), 
     	                                             paintObj.getPosition().getLength());
-    	        Rectangle rect = paintObj.getWidgetRect(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange);
-    	        if( rect != null && rect.intersects(event.x, event.y, event.width, event.height) )
-    	            paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange, rect );	        
+    	        Rectangle widgetRect = paintObj.getWidgetRect(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange);
+    	        if( widgetRect != null && widgetRect.intersects(event.x, event.y, event.width, event.height) )
+    	            paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange, widgetRect );	        
             }
         } 
         catch (Exception e)
@@ -392,6 +392,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
     {
         if(!_isActive)
         {
+            if(_sourceViewer == null)
+                return;
+            
             _isActive = true;
             
             StyledText st = _sourceViewer.getTextWidget();
@@ -656,6 +659,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     {
         if(!_conf.getPairConfiguration().isSurroundingPairsEnabled())
             return clearSurroundingPairsToPaint();
+           
         
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
         List<BracketsPair> listOfPairs = cont.getPairsSurrounding(caretOffset);
@@ -673,6 +677,11 @@ public class BracketsHighlighter implements CaretListener, Listener,
                     it.remove();
                     break;
                 }
+            }
+            
+            if( pair.getDistanceBetweenBrackets()-1 < _conf.getPairConfiguration().getMinDistanceBetweenBrackets())
+            {
+                it.remove();
             }
         }
         
@@ -904,7 +913,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
                 Position pos = bracket.getPositionRaw();
                 RGB fg = _conf.getPairConfiguration().getColor(true, colorCode);
                 RGB bg = _conf.getPairConfiguration().getColor(false, colorCode);
-                paintableObjectsList.add(new PaintableBracket(pos, fg, bg));
+                String highlightType = _conf.getPairConfiguration().getHighlightType(colorCode);
+                paintableObjectsList.add(new PaintableBracket(pos, fg, bg, highlightType));
             }
             colorCode += colorCodeStep;                
         }
@@ -918,7 +928,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
             Position pos = bracket.getPositionRaw();
             RGB fg = _conf.getSingleBracketConfiguration().getColor(true);
             RGB bg = _conf.getSingleBracketConfiguration().getColor(false);
-            paintableObjectsList.add(new PaintableBracket(pos, fg, bg));
+            String highlightType = _conf.getSingleBracketConfiguration().getHighlightType();
+            paintableObjectsList.add(new PaintableBracket(pos, fg, bg, highlightType));
         }
     }
 

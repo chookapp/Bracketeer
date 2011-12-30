@@ -152,6 +152,11 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
                                                new RGB(val,val,val));
             }
             
+            store.setDefault(PreferencesConstants.preferencePath(pluginName) +
+                             PreferencesConstants.Highlights.getAttrPath(i, false) +
+                             PreferencesConstants.Highlights.HighlightTypeAttr, 
+                             PreferencesConstants.Highlights.HighlightTypeValSolid);
+            
             // TODO: get the real editor background default
             /*
             Color def = Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND);
@@ -174,6 +179,8 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         store.setDefault(PreferencesConstants.preferencePath(pluginName) +
                          PreferencesConstants.Surrounding.NumBracketsToShow, 
                          PreferencesConstants.MAX_PAIRS);
+        store.setDefault(PreferencesConstants.preferencePath(pluginName) +
+                         PreferencesConstants.Surrounding.MinDistanceBetweenBrackets, 1);
         store.setDefault(PreferencesConstants.preferencePath(pluginName) +
                          PreferencesConstants.Surrounding.ShowBrackets, 
                          element.getAttribute(ProcessorsRegistry.SUPPORTED_BRACKETS_ATTR));

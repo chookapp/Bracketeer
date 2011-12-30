@@ -28,3 +28,20 @@ Screen shots
 ![screenshot](https://github.com/chookapp/Bracketeer/raw/master/Bracketeer/doc/all-surrounding-hyperlink.JPG)
 
 You can find more information and screenshots in the [Wiki](https://github.com/chookapp/Bracketeer/wiki) or in the preferences help pages (after installing Bracketeer in Eclipse)
+
+Feedback
+========
+
+* Found a bug? Have a feature request? Visit the [issues page](https://github.com/chookapp/Bracketeer/issues).
+* Have a comment you want to share? Want to support Bracketeer? Visit the Eclipse Marketplace pages [Bracketeer for C/C++](http://marketplace.eclipse.org/content/bracketeer-cc-cdt),  [Bracketeer for Java](http://marketplace.eclipse.org/content/bracketeer-java-jdt)
+
+Release notes
+=============
+
+Build 1.1.0
+-----------
+
+* Fixed [issue 1](https://github.com/chookapp/Bracketeer/issues/1) support Google's WindowBuilder.
+* Option of using a rectangle outline when highlighting brackets.
+* Option to ignore pairs which are close to eachother.
+

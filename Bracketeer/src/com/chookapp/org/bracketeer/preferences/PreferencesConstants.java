@@ -21,6 +21,7 @@ public final class PreferencesConstants
         public static final String Enable = SurroundingPath + "Enable"; //$NON-NLS-1$
         public static final String ShowBrackets = SurroundingPath + "ShowBrackets"; //$NON-NLS-1$
         public static final String NumBracketsToShow = SurroundingPath + "NumBracketsToShow";  //$NON-NLS-1$
+        public static final String MinDistanceBetweenBrackets = SurroundingPath + "MinDistanceBetweenBrackets"; //$NON-NLS-1$
     }
     
     public final static class Hovering
@@ -39,7 +40,7 @@ public final class PreferencesConstants
         private static final String MissingPair = "MissingPair."; //$NON-NLS-1$
         
         private static final String Background = "Background."; //$NON-NLS-1$
-        private static final String Foreground = "Foreground.";         //$NON-NLS-1$
+        private static final String Foreground = "Foreground."; //$NON-NLS-1$
         
         /**
          * 
@@ -71,7 +72,11 @@ public final class PreferencesConstants
         
         public static final String UseDefault = "UseDefault"; //$NON-NLS-1$
         public static final String Color = "Color"; //$NON-NLS-1$
-
+        public static final String HighlightTypeAttr = "HighlightType"; //$NON-NLS-1$
+        
+        public static final String HighlightTypeValNone = "None";
+        public static final String HighlightTypeValSolid = "Solid";
+        public static final String HighlightTypeValOutline = "Outline";
         
     }
     

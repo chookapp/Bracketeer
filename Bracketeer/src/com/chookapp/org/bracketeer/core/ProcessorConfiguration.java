@@ -48,27 +48,35 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     {
         private RGB[] _fgColors;
         private RGB[] _bgColors;
+        private String[] _highlightTypes;
         
         private int _surroundingPairsCount;
         private boolean _surroundingPairsEnable;
         private String _surroundingPairsToInclude;
         
         private boolean _hoveredPairsEnable;
+        private int _minDistanceBetweenBrackets;
         
         public PairConfiguration()
         {
             _fgColors = new RGB[PreferencesConstants.MAX_PAIRS];
             _bgColors = new RGB[PreferencesConstants.MAX_PAIRS];
+            _highlightTypes = new String[PreferencesConstants.MAX_PAIRS];
         }
 
         /* setters */
         
-        public void setColor(boolean foregound, int colorIndex, RGB color)
+        public void setColor(boolean foregound, int pairIdx, RGB color)
         {
             if(foregound)
-                _fgColors[colorIndex] = color;
+                _fgColors[pairIdx] = color;
             else
-                _bgColors[colorIndex] = color;
+                _bgColors[pairIdx] = color;
+        }
+        
+        public void setHighlightType(int pairIdx, String highlightType)
+        {
+            _highlightTypes[pairIdx] = highlightType;
         }
         
         public void setEnableSurrounding(boolean enable)
@@ -91,6 +99,13 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             _surroundingPairsToInclude = pairs;
         }
         
+        public void setMinDistanceBetweenBrackets(int distance)
+        {
+            _minDistanceBetweenBrackets = distance;
+        }
+        
+      
+        
         /* getters */
                 
         public RGB getColor(boolean foregound, int colorIndex)
@@ -101,6 +116,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                 return _bgColors[colorIndex];
         }
 
+        public String getHighlightType(int pairIdx)
+        {
+            return _highlightTypes[pairIdx];
+        }
+        
         public boolean isSurroundingPairsEnabled()
         {
             return _surroundingPairsEnable;
@@ -121,7 +141,13 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             return _hoveredPairsEnable;
         }
 
-   
+        public int getMinDistanceBetweenBrackets()
+        {
+            return _minDistanceBetweenBrackets;
+        }
+
+
+     
         
     }
     
@@ -129,6 +155,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     {
         private RGB _fgColor;
         private RGB _bgColor;
+        private String _highlightType;
         
         public SingleBracketConfiguration()
         {
@@ -144,6 +171,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                 _bgColor = color;
         }
         
+        public void setHighlightType(String highlightType)
+        {
+            _highlightType = highlightType;
+        }
+        
         /* getters */
         
         public RGB getColor(boolean foregound)
@@ -153,6 +185,12 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             else
                 return _bgColor;
         }
+        
+        public String getHighlightType()
+        {
+            return _highlightType;
+        }        
+       
     }
     
     public class HintConfiguration implements IHintConfiguration
@@ -483,7 +521,9 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                                                                  PreferencesConstants.Surrounding.NumBracketsToShow));
             _pairConf.setSurroundingPairsToInclude(_prefStore.getString(prefBase +
                                                                         PreferencesConstants.Surrounding.ShowBrackets));
-            
+            _pairConf.setMinDistanceBetweenBrackets(_prefStore.getInt(prefBase +
+                                                                      PreferencesConstants.Surrounding.MinDistanceBetweenBrackets));
+           
             /* single */ 
             
             int pairIdx = PreferencesConstants.MAX_PAIRS + 1;
@@ -502,6 +542,44 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                                                                                PreferencesConstants.Highlights.Color ) );
             }
         }
+        
+        /* Highlight type */
+        String defHighlightType = _prefStore.getString( prefBase +
+                                                    PreferencesConstants.Highlights.getAttrPath(0, false) +
+                                                    PreferencesConstants.Highlights.HighlightTypeAttr);
+        
+        for (int pairIdx = 0; pairIdx < PreferencesConstants.MAX_PAIRS; pairIdx++)
+        {
+            if( _prefStore.getBoolean( prefBase +
+                                       PreferencesConstants.Highlights.getAttrPath(pairIdx+1, false) +
+                                       PreferencesConstants.Highlights.UseDefault ) )
+            {
+                _pairConf.setHighlightType(pairIdx, defHighlightType);
+            }
+            else
+            {
+                _pairConf.setHighlightType(pairIdx, 
+                                           _prefStore.getString( prefBase +
+                                                                 PreferencesConstants.Highlights.getAttrPath(pairIdx+1, false) +
+                                                                 PreferencesConstants.Highlights.HighlightTypeAttr ) );
+            }
+        }
+        
+        int pairIdx = PreferencesConstants.MAX_PAIRS + 1;
+        
+        if( _prefStore.getBoolean( prefBase +
+                                   PreferencesConstants.Highlights.getAttrPath(pairIdx+1, false) +
+                                   PreferencesConstants.Highlights.UseDefault ) )
+        {
+            _singleConf.setHighlightType(defHighlightType);
+        }
+        else
+        {
+            _singleConf.setHighlightType( _prefStore.getString( prefBase +
+                                                                PreferencesConstants.Highlights.getAttrPath(pairIdx+1, false) +
+                                                                PreferencesConstants.Highlights.HighlightTypeAttr ) );
+        }
+        
     }
 
     @Override
