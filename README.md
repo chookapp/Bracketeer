@@ -35,8 +35,8 @@ Feedback
 * Found a bug? Have a feature request? Visit the [issues page](https://github.com/chookapp/Bracketeer/issues).
 * Have a comment you want to share? Want to support Bracketeer? Visit the Eclipse Marketplace pages [Bracketeer for C/C++](http://marketplace.eclipse.org/content/bracketeer-cc-cdt), [Bracketeer for Java](http://marketplace.eclipse.org/content/bracketeer-java-jdt)
 
-Release notes
-=============
+Build notes
+============
 
 Build 1.1.0 (next release)
 -----------
@@ -45,4 +45,4 @@ Build 1.1.0 (next release)
 * Fixed [issue 2](https://github.com/chookapp/Bracketeer/issues/2).
 * Option of using a rectangle outline when highlighting brackets.
 * Option to ignore pairs which are close to eachother.
-* Added annotation to "missing pair"
+* Added annotation to "missing pair".
