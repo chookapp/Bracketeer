@@ -31,7 +31,7 @@ public class ProcessorsRegistry
 	private List<IBracketeerProcessorsFactory> _processorFactories;
 	private List<ProcessorConfiguration> _processorConfigurations;
 	
-	public ProcessorsRegistry()
+    public ProcessorsRegistry()
 	{
 		_processorFactories = new LinkedList<IBracketeerProcessorsFactory>();
 		_processorConfigurations = new LinkedList<ProcessorConfiguration>();
@@ -45,6 +45,7 @@ public class ProcessorsRegistry
 				_processorFactories.add((IBracketeerProcessorsFactory) o);
 				
 				_processorConfigurations.add( new ProcessorConfiguration(element) );
+				
 			} catch (Exception e) {
 				Activator.log(e);
 			}			

@@ -50,6 +50,9 @@ public class Messages extends NLS
     public static String MainPrefPage_txtNoBracketeerEditor_text;
     public static String ModifiersKeySequenceText_ModifiersToolTip;
     public static String HighlightingBracketsPrefPage_BgStyle;
+    public static String HighlightingBracketsPrefPage_enableAnnotation;
+    public static String HighlightingBracketsPrefPage_annotationLink;
+    public static String HighlightingBracketsPrefPage_grpAnnotation_text;
     static
     {
         // initialize resource bundle

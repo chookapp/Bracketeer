@@ -175,6 +175,9 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         }
         
         store.setDefault(PreferencesConstants.preferencePath(pluginName) +
+                         PreferencesConstants.Annotations.Enable, true);
+        
+        store.setDefault(PreferencesConstants.preferencePath(pluginName) +
                          PreferencesConstants.Surrounding.Enable, true);
         store.setDefault(PreferencesConstants.preferencePath(pluginName) +
                          PreferencesConstants.Surrounding.NumBracketsToShow, 

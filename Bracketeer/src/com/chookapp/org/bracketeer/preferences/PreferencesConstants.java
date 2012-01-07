@@ -14,6 +14,13 @@ public final class PreferencesConstants
 { 
     public static final int MAX_PAIRS = 4;
     
+    public final static class Annotations
+    {
+        private static final String AnnotationPath = "Annotation."; //$NON-NLS-1$
+
+        public static final String Enable = AnnotationPath + "MissingPair.Enable"; //$NON-NLS-1$
+    }
+    
     public final static class Surrounding
     {
         private static final String SurroundingPath = "Surrounding."; //$NON-NLS-1$

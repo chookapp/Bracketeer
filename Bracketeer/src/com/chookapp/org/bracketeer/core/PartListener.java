@@ -329,7 +329,7 @@ public class PartListener implements IWindowListener, IPartListener2
         
         BracketsHighlighter bracketsHighlighter = new BracketsHighlighter(); 
         bracketsHighlighter.Init(processor.getProcessor(), 
-                                 doc, textViewer,
+                                 part, doc, textViewer,
                                  processor.getConfiguration());
         synchronized (_activeMap) 
         {                 

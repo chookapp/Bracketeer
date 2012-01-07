@@ -205,5 +205,46 @@
             plugin="com.choockapp.org.bracketeer">
       </contexts>
    </extension>
+   <extension
+         id="com.chookapp.org.bracketeer.unmatchedBracket.marker"
+         name="Bracket missing pair"
+         point="org.eclipse.core.resources.markers">
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerSeverity="1"
+            markerType="com.chookapp.org.bracketeer.unmatchedBracket.marker"
+            name="com.chookapp.org.bracketeer.unmatchedBracket.annotation"
+            super="org.eclipse.ui.workbench.texteditor.error">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="com.chookapp.org.bracketeer.unmatchedBracket.annotation"
+            colorPreferenceKey="com.chookapp.org.bracketeer.unmatchedBracket.annotation.color"
+            colorPreferenceValue="250,0,0"
+            contributesToHeader="false"
+            highlightPreferenceValue="false"
+            includeOnPreferencePage="true"
+            isGoToNextNavigationTarget="false"
+            isGoToNextNavigationTargetKey="com.chookapp.org.bracketeer.unmatchedBracket.annotation.goToNext"
+            isGoToPreviousNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="com.chookapp.org.bracketeer.unmatchedBracket.annotation.goToPrev"
+            label="Bracket missing pair"
+            overviewRulerPreferenceKey="com.chookapp.org.bracketeer.unmatchedBracket.annotation.overviewRuler"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="1"
+            showInNextPrevDropdownToolbarAction="false"
+            showInNextPrevDropdownToolbarActionKey="com.chookapp.org.bracketeer.unmatchedBracket.annotation.showInNextPrev"
+            symbolicIcon="error"
+            textPreferenceKey="com.chookapp.org.bracketeer.unmatchedBracket.annotation.text"
+            textPreferenceValue="false"
+            textStylePreferenceValue="NONE"
+            verticalRulerPreferenceKey="com.chookapp.org.bracketeer.unmatchedBracket.annotation.verticalRuler"
+            verticalRulerPreferenceValue="true">
+      </specification>
+   </extension>
 
 </plugin>

@@ -33,7 +33,7 @@ public class PaintableBracket extends PaintableObject
     public PaintableBracket(Position position, RGB foreground, RGB background, String highlightType)
     {
         super(position, foreground, 
-              (highlightType == PreferencesConstants.Highlights.HighlightTypeValSolid) ? background : null);
+              (highlightType.equals(PreferencesConstants.Highlights.HighlightTypeValSolid)) ? background : null);
         _highlightType = highlightType;
         _outlineColor = background;
     }

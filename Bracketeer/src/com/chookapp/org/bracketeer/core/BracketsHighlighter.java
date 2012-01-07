@@ -15,11 +15,18 @@
 package com.chookapp.org.bracketeer.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPaintPositionManager;
@@ -31,6 +38,9 @@ import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.JFaceTextUtil;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.swt.SWT;
@@ -48,7 +58,11 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.services.IDisposable;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
 
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.BracketsPair;
@@ -66,7 +80,11 @@ public class BracketsHighlighter implements CaretListener, Listener,
     private ISourceViewer _sourceViewer;
     private StyledText _textWidget;
 	private ProcessingThread _processingThread;
+	private IDocument _doc;
 	private ProcessorConfiguration _conf;
+	private IResource _resource;
+	private IAnnotationModel _annotationModel;
+	private Map<Annotation, Position> _annotationMap;
 	
 	private boolean _isActive;
 	
@@ -89,6 +107,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    _processingThread = null;
 	    _textWidget = null;
 	    _conf = null;
+	    _doc = null;
+	    _resource = null;
+	    _annotationModel = null;
+	    _annotationMap = new HashMap<Annotation, Position>();
 	    
 	    _isActive = false;
 	    
@@ -126,9 +148,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	/************************************************************
 	 * public methods
 	 * @param part 
+	 * @param part 
 	 ************************************************************/
 	
-	public void Init(BracketeerProcessor processor, IDocument doc, 
+	public void Init(BracketeerProcessor processor, IEditorPart part, IDocument doc, 
 	                 ITextViewer textViewer, ProcessorConfiguration conf) 
 	{
 		
@@ -136,6 +159,22 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		_textWidget = _sourceViewer.getTextWidget();
 		_conf = conf;
 		processor.setHintConf(conf.getHintConfiguration());
+		_doc = doc;
+		
+		_resource = (IResource) part.getEditorInput().getAdapter(IResource.class);
+		if (_resource == null)
+		    Activator.log("Unable to get resource");
+		
+        ITextEditor editor = (ITextEditor) part.getAdapter(ITextEditor.class);
+        if (editor == null)
+        {
+            Activator.log("Unable to get editor");
+        } 
+        else 
+        {
+            IDocumentProvider provider = editor.getDocumentProvider();
+            _annotationModel = provider.getAnnotationModel(editor.getEditorInput());
+        }
 		
         _processingThread = new ProcessingThread(doc, processor);
         _processingThread.getBracketContainer().addListener(this);
@@ -393,7 +432,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
         if(!_isActive)
         {
             if(_sourceViewer == null)
+            {
+                Activator.log("cannot paint, no sourceViewer found");
                 return;
+            }
             
             _isActive = true;
             
@@ -923,6 +965,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     private void addPaintableObjectsSingles(List<SingleBracket> listOfSingles,
                                             List<PaintableBracket> paintableObjectsList)
     {
+        Map<Annotation, Position> newMap = new HashMap<Annotation, Position>();
         for (SingleBracket bracket : listOfSingles)
         {
             Position pos = bracket.getPositionRaw();
@@ -930,6 +973,49 @@ public class BracketsHighlighter implements CaretListener, Listener,
             RGB bg = _conf.getSingleBracketConfiguration().getColor(false);
             String highlightType = _conf.getSingleBracketConfiguration().getHighlightType();
             paintableObjectsList.add(new PaintableBracket(pos, fg, bg, highlightType));
+            
+            if( _conf.getSingleBracketConfiguration().getAnnotate() &&
+                    _resource != null && _annotationMap != null )
+            {
+                try
+                {
+                    IMarker marker = _resource.createMarker("com.chookapp.org.bracketeer.unmatchedBracket.marker");
+
+                    SimpleMarkerAnnotation ma = 
+                            new SimpleMarkerAnnotation("com.chookapp.org.bracketeer.unmatchedBracket.annotation", 
+                                                       marker);
+
+                    Position newPos = new Position(pos.getOffset());
+                    newMap.put(ma, newPos);
+                }
+                catch (CoreException e)
+                {
+                    Activator.log(e);
+                }        
+            }
+        }
+        
+        Set<Annotation> oldKeySet = _annotationMap.keySet();
+        if( !oldKeySet.isEmpty() || !newMap.isEmpty() )
+        {
+            _annotationModel.connect(_doc);
+
+            if (_annotationModel instanceof IAnnotationModelExtension) {
+                ((IAnnotationModelExtension)_annotationModel).replaceAnnotations(oldKeySet.toArray(new Annotation[oldKeySet.size()]), newMap);
+            } else {
+                for (Annotation annotation : oldKeySet)
+                {
+                    _annotationModel.removeAnnotation(annotation);
+                }
+                Iterator<Entry<Annotation, Position>> iter= newMap.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Entry<Annotation, Position> mapEntry= iter.next();
+                    _annotationModel.addAnnotation(mapEntry.getKey(), mapEntry.getValue());
+                }
+            }
+
+            _annotationMap = newMap;
+            _annotationModel.disconnect(_doc);
         }
     }
 

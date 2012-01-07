@@ -14,3 +14,4 @@ Export-Package: com.chookapp.org.bracketeer.common,
  com.chookapp.org.bracketeer.extensionpoint
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.core.resources

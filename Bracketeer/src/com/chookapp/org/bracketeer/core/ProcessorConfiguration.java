@@ -156,6 +156,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         private RGB _fgColor;
         private RGB _bgColor;
         private String _highlightType;
+        private boolean _annotate;
         
         public SingleBracketConfiguration()
         {
@@ -176,6 +177,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             _highlightType = highlightType;
         }
         
+        public void setAnnotate(boolean enable)
+        {
+            _annotate = enable;
+        }
+        
         /* getters */
         
         public RGB getColor(boolean foregound)
@@ -189,7 +195,12 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         public String getHighlightType()
         {
             return _highlightType;
-        }        
+        }
+        
+        public boolean getAnnotate()
+        {
+            return _annotate;
+        }
        
     }
     
@@ -579,6 +590,8 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                                                                 PreferencesConstants.Highlights.getAttrPath(pairIdx+1, false) +
                                                                 PreferencesConstants.Highlights.HighlightTypeAttr ) );
         }
+        
+        _singleConf.setAnnotate(_prefStore.getBoolean( prefBase + PreferencesConstants.Annotations.Enable ));
         
     }
 
