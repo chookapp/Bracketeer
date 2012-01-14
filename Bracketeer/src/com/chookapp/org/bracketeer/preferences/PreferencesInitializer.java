@@ -50,7 +50,9 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
     {
         String prefBase = PreferencesConstants.preferencePath(pluginName);
         store.setDefault(prefBase+PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR, true );
-        store.setDefault(prefBase+PreferencesConstants.Hints.Globals.SHOW_ON_HOVER, true );
+        
+        store.setDefault(prefBase+PreferencesConstants.Hints.Hover.ENABLE, true );
+        store.setDefault(prefBase+PreferencesConstants.Hints.Hover.MAX_LEN, 80 );
         
         String hintType = PreferencesConstants.Hints.DEFAULT_TYPE;
         prefBase = PreferencesConstants.preferencePath(pluginName) +
@@ -190,5 +192,7 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         
         store.setDefault(PreferencesConstants.preferencePath(pluginName) +
                          PreferencesConstants.Hovering.Enable, true);
+        store.setDefault(PreferencesConstants.preferencePath(pluginName) +
+                         PreferencesConstants.Hovering.PopupEnable, true);
     }
 }

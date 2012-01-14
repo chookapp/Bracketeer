@@ -36,6 +36,8 @@ public final class PreferencesConstants
         private static final String HoveringPath = "Hovering."; //$NON-NLS-1$
         
         public static final String Enable = HoveringPath + "Enable"; //$NON-NLS-1$
+
+        public static final String PopupEnable = HoveringPath + "EnablePopup"; //$NON-NLS-1$
     }
     
     public final static class Highlights
@@ -131,8 +133,14 @@ public final class PreferencesConstants
         public final static class Globals
         {
             private static final String PATH = "Hints.Globals."; //$NON-NLS-1$
-            public static final String SHOW_ON_HOVER = PATH + "ShowOnHover"; //$NON-NLS-1$
-            public static final String SHOW_IN_EDITOR = PATH + "ShowInEditor";             //$NON-NLS-1$
+            public static final String SHOW_IN_EDITOR = PATH + "ShowInEditor"; //$NON-NLS-1$
+        }
+        
+        public final static class Hover
+        {
+            private static final String PATH = "Hints.Hover."; //$NON-NLS-1$
+            public static final String ENABLE = PATH + "Enable"; //$NON-NLS-1$
+            public static final String MAX_LEN = PATH + "MaxLength";            
         }
         
         // public static final String ENABLED = "enabled";

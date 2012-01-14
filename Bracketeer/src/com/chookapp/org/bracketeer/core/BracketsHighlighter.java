@@ -92,7 +92,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	private List<PaintableBracket> _surroundingPairsToPaint;
 	private List<PaintableBracket> _singleBracketsToPaint;
 	private List<PaintableHint> _hintsToPaint;
+	PaintableHint _hoveredHintToPaint;
     private Point m_hoverEntryPoint;
+    private Popup _popup;
     
     private PaintableHint _mousePointingAtHint;
     private SingleBracket _mousePointingAtBracket;
@@ -100,6 +102,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
    
     private int _caretOffset;
     private int m_hyperlinkModifiers;
+    
 	
 	public BracketsHighlighter()
 	{
@@ -119,6 +122,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    _singleBracketsToPaint = new LinkedList<PaintableBracket>();
 	    _hintsToPaint = new ArrayList<PaintableHint>();
 	    m_hoverEntryPoint = null;
+	    _hoveredHintToPaint = null;
+	    _popup = null;
 	    
 	    _mousePointingAtHint = null;
 	    _mousePointingAtBracket = null;
@@ -126,7 +131,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	}
 	
 	@Override
-	public void dispose() {
+	public void dispose() 
+	{
+	    clearPopup();
+	    
 		if( _sourceViewer == null )
 			return;
 		
@@ -231,9 +239,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	        
     		try
     		{
-    			int caret = _textWidget.getOffsetAtLocation(new Point(event.x, event.y));
-    			caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
-
+    		    int caret = getDocCarretAdvanced(null, event.x, event.y);
+    		        		 
     		    if( mouseHoverAt(_textWidget, caret) )
     		    {
     		        m_hoverEntryPoint = new Point(event.x, event.y);    		        
@@ -245,7 +252,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     		catch(Exception e )
     		{
     		    Activator.log(e);
-    		}
+    		}    		
     		break;
     		
 	    case SWT.MouseMove:
@@ -334,7 +341,38 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    }
 	}
 
-	@Override
+	private int getDocCarretAdvanced(GC outerGc, int x, int y)
+    {
+        int caret = -1;
+             
+        GC gc = null;
+        if( outerGc == null )
+            gc = new GC(_textWidget);
+        else
+            gc = outerGc;
+        
+        try
+        {
+            int charWidth = gc.getFontMetrics().getAverageCharWidth();
+
+            caret = _textWidget.getOffsetAtLocation(new Point(x + (charWidth/4), y));
+            caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
+            caret--;
+        }
+        catch(IllegalArgumentException e)
+        {
+            caret = -1;
+        }
+        finally
+        {
+            if(outerGc == null)
+                gc.dispose();
+        }
+
+        return caret;
+    }
+
+    @Override
 	public void focusGained(FocusEvent e)
 	{
 	}
@@ -382,20 +420,37 @@ public class BracketsHighlighter implements CaretListener, Listener,
                                    null);
             }
     	    
+    	    boolean hoveredHintPainted = false;
     	    for (PaintableHint paintObj : _hintsToPaint)
             {
-    	        IRegion widgetRange = getWidgetRange(paintObj.getPosition().getOffset(), 
-    	                                             paintObj.getPosition().getLength());
-    	        Rectangle widgetRect = paintObj.getWidgetRect(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange);
-    	        if( widgetRect != null && widgetRect.intersects(event.x, event.y, event.width, event.height) )
-    	            paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange, widgetRect );	        
+    	        if(_hoveredHintToPaint != null && _hoveredHintToPaint.getPosition().equals(paintObj.getPosition()))
+    	        {
+    	            paintObj = _hoveredHintToPaint;
+    	            hoveredHintPainted = true;
+    	        }
+    	        
+    	        paintHint(paintObj, event);
             }
+    	    
+    	    if(!hoveredHintPainted && _hoveredHintToPaint != null)
+    	    {
+    	        paintHint(_hoveredHintToPaint, event);
+    	    }
         } 
         catch (Exception e)
         {
             Activator.log(e);
         }
 	}
+    
+    private void paintHint(PaintableHint paintObj, PaintEvent event)
+    {
+        IRegion widgetRange = getWidgetRange(paintObj.getPosition().getOffset(), 
+                                             paintObj.getPosition().getLength());
+        Rectangle widgetRect = paintObj.getWidgetRect(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange);
+        if( widgetRect != null && widgetRect.intersects(event.x, event.y, event.width, event.height) )
+            paintObj.paint(event.gc, _textWidget, _sourceViewer.getDocument(), widgetRange, widgetRect );        
+    }
 
 	public ITextViewer getTextViewer()
 	{
@@ -504,7 +559,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
            update |= updateSingleBrackets();
        
        // I'm ignoring 'hintsTouched' because the "line distance" might have been modified
-       update |= updateHints();                
+       update |= updateHints();
+       update |= clearHoveredHint();
 
        if(update)
        {
@@ -543,17 +599,32 @@ public class BracketsHighlighter implements CaretListener, Listener,
     {
         if( _mousePointingAtHint != null )
         {
-            GC gc = new GC(_textWidget);   
-
-            IRegion widgetRange = getWidgetRange(_mousePointingAtHint.getPosition().getOffset(), 
-                                                 _mousePointingAtHint.getPosition().getLength());
-            Rectangle rect = _mousePointingAtHint.getWidgetRect(gc, _textWidget, 
-                                                                _sourceViewer.getDocument(), widgetRange);
-
+//            GC gc = new GC(_textWidget);   
+//
+//            try
+//            {
+//                IRegion widgetRange = getWidgetRange(_mousePointingAtHint.getPosition().getOffset(), 
+//                                                     _mousePointingAtHint.getPosition().getLength());
+//                Rectangle rect = _mousePointingAtHint.getWidgetRect(gc, _textWidget, 
+//                                                                    _sourceViewer.getDocument(), widgetRange);
+//
+//                _mousePointingAtHint.setUnderline(false);
+//                if( rect != null )
+//                    _textWidget.redraw(rect.x, rect.y, rect.width, rect.height, true);
+//                else
+//                    _textWidget.redraw();
+//                _mousePointingAtHint = null;
+//            }
+//            finally
+//            {
+//                gc.dispose();
+//            }
+        
+            // unoptimize... (I'm not sure that the code above, which works, doesn't take more time...)
             _mousePointingAtHint.setUnderline(false);
-            _textWidget.redraw(rect.x, rect.y, rect.width, rect.height, true);
+            _textWidget.redraw();
             _mousePointingAtHint = null;
-            gc.dispose();
+            
         }
         
         if( _mousePointingAtBracket != null )
@@ -567,34 +638,23 @@ public class BracketsHighlighter implements CaretListener, Listener,
     private void mousePointingAt(int x, int y)
     {
         int caret = -1;
-        int charWidth;
         
         GC gc = new GC(_textWidget);
         
         try
         {
-        
-            charWidth = gc.getFontMetrics().getAverageCharWidth();
+            caret = getDocCarretAdvanced(gc, x, y);
             
             if( _mousePointingAtBracket != null )
             {
-                try
-                {
-                    caret = _textWidget.getOffsetAtLocation(new Point(x + (charWidth/2), y));
-                    caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
-                    caret--;
-                }
-                catch(IllegalArgumentException e)
-                {
-                    caret = -1;
-                }
-                
                 Position pos = _mousePointingAtBracket.getPosition();
                 if( (pos != null) && (pos.getOffset() == caret) )
                     return;
                 
                 _mousePointingAtBracket = null;
                 clearHoveredPairsToPaint();
+                clearHoveredHint();
+                clearPopup();
                 
                 // TODO: optimize? (redraw only the needed sections)
                 _textWidget.redraw();
@@ -611,7 +671,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
                     return;
                 
                 _mousePointingAtHint.setUnderline(false);
-                _textWidget.redraw(rect.x, rect.y, rect.width, rect.height, true);
+                _textWidget.redraw();
                 _mousePointingAtHint = null;
             }
             
@@ -633,20 +693,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         {
             gc.dispose();
         }
-        
-        if( caret == -1 )
-        {
-            try
-            {
-                caret = _textWidget.getOffsetAtLocation(new Point(x + (charWidth/2), y));
-                caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
-                caret--;
-            }
-            catch(IllegalArgumentException e)
-            {
-                return;
-            }
-        }
+              
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
         List<BracketsPair> pairs = cont.getMatchingPairs(caret, 1);
         Assert.isTrue(pairs.size() <= 1);
@@ -689,6 +736,8 @@ public class BracketsHighlighter implements CaretListener, Listener,
     {        
         boolean update = updateSurroundingPairsToPaint(caretOffset);
         update |= clearHoveredPairsToPaint();
+        update |= clearHoveredHint();
+        clearPopup();
         
         if(update)
         {
@@ -697,6 +746,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         }
     }
     
+
     private boolean updateSurroundingPairsToPaint(int caretOffset)
     {
         if(!_conf.getPairConfiguration().isSurroundingPairsEnabled())
@@ -769,7 +819,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         ArrayList<PaintableHint> hintsToPaint = new ArrayList<PaintableHint>();
         HintConfiguration conf = _conf.getHintConfiguration();
-        IDocument doc = _sourceViewer.getDocument();
+        IDocument doc = _doc;
         
         for (Hint hint : cont.getHints())
         {
@@ -839,7 +889,63 @@ public class BracketsHighlighter implements CaretListener, Listener,
      */
     private boolean mouseHoverAt(StyledText st, int origCaret)
     {
-        return markHoveredBrackets(origCaret) || showToolTip(origCaret, true);
+        boolean ret = markHoveredBrackets(origCaret);
+        ret |= showHoveredHint(origCaret);
+        ret |= showPopup(origCaret);
+        return ret;
+    }
+
+    private boolean showPopup(int origCaret)
+    {
+        clearPopup();
+        if( !_conf.getPairConfiguration().isPopupEnabled() )
+            return false;
+        
+        BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
+        List<BracketsPair> listOfPairs = cont.getMatchingPairs(origCaret, 1);        
+        if(listOfPairs.isEmpty())
+            return false;
+        
+        BracketsPair pair = listOfPairs.get(0);
+        Position pos = pair.getClosingBracket().getPosition();
+        if(pos == null || !pos.overlapsWith(origCaret, 2))
+            return false;
+        
+        if( pair.getClosingBracket().getChar() != '}' )
+            return false;
+        
+        pos = pair.getOpeningBracket().getPosition();
+        if( pos == null )
+            return false;
+
+        String lines = "";
+        try
+        {
+            int line = _doc.getLineOfOffset(pos.getOffset());
+            int linesCount = _doc.getNumberOfLines();
+            if(line > 0)
+                line--;
+            for(int i = 0; i < 3; i++)
+            {
+                // end of document
+                if(line >= linesCount)
+                    break;
+                
+                IRegion region = _doc.getLineInformation(line+i);
+                if( i > 0 )
+                    lines += "\r\n";                
+                lines += _doc.get(region.getOffset(), region.getLength());
+            }
+        }
+        catch (BadLocationException e)
+        {
+            Activator.log(e);
+            return false;
+        }
+        
+        _popup = new Popup(_textWidget, lines);
+        
+        return true;
     }
 
     private boolean markHoveredBrackets(int origCaret)
@@ -879,17 +985,41 @@ public class BracketsHighlighter implements CaretListener, Listener,
       return true;        
     }
     
-    private boolean showToolTip(int origCaret, boolean hover)
+    private boolean showHoveredHint(int origCaret)
     {
-//        BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
-//        Hint hint = cont.getHint(origCaret);
-//        if( hint == null )
-//            return false;
-//        
-//        if( hover && !_conf.getHintConfiguration().isShowOnHover(hint.getType()) )
-//            return false;
+        BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
+        Hint hint = cont.getHint(origCaret);
+        HintConfiguration conf = _conf.getHintConfiguration();
+        if( !conf.isShowOnHover() )
+            hint = null;
         
-        return false;
+        PaintableHint hintToPaint = null; 
+        if( hint != null )
+        {
+            String type = hint.getType();
+            hintToPaint = new PaintableHint(hint.getHintPositionRaw(),
+                                            conf.getColor(type, true),
+                                            conf.getColor(type, false), 
+                                            conf.isItalic(type),
+                                            conf.formatTextHovered(type, hint.getTxt()));
+        }        
+        
+        boolean redraw = false;
+        if( _hoveredHintToPaint == null && hintToPaint != null )
+            redraw = true;
+        else if( _hoveredHintToPaint != null &&
+                !_hoveredHintToPaint.equals(hintToPaint) )
+            redraw = true;
+        
+        _hoveredHintToPaint = hintToPaint;
+        
+        if(redraw)
+        {
+            // TODO: optimize? (redraw only the needed sections)
+            _textWidget.redraw();
+        }
+        
+        return hint != null;
     }
     
     private boolean areEqualPairs(List<BracketsPair> listOfPairs,
@@ -1019,6 +1149,14 @@ public class BracketsHighlighter implements CaretListener, Listener,
         }
     }
 
+    private void clearPopup()
+    {
+        if( _popup == null )
+            return;
+        
+        _popup.dispose();
+        _popup = null;
+    }
 
     private boolean clearHoveredPairsToPaint()
     {
@@ -1031,6 +1169,13 @@ public class BracketsHighlighter implements CaretListener, Listener,
             }
         }
         return false;
+    }
+    
+    private boolean clearHoveredHint()
+    {
+        boolean ret = _hoveredHintToPaint != null;
+        _hoveredHintToPaint = null;
+        return ret;
     }
 
     private boolean clearSurroundingPairsToPaint()

@@ -57,6 +57,8 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         private boolean _hoveredPairsEnable;
         private int _minDistanceBetweenBrackets;
         
+        private boolean _popupEnabled;
+        
         public PairConfiguration()
         {
             _fgColors = new RGB[PreferencesConstants.MAX_PAIRS];
@@ -104,7 +106,10 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             _minDistanceBetweenBrackets = distance;
         }
         
-      
+        public void setEnablePopup(boolean enable)
+        {
+            _popupEnabled = enable;
+        }
         
         /* getters */
                 
@@ -144,6 +149,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         public int getMinDistanceBetweenBrackets()
         {
             return _minDistanceBetweenBrackets;
+        }
+
+        public boolean isPopupEnabled()
+        {
+            return _popupEnabled;
         }
 
 
@@ -208,6 +218,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     {
         private HashMap<String, HashMap<String, Object>> _attrMaps; // the "Object" is either a String or a RGB
         private boolean _showOnHover;
+        private int _hoveredMaxLength;
         
         public HintConfiguration()
         {
@@ -254,7 +265,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             return (getBoolAttr(type, PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR));
         }
         
-        public boolean isShowOnHover(String type)
+        public boolean isShowOnHover()
         {
             return _showOnHover;
         }
@@ -276,10 +287,20 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         {
             if( getBoolAttr(type, PreferencesConstants.Hints.Display.STRIP_WHITESPACE) )
                 txt = txt.replaceAll("[\\t ]+", ""); //$NON-NLS-1$ //$NON-NLS-2$
-            txt = performEllipsis(type, txt);
+            int maxLen = getIntAttr(type, PreferencesConstants.Hints.Display.MAX_LENGTH);
+            txt = performEllipsis(type, txt, maxLen);
             txt = " /* " + txt + " */"; //$NON-NLS-1$ //$NON-NLS-2$
             return txt;
         }
+        
+        public String formatTextHovered(String type, String txt)
+        {
+            if( getBoolAttr(type, PreferencesConstants.Hints.Display.STRIP_WHITESPACE) )
+                txt = txt.replaceAll("[\\t ]+", ""); //$NON-NLS-1$ //$NON-NLS-2$
+            txt = performEllipsis(type, txt, _hoveredMaxLength);
+            txt = " /* " + txt + " */"; //$NON-NLS-1$ //$NON-NLS-2$
+            return txt;
+        }        
         
         public boolean isItalic(String type)
         {
@@ -293,10 +314,9 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         }
 
         
-        private String performEllipsis(String type, String txt)
+        private String performEllipsis(String type, String txt, int maxLen)
         {
-            String elip = getStringAttr(type, PreferencesConstants.Hints.Display.Ellipsis.ATTR);
-            int maxLen = getIntAttr(type, PreferencesConstants.Hints.Display.MAX_LENGTH);
+            String elip = getStringAttr(type, PreferencesConstants.Hints.Display.Ellipsis.ATTR);            
 
             if( txt.length() <= maxLen )
                 return txt;
@@ -408,7 +428,8 @@ public class ProcessorConfiguration implements IPropertyChangeListener
     private void updateHintConf()
     {   
         String prefBase = PreferencesConstants.preferencePath(_name);
-        _hintConf._showOnHover = _prefStore.getBoolean( prefBase+PreferencesConstants.Hints.Globals.SHOW_ON_HOVER );
+        _hintConf._showOnHover = _prefStore.getBoolean( prefBase+PreferencesConstants.Hints.Hover.ENABLE );
+        _hintConf._hoveredMaxLength = _prefStore.getInt( prefBase+PreferencesConstants.Hints.Hover.MAX_LEN );
         boolean showInEditor = _prefStore.getBoolean( prefBase+PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR );
         
         String defaultBase = PreferencesConstants.preferencePath(_name) +
@@ -534,7 +555,9 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                                                                         PreferencesConstants.Surrounding.ShowBrackets));
             _pairConf.setMinDistanceBetweenBrackets(_prefStore.getInt(prefBase +
                                                                       PreferencesConstants.Surrounding.MinDistanceBetweenBrackets));
-           
+            _pairConf.setEnablePopup(_prefStore.getBoolean(prefBase +
+                                                            PreferencesConstants.Hovering.PopupEnable));
+            
             /* single */ 
             
             int pairIdx = PreferencesConstants.MAX_PAIRS + 1;
