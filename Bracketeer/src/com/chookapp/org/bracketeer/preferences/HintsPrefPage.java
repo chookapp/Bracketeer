@@ -62,6 +62,8 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
         public Composite _whenToShowUseDefParent;
         
         public java.util.List<FEInfo> _dynamicFe;
+        public BooleanFieldEditor _hoverEn;
+        public Composite _hoverMaxLen;
     }
     
     class FEInfo
@@ -144,14 +146,39 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             Composite composite_2 = new Composite(composite, SWT.NONE);
             addField(new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName)+PreferencesConstants.Hints.Globals.SHOW_IN_EDITOR,
                                             Messages.HintsPrefPage_DisplayHintsInEditor, BooleanFieldEditor.DEFAULT, composite_2));
+            
+            Composite composite_3 = new Composite(composite, SWT.NONE);
+            BooleanFieldEditor bfe = new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName) +
+                                         PreferencesConstants.Hints.Hover.ENABLE,
+                                         Messages.HintsPrefPage_HintOnHover, BooleanFieldEditor.DEFAULT, composite_3);
+            addField(bfe);
+            tabInfo._hoverEn = bfe;
+            
+            Composite composite_24 = new Composite(composite, SWT.NONE);
+            GridLayout gl_composite_24 = new GridLayout(1, false);
+            gl_composite_24.verticalSpacing = 0;
+            gl_composite_24.marginHeight = 0;
+            gl_composite_24.marginLeft = 10;
+            composite_24.setLayout(gl_composite_24);
+            
+            Composite composite_23 = new Composite(composite_24, SWT.NONE);
+
+            SpinnerFieldEditor spinner = new SpinnerFieldEditor(PreferencesConstants.preferencePath(pluginName) +
+                                                                PreferencesConstants.Hints.Hover.MAX_LEN,
+                                                                "Override max length to ", composite_23);
+            spinner.setLabelText(Messages.HintsPrefPage_HintHoverMaxLen);
+            addField(spinner);
+            tabInfo._hoverMaxLen = composite_23;
+            
+            Group grpHintsConfiguration = new Group(composite, SWT.NONE);
+            grpHintsConfiguration.setText(Messages.HintsPrefPage_grpHintsConfiguration_text);
+            grpHintsConfiguration.setLayout(new GridLayout(1, false));
 
 //            Composite composite_3 = new Composite(composite, SWT.NONE);
 //            addField(new BooleanFieldEditor(PreferencesConstants.Hints.Globals.SHOW_ON_HOVER,
 //                                            "Display tooltip on hover", BooleanFieldEditor.DEFAULT, composite_3));
 
-            Composite composite_1 = new Composite(composite, SWT.NONE);
-            composite_1.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true, 1, 1));
-            composite_1.setBounds(0, 0, 64, 64);
+            Composite composite_1 = new Composite(grpHintsConfiguration, SWT.NONE);
             composite_1.setLayout(new GridLayout(2, false));
 
             Composite composite_4 = new Composite(composite_1, SWT.NONE);
@@ -189,8 +216,8 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             grpWhenToShow.setLayout(new GridLayout(1, false));
 
             Composite composite_6 = new Composite(grpWhenToShow, SWT.NONE);
-            BooleanFieldEditor bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.USE_DEFAULT, 
-                                                            Messages.HintsPrefPage_UseDef, BooleanFieldEditor.DEFAULT, composite_6);
+            bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.USE_DEFAULT, 
+                                         Messages.HintsPrefPage_UseDef, BooleanFieldEditor.DEFAULT, composite_6);
             addField(bfe);
             addDynamicFE(tabInfo, bfe, PreferencesConstants.Hints.WhenToShow.USE_DEFAULT);
             tabInfo._whenToShowUseDef = bfe;
@@ -200,7 +227,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             GridLayout gl_composite_15 = new GridLayout(1, false);
             gl_composite_15.marginLeft = 10;
             composite_15.setLayout(gl_composite_15);
-            
+
             Composite composite_7 = new Composite(composite_15, SWT.NONE);
             bfe = new BooleanFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR,
                                          Messages.HintsPrefPage_DisplayHintsInEditor, BooleanFieldEditor.DEFAULT, composite_7);
@@ -210,8 +237,8 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             tabInfo._showInEditorParent = composite_7;
 
             Composite composite_14 = new Composite(composite_15, SWT.NONE);
-            SpinnerFieldEditor spinner = new SpinnerFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
-                                                                Messages.HintsPrefPage_MinLines, composite_14);
+            spinner = new SpinnerFieldEditor(basePref + PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
+                                             Messages.HintsPrefPage_MinLines, composite_14);
             addField(spinner);
             addDynamicFE(tabInfo, spinner, PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE);
             tabInfo._whenToShowMinLines = composite_14;
@@ -271,7 +298,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
 
             Composite composite_11 = new Composite(grpBackgroundColor, SWT.NONE);
             cfe = new ColorFieldEditor(basePref + PreferencesConstants.Hints.Font.BG_COLOR,
-                                         Messages.HintsPrefPage_Color, composite_11);
+                                       Messages.HintsPrefPage_Color, composite_11);
             addField(cfe);
             addDynamicFE(tabInfo, cfe, PreferencesConstants.Hints.Font.BG_COLOR);
             tabInfo._fontBgColor = composite_11;
@@ -392,7 +419,8 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                     event.getSource() == tabInfo._whenToShowUseDef ||
                     event.getSource() == tabInfo._fontBgDef ||
                     event.getSource() == tabInfo._fontFgDef ||
-                    event.getSource() == tabInfo._showInEditor)
+                    event.getSource() == tabInfo._showInEditor ||
+                    event.getSource() == tabInfo._hoverEn)
             {
                 updateAll();
             }
@@ -460,6 +488,8 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
             setEnable(tabInfo._whenToShowUseDefParent, idx != 0);
             setEnable(tabInfo._fontUseDefParent, idx != 0 && !disableAll);
             setEnable(tabInfo._displayUseDefParnet, idx != 0 && !disableAll);
+            
+            setEnable(tabInfo._hoverMaxLen, tabInfo._hoverEn.getBooleanValue());
         }
         
     }

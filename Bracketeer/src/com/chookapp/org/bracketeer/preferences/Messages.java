@@ -53,6 +53,11 @@ public class Messages extends NLS
     public static String HighlightingBracketsPrefPage_enableAnnotation;
     public static String HighlightingBracketsPrefPage_annotationLink;
     public static String HighlightingBracketsPrefPage_grpAnnotation_text;
+    public static String HighlightingBracketsPrefPage_ShowPopup;
+    public static String HighlightingBracketsPrefPage_PopupOnlyWithoutHint;
+    public static String HintsPrefPage_HintOnHover;
+    public static String HintsPrefPage_HintHoverMaxLen;
+    public static String HintsPrefPage_grpHintsConfiguration_text;
     static
     {
         // initialize resource bundle

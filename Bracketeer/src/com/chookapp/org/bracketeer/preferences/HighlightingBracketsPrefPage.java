@@ -58,6 +58,8 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
         public ComboFieldEditor _highlighStyleFE;
         public Composite _highlighStyleFEparent;
         public Composite _annotationComposite;
+        public BooleanFieldEditor _popupEn;
+        public Composite _popupWithoutHint;
         
         public TabInfo()
         {
@@ -315,8 +317,27 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             
             Composite composite_9 = new Composite(grpHovering, SWT.NONE);
             addField(new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName) +
-                                            PreferencesConstants.Hovering.Enable, Messages.HighlightingBracketsPrefPage_Enable, 
+                                            PreferencesConstants.Hovering.Enable, "Show matching pairs of the brackets near the hover point", 
                                             BooleanFieldEditor.DEFAULT, composite_9));
+            
+            Composite composite_21 = new Composite(grpHovering, SWT.NONE);
+            bfe = new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName) +
+                                         PreferencesConstants.Hovering.PopupEnable, 
+                                         Messages.HighlightingBracketsPrefPage_ShowPopup, 
+                                         BooleanFieldEditor.DEFAULT, composite_21);
+            addField(bfe);
+            tabInfo._popupEn = bfe;
+            
+            Composite composite_22 = new Composite(grpHovering, SWT.NONE);
+            GridData gd_composite_22 = new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1);
+            gd_composite_22.horizontalIndent = 20;
+            composite_22.setLayoutData(gd_composite_22);
+            bfe = new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName) +
+                                         PreferencesConstants.Hovering.PopupOnlyWithoutHint, 
+                                         Messages.HighlightingBracketsPrefPage_PopupOnlyWithoutHint, 
+                                         BooleanFieldEditor.DEFAULT, composite_22);
+            addField(bfe);
+            tabInfo._popupWithoutHint = composite_22;
         }
         
         PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.highlight_pref"); //$NON-NLS-1$
@@ -413,6 +434,8 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             
             setEnable(tabInfo._annotationComposite, idx == 5);
             
+            setEnable(tabInfo._popupWithoutHint, tabInfo._popupEn.getBooleanValue());
+            
         }
     }
     
@@ -437,6 +460,9 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             for( BooleanFieldEditor bfe : tabInfo._highlighUseDefualtFE )            
                 if( event.getSource() == bfe )
                     updateHihglightFieldEditors();
+            
+            if( event.getSource() == tabInfo._popupEn )
+                updateHihglightFieldEditors();
         }
     }
 }
