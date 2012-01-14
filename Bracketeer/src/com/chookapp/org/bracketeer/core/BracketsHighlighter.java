@@ -901,6 +901,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
         if( !_conf.getPairConfiguration().isPopupEnabled() )
             return false;
         
+        if( _conf.getPairConfiguration().showPopupOnlyWithoutHint() && _hoveredHintToPaint != null )
+            return false;
+        
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
         List<BracketsPair> listOfPairs = cont.getMatchingPairs(origCaret, 1);        
         if(listOfPairs.isEmpty())
@@ -918,6 +921,17 @@ public class BracketsHighlighter implements CaretListener, Listener,
         if( pos == null )
             return false;
 
+//        IRegion widgetRange = getWidgetRange(pos.getOffset(), pos.getLength());
+//        if(widgetRange != null )
+//        {
+//            Point p = _textWidget.getLocationAtOffset(widgetRange.getOffset());
+//            return false;
+//        }
+        
+        // this this bracket visible?
+        if( getInclusiveTopIndexStartOffset() < pos.getOffset() )
+            return false;
+        
         String lines = "";
         try
         {

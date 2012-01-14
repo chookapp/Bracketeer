@@ -36,8 +36,8 @@ public final class PreferencesConstants
         private static final String HoveringPath = "Hovering."; //$NON-NLS-1$
         
         public static final String Enable = HoveringPath + "Enable"; //$NON-NLS-1$
-
         public static final String PopupEnable = HoveringPath + "EnablePopup"; //$NON-NLS-1$
+        public static final String PopupOnlyWithoutHint = HoveringPath + "PopupOnlyWithoutHint"; //$NON-NLS-1$
     }
     
     public final static class Highlights

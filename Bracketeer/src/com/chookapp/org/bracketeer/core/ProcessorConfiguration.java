@@ -58,6 +58,7 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         private int _minDistanceBetweenBrackets;
         
         private boolean _popupEnabled;
+        private boolean _popupOnlyWithoutHint;
         
         public PairConfiguration()
         {
@@ -111,6 +112,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             _popupEnabled = enable;
         }
         
+        public void setPopupOnlyWithoutHint(boolean enable)
+        {
+            _popupOnlyWithoutHint = enable;
+        }
+        
         /* getters */
                 
         public RGB getColor(boolean foregound, int colorIndex)
@@ -154,6 +160,11 @@ public class ProcessorConfiguration implements IPropertyChangeListener
         public boolean isPopupEnabled()
         {
             return _popupEnabled;
+        }
+
+        public boolean showPopupOnlyWithoutHint()
+        {            
+            return _popupOnlyWithoutHint;
         }
 
 
@@ -557,6 +568,9 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                                                                       PreferencesConstants.Surrounding.MinDistanceBetweenBrackets));
             _pairConf.setEnablePopup(_prefStore.getBoolean(prefBase +
                                                             PreferencesConstants.Hovering.PopupEnable));
+            _pairConf.setPopupOnlyWithoutHint(_prefStore.getBoolean(prefBase +
+                                                                    PreferencesConstants.Hovering.PopupOnlyWithoutHint));
+           
             
             /* single */ 
             

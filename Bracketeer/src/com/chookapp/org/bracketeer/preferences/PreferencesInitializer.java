@@ -194,5 +194,7 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
                          PreferencesConstants.Hovering.Enable, true);
         store.setDefault(PreferencesConstants.preferencePath(pluginName) +
                          PreferencesConstants.Hovering.PopupEnable, true);
+        store.setDefault(PreferencesConstants.preferencePath(pluginName) +
+                         PreferencesConstants.Hovering.PopupOnlyWithoutHint, true);
     }
 }
