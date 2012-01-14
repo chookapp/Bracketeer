@@ -11,6 +11,7 @@
 package com.chookapp.org.bracketeer.cdt;
 
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
+import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
@@ -18,14 +19,14 @@ import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTIfStatement;
 
 import com.chookapp.org.bracketeer.common.Hint;
@@ -55,8 +56,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     {
         try
         {
-            if( statement instanceof ICPPASTIfStatement )        
-                visitIf((ICPPASTIfStatement) statement);
+            if( statement instanceof IASTIfStatement )        
+                visitIf((IASTIfStatement) statement);
             
             if( statement instanceof IASTSwitchStatement )
                 visitSwitch((IASTSwitchStatement) statement);
@@ -74,15 +75,23 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         return shouldContinue();
     }
 
-    private void visitIf(ICPPASTIfStatement statement)
+    private void visitIf(IASTIfStatement statement)
     {
         /* TODO: specific params: don't show the if hint if there's an "else if" after it (by checking if the elseClause is an instance of ifstatment) */
         
         String hint = "";
         if( statement.getConditionExpression() != null )
+        {
             hint = statement.getConditionExpression().getRawSignature();
-        else if( statement.getConditionDeclaration() != null )
-            hint = statement.getConditionDeclaration().getRawSignature();
+        }
+        else 
+        {
+            if( (statement instanceof ICPPASTIfStatement) && 
+                    ((ICPPASTIfStatement)statement).getConditionDeclaration() != null )
+            {
+                hint = ((ICPPASTIfStatement)statement).getConditionDeclaration().getRawSignature();
+            }
+        }
             
         IASTStatement thenClause = statement.getThenClause();
         IASTStatement elseClause = statement.getElseClause();
@@ -98,7 +107,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             }
             
             // if the else looks like this "} else {", then show the hint on the "{"
-            if( !showIfHint && !(elseClause instanceof ICPPASTIfStatement) )
+            if( !showIfHint && !(elseClause instanceof IASTIfStatement) )
             {
                 endLoc = elseClause.getFileLocation().getNodeOffset();
                 showIfHint = true;
@@ -117,7 +126,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             _container.add(new Hint("if", startLoc, endLoc, "if("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         } 
 
-        if( elseClause != null && !(elseClause instanceof ICPPASTIfStatement) && 
+        if( elseClause != null && !(elseClause instanceof IASTIfStatement) && 
                 (elseClause instanceof IASTCompoundStatement))
         {
             IASTFileLocation location = elseClause.getFileLocation();
@@ -178,8 +187,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     {
         try
         {
-            if( declaration instanceof ICPPASTFunctionDefinition )
-                visitFunc((ICPPASTFunctionDefinition) declaration);
+            if( declaration instanceof IASTFunctionDefinition )
+                visitFunc((IASTFunctionDefinition) declaration);
             
             if( declaration instanceof IASTSimpleDeclaration)
                 visitType((IASTSimpleDeclaration) declaration);
@@ -191,7 +200,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         return shouldContinue();
     }  
     
-    private void visitFunc(ICPPASTFunctionDefinition declaration)
+    private void visitFunc(IASTFunctionDefinition declaration)
     {
         IASTStatement body = declaration.getBody();
         if(!( body instanceof IASTCompoundStatement) )
@@ -232,9 +241,9 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         /* TODO: specific params: include type('class' / 'struct') */
         
         IASTDeclSpecifier spec = declaration.getDeclSpecifier();
-        if( spec instanceof ICPPASTCompositeTypeSpecifier )
+        if( spec instanceof IASTCompositeTypeSpecifier )
         {
-            String hint = ((ICPPASTCompositeTypeSpecifier)spec).getName().getRawSignature();
+            String hint = ((IASTCompositeTypeSpecifier)spec).getName().getRawSignature();
             if( hint.isEmpty() )
                 return;
             

@@ -46,3 +46,4 @@ Build 1.1.0 (next release)
 * Option of using a rectangle outline when highlighting brackets.
 * Option to ignore pairs which are close to eachother.
 * Added annotation to "missing pair".
+* Fixed [issue 4](https://github.com/chookapp/Bracketeer/issues/4) - Support also C statements (not only C++).
