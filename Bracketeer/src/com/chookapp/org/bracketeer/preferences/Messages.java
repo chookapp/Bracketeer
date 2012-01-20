@@ -20,6 +20,7 @@ public class Messages extends NLS
     public static String HighlightingBracketsPrefPage_Pair4;
     public static String HighlightingBracketsPrefPage_Pairs;
     public static String HighlightingBracketsPrefPage_PairsToShow;
+    public static String HighlightingBracketsPrefPage_ShowHoveredPairs;
     public static String HighlightingBracketsPrefPage_ShowUpTo;
     public static String HighlightingBracketsPrefPage_SurroundingBrkt;
     public static String HighlightingBracketsPrefPage_UseDef;
@@ -52,12 +53,18 @@ public class Messages extends NLS
     public static String HighlightingBracketsPrefPage_BgStyle;
     public static String HighlightingBracketsPrefPage_enableAnnotation;
     public static String HighlightingBracketsPrefPage_annotationLink;
+    public static String HighlightingBracketsPrefPage_charsApart;
     public static String HighlightingBracketsPrefPage_grpAnnotation_text;
+    public static String HighlightingBracketsPrefPage_None;
+    public static String HighlightingBracketsPrefPage_Outline;
+    public static String HighlightingBracketsPrefPage_ShowPairsWhichAreAtLeast;
     public static String HighlightingBracketsPrefPage_ShowPopup;
+    public static String HighlightingBracketsPrefPage_Solid;
     public static String HighlightingBracketsPrefPage_PopupOnlyWithoutHint;
     public static String HintsPrefPage_HintOnHover;
     public static String HintsPrefPage_HintHoverMaxLen;
     public static String HintsPrefPage_grpHintsConfiguration_text;
+    public static String HintsPrefPage_OverrideMaxLength;
     static
     {
         // initialize resource bundle

@@ -165,7 +165,7 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
 
             SpinnerFieldEditor spinner = new SpinnerFieldEditor(PreferencesConstants.preferencePath(pluginName) +
                                                                 PreferencesConstants.Hints.Hover.MAX_LEN,
-                                                                "Override max length to ", composite_23);
+                                                                Messages.HintsPrefPage_OverrideMaxLength, composite_23);
             spinner.setLabelText(Messages.HintsPrefPage_HintHoverMaxLen);
             addField(spinner);
             tabInfo._hoverMaxLen = composite_23;

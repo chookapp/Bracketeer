@@ -208,9 +208,9 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
                                                          PreferencesConstants.Highlights.getAttrPath(0, false) +
                                                          PreferencesConstants.Highlights.HighlightTypeAttr,
                                                          Messages.HighlightingBracketsPrefPage_BgStyle, 
-                                                         new String[][]{{PreferencesConstants.Highlights.HighlightTypeValNone, "None"}, 
-                                                                        {PreferencesConstants.Highlights.HighlightTypeValSolid, "Solid"},
-                                                                        {PreferencesConstants.Highlights.HighlightTypeValOutline, "Outline"}}, 
+                                                         new String[][]{{PreferencesConstants.Highlights.HighlightTypeValNone, Messages.HighlightingBracketsPrefPage_None}, 
+                                                                        {PreferencesConstants.Highlights.HighlightTypeValSolid, Messages.HighlightingBracketsPrefPage_Solid},
+                                                                        {PreferencesConstants.Highlights.HighlightTypeValOutline, Messages.HighlightingBracketsPrefPage_Outline}}, 
                                                          composite_15);
             addField(cofe);
             tabInfo._highlighStyleFE = cofe;
@@ -302,11 +302,11 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             Composite composite_18 = new Composite(composite_17, SWT.NONE);
             spinner = new SpinnerFieldEditor(PreferencesConstants.preferencePath(pluginName) +
                                              PreferencesConstants.Surrounding.MinDistanceBetweenBrackets, 
-                                             "Show pairs which are at least ", composite_18);
+                                             Messages.HighlightingBracketsPrefPage_ShowPairsWhichAreAtLeast, composite_18);
             addField(spinner);
             lblNewLabel = new Label(composite_17, SWT.NONE);
             lblNewLabel.setAlignment(SWT.RIGHT);
-            lblNewLabel.setText("characters apart");
+            lblNewLabel.setText(Messages.HighlightingBracketsPrefPage_charsApart);
 
             
             
@@ -317,7 +317,7 @@ public class HighlightingBracketsPrefPage extends ChangingFieldsPrefPage
             
             Composite composite_9 = new Composite(grpHovering, SWT.NONE);
             addField(new BooleanFieldEditor(PreferencesConstants.preferencePath(pluginName) +
-                                            PreferencesConstants.Hovering.Enable, "Show matching pairs of the brackets near the hover point", 
+                                            PreferencesConstants.Hovering.Enable, Messages.HighlightingBracketsPrefPage_ShowHoveredPairs, 
                                             BooleanFieldEditor.DEFAULT, composite_9));
             
             Composite composite_21 = new Composite(grpHovering, SWT.NONE);

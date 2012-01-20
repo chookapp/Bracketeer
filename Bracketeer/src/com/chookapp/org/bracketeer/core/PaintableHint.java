@@ -93,7 +93,7 @@ public class PaintableHint extends PaintableObject
         }
     }
 
-    private boolean check(IDocument doc) throws BadLocationException
+    public boolean isOkToShow(IDocument doc) throws BadLocationException
     {
         IRegion region = doc.getLineInformationOfOffset(_position.getOffset());
         int startOffset = _position.getOffset() + 1;
@@ -126,7 +126,7 @@ public class PaintableHint extends PaintableObject
             if( widgetRange == null )
                 return null;
             
-            if( !check(doc) )
+            if( !isOkToShow(doc) )
                 return null;
             
             int offset = widgetRange.getOffset();

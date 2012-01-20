@@ -56,6 +56,17 @@ public class PreprocessorVisitor
         
         _stack = new Stack<CondInfo>();
     }
+    
+    private String stripEolBackslash(char[] ch)
+    {
+        String str = new String(ch);
+        return stripEolBackslash(str);
+    }
+    
+    private String stripEolBackslash(String str)
+    {
+        return str.replaceAll("\\\\(\\s*[\r|\n])", "$1");
+    }
 
     public void visit(IASTPreprocessorStatement[] stmts)
     {
@@ -68,7 +79,7 @@ public class PreprocessorVisitor
             {
                 StringBuffer str = new StringBuffer();
                 str.append("if(");
-                str.append(((IASTPreprocessorIfStatement)stmt).getCondition());
+                str.append(stripEolBackslash(((IASTPreprocessorIfStatement)stmt).getCondition()));
                 str.append(')');
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
@@ -76,7 +87,7 @@ public class PreprocessorVisitor
             {
                 StringBuffer str = new StringBuffer();
                 str.append("if_defined(");
-                str.append(((IASTPreprocessorIfdefStatement)stmt).getCondition());
+                str.append(stripEolBackslash(((IASTPreprocessorIfdefStatement)stmt).getCondition()));
                 str.append(')');
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
@@ -85,7 +96,7 @@ public class PreprocessorVisitor
             {
                 StringBuffer str = new StringBuffer();
                 str.append("if_not_defined(");
-                str.append(((IASTPreprocessorIfndefStatement)stmt).getCondition());
+                str.append(stripEolBackslash(((IASTPreprocessorIfndefStatement)stmt).getCondition()));
                 str.append(')');
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
@@ -108,7 +119,7 @@ public class PreprocessorVisitor
                 
                 StringBuffer str = new StringBuffer();
                 str.append("if(");
-                str.append(((IASTPreprocessorElifStatement)stmt).getCondition());
+                str.append(stripEolBackslash(((IASTPreprocessorElifStatement)stmt).getCondition()));
                 str.append(')');
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));

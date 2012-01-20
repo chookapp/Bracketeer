@@ -83,9 +83,9 @@ public final class PreferencesConstants
         public static final String Color = "Color"; //$NON-NLS-1$
         public static final String HighlightTypeAttr = "HighlightType"; //$NON-NLS-1$
         
-        public static final String HighlightTypeValNone = "None";
-        public static final String HighlightTypeValSolid = "Solid";
-        public static final String HighlightTypeValOutline = "Outline";
+        public static final String HighlightTypeValNone = "None"; //$NON-NLS-1$
+        public static final String HighlightTypeValSolid = "Solid"; //$NON-NLS-1$
+        public static final String HighlightTypeValOutline = "Outline"; //$NON-NLS-1$
         
     }
     
@@ -140,7 +140,7 @@ public final class PreferencesConstants
         {
             private static final String PATH = "Hints.Hover."; //$NON-NLS-1$
             public static final String ENABLE = PATH + "Enable"; //$NON-NLS-1$
-            public static final String MAX_LEN = PATH + "MaxLength";            
+            public static final String MAX_LEN = PATH + "MaxLength";             //$NON-NLS-1$
         }
         
         // public static final String ENABLED = "enabled";

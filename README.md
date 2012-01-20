@@ -41,11 +41,13 @@ Build notes
 Build 1.1.0 (next release)
 -----------
 
-* Fixed [issue 1](https://github.com/chookapp/Bracketeer/issues/1) - support Google's WindowBuilder.
-* Fixed [issue 2](https://github.com/chookapp/Bracketeer/issues/2).
+* Fixed [issue 1](https://github.com/chookapp/Bracketeer/issues/1) - Support Google's WindowBuilder.
+* Fixed [issue 2](https://github.com/chookapp/Bracketeer/issues/2) and [issue 5](https://github.com/chookapp/Bracketeer/issues/5) - Null pointer exceptions.
 * Option of using a rectangle outline when highlighting brackets.
 * Option to ignore pairs which are close to each other.
 * Added annotation to "missing pair".
 * Fixed [issue 4](https://github.com/chookapp/Bracketeer/issues/4) - Support also C statements (not only C++).
 * Show "hint" when hovering (overriding "regular" behavior)
 * Show basic popup when hovering over a closing bracket (will be improved on the next version)
+* Fixed [issue 6](https://github.com/chookapp/Bracketeer/issues/6) - Join hint's multiple lines to one line.
+

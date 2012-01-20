@@ -92,7 +92,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	private List<PaintableBracket> _surroundingPairsToPaint;
 	private List<PaintableBracket> _singleBracketsToPaint;
 	private List<PaintableHint> _hintsToPaint;
-	PaintableHint _hoveredHintToPaint;
+	private PaintableHint _hoveredHintToPaint;
     private Point m_hoverEntryPoint;
     private Popup _popup;
     
@@ -171,12 +171,12 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		
 		_resource = (IResource) part.getEditorInput().getAdapter(IResource.class);
 		if (_resource == null)
-		    Activator.log("Unable to get resource");
+		    Activator.log(Messages.BracketsHighlighter_UnableToGetResource);
 		
         ITextEditor editor = (ITextEditor) part.getAdapter(ITextEditor.class);
         if (editor == null)
         {
-            Activator.log("Unable to get editor");
+            Activator.log(Messages.BracketsHighlighter_UnableToGetEditor);
         } 
         else 
         {
@@ -488,7 +488,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         {
             if(_sourceViewer == null)
             {
-                Activator.log("cannot paint, no sourceViewer found");
+                Activator.log(Messages.BracketsHighlighter_UnableToPaint_SourceViewer);
                 return;
             }
             
@@ -518,6 +518,9 @@ public class BracketsHighlighter implements CaretListener, Listener,
             return;
         
         _isActive = false;
+        
+        if( _sourceViewer == null )
+            return;
         
         StyledText st = _sourceViewer.getTextWidget();
         if( st == null )
@@ -901,8 +904,18 @@ public class BracketsHighlighter implements CaretListener, Listener,
         if( !_conf.getPairConfiguration().isPopupEnabled() )
             return false;
         
-        if( _conf.getPairConfiguration().showPopupOnlyWithoutHint() && _hoveredHintToPaint != null )
-            return false;
+        try
+        {
+            if( _conf.getPairConfiguration().showPopupOnlyWithoutHint() && _hoveredHintToPaint != null &&
+                    _hoveredHintToPaint.isOkToShow(_doc) )
+            {
+                return false;
+            }
+        }
+        catch (BadLocationException e)
+        {
+            Activator.log(e);
+        }
         
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();
         List<BracketsPair> listOfPairs = cont.getMatchingPairs(origCaret, 1);        
@@ -932,7 +945,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         if( getInclusiveTopIndexStartOffset() < pos.getOffset() )
             return false;
         
-        String lines = "";
+        String lines = ""; //$NON-NLS-1$
         try
         {
             int line = _doc.getLineOfOffset(pos.getOffset());
@@ -947,7 +960,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
                 
                 IRegion region = _doc.getLineInformation(line+i);
                 if( i > 0 )
-                    lines += "\r\n";                
+                    lines += "\r\n";                 //$NON-NLS-1$
                 lines += _doc.get(region.getOffset(), region.getLength());
             }
         }
@@ -1123,10 +1136,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
             {
                 try
                 {
-                    IMarker marker = _resource.createMarker("com.chookapp.org.bracketeer.unmatchedBracket.marker");
+                    IMarker marker = _resource.createMarker("com.chookapp.org.bracketeer.unmatchedBracket.marker"); //$NON-NLS-1$
 
                     SimpleMarkerAnnotation ma = 
-                            new SimpleMarkerAnnotation("com.chookapp.org.bracketeer.unmatchedBracket.annotation", 
+                            new SimpleMarkerAnnotation("com.chookapp.org.bracketeer.unmatchedBracket.annotation",  //$NON-NLS-1$
                                                        marker);
 
                     Position newPos = new Position(pos.getOffset());

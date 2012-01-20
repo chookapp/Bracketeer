@@ -24,10 +24,10 @@ public class Hint
     {
         _originPosition = new Position(originOffset, 1);
         _hintPosition = new Position(hintOffset, 1);
-        _str = txt;
+        _str = txt.replaceAll("\\s*[\r|\n]+\\s*", " ");
         _type = type;
     }
-
+    
     public String getTxt()
     {
         return _str;
