@@ -38,7 +38,7 @@ Feedback
 Build notes
 ============
 
-Build 1.1.0 (next release)
+Build 1.1.0
 -----------
 
 * Fixed [issue 1](https://github.com/chookapp/Bracketeer/issues/1) - Support Google's WindowBuilder.
