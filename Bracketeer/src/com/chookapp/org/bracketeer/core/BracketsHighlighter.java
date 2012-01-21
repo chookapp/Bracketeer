@@ -355,9 +355,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
         {
             int charWidth = gc.getFontMetrics().getAverageCharWidth();
 
-            caret = _textWidget.getOffsetAtLocation(new Point(x + (charWidth/4), y));
-            caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);
-            caret--;
+            caret = _textWidget.getOffsetAtLocation(new Point(x + (charWidth/2), y));
+            caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);            
+            if( caret > 0 )
+                caret--;
         }
         catch(IllegalArgumentException e)
         {
@@ -367,6 +368,21 @@ public class BracketsHighlighter implements CaretListener, Listener,
         {
             if(outerGc == null)
                 gc.dispose();
+        }
+        
+        if( caret == -1 )
+        {
+            try
+            {
+                caret = _textWidget.getOffsetAtLocation(new Point(x, y));
+                caret = ((ProjectionViewer)_sourceViewer).widgetOffset2ModelOffset(caret);            
+                if( caret > 0 )
+                    caret--;
+            }
+            catch(IllegalArgumentException e)
+            {
+                caret = -1;
+            }
         }
 
         return caret;
