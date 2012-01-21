@@ -2,7 +2,7 @@
 <feature
       id="com.chookapp.org.BracketeerCDT"
       label="Bracketeer CDT support"
-      version="1.0.0.qualifier"
+      version="1.1.0.qualifier"
       provider-name="Chookapp">
 
    <description url="https://github.com/chookapp/Bracketeer">
@@ -36,7 +36,7 @@ It adds support for the CDT (C/C++) eclipse tool.
          id="com.chookapp.org.BracketeerCDT"
          download-size="0"
          install-size="0"
-         version="1.0.0.qualifier"
+         version="1.1.0.qualifier"
          unpack="false"/>
 
 </feature>

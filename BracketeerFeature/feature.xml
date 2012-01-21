@@ -2,7 +2,7 @@
 <feature
       id="com.chookapp.org.Bracketeer"
       label="Bracketeer"
-      version="1.0.0.qualifier"
+      version="1.1.0.qualifier"
       provider-name="Chookapp">
 
    <description url="https://github.com/chookapp/Bracketeer">
@@ -32,13 +32,14 @@ without it.
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.core.resources"/>
    </requires>
 
    <plugin
          id="com.chookapp.org.Bracketeer"
          download-size="0"
          install-size="0"
-         version="1.0.0.qualifier"
+         version="1.1.0.qualifier"
          unpack="false"/>
 
 </feature>
