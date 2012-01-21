@@ -101,6 +101,7 @@ public class BracketeerToggleState extends State implements
         Set set = sourceValuesByName.entrySet();
         for (Iterator it = set.iterator(); it.hasNext();)
         {
+            @SuppressWarnings("unchecked")
             Map.Entry<String, Object> entry = (Map.Entry<String, Object>) it.next();
             sourceChanged(sourcePriority, entry.getKey(), entry.getValue());
         }

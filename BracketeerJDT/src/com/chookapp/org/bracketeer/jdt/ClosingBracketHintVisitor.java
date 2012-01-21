@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -67,7 +66,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         hint.append(node.getName().getIdentifier());
         /* TODO: specific params: exclude function parameters (show only the name) */
         hint.append('(');
-        for (Iterator iterator = node.parameters().iterator(); iterator.hasNext();)
+        for (@SuppressWarnings("rawtypes")
+        Iterator iterator = node.parameters().iterator(); iterator.hasNext();)
         {
             SingleVariableDeclaration param = (SingleVariableDeclaration) iterator.next();
             hint.append(param.getName());
