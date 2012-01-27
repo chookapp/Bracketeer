@@ -38,10 +38,11 @@ Feedback
 Build notes
 ============
 
-Build 1.2.0
+Build 1.2.0 (next release)
 -----------
 
-* Modified default hot-keys for enable/disable hints (Ctrl-[, Ctrl-H) and enable/disable sorrounding brackets (Ctrl-[, Ctrl-S), as suggested in [issue 7](https://github.com/chookapp/Bracketeer/issues/7).
+* Modified default hot-keys for enable/disable hints (**Ctrl-[, Ctrl-H**) and enable/disable sorrounding brackets (**Ctrl-[, Ctrl-S**), as suggested in [issue 7](https://github.com/chookapp/Bracketeer/issues/7).
+* The popup now has colors and highlights the matching bracket.
 * Some small bug fixes.
 
 Build 1.1.0

@@ -949,44 +949,39 @@ public class BracketsHighlighter implements CaretListener, Listener,
         pos = pair.getOpeningBracket().getPosition();
         if( pos == null )
             return false;
-
-//        IRegion widgetRange = getWidgetRange(pos.getOffset(), pos.getLength());
-//        if(widgetRange != null )
-//        {
-//            Point p = _textWidget.getLocationAtOffset(widgetRange.getOffset());
-//            return false;
-//        }
-        
+       
         // this this bracket visible?
         if( getInclusiveTopIndexStartOffset() < pos.getOffset() )
             return false;
-        
-        String lines = ""; //$NON-NLS-1$
-        try
-        {
-            int line = _doc.getLineOfOffset(pos.getOffset());
-            int linesCount = _doc.getNumberOfLines();
-            if(line > 0)
-                line--;
-            for(int i = 0; i < 3; i++)
+
+        PaintableBracket paintBracket = null;
+        synchronized (_hoveredPairsToPaint)
+        {           
+            for (PaintableBracket paintableBracket : _hoveredPairsToPaint)
             {
-                // end of document
-                if(line >= linesCount)
+                if(paintableBracket.getPosition().equals(pos))
+                {
+                    paintBracket = paintableBracket;
                     break;
-                
-                IRegion region = _doc.getLineInformation(line+i);
-                if( i > 0 )
-                    lines += "\r\n";                 //$NON-NLS-1$
-                lines += _doc.get(region.getOffset(), region.getLength());
+                }
             }
         }
-        catch (BadLocationException e)
+        
+        if(paintBracket == null)
         {
-            Activator.log(e);
+            Activator.log("matching bracket not highligheted");
             return false;
         }
         
-        _popup = new Popup(_textWidget, lines);
+        try
+        {
+            _popup = new Popup(_textWidget, _doc, paintBracket);
+        }
+        catch(BadLocationException e)
+        {
+            _popup = null;
+            return false;
+        }
         
         return true;
     }

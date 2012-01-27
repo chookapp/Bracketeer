@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Display;
 public abstract class PaintableObject
 {
     protected Position _position;
-    private RGB _foreground;
+    protected RGB _foreground;
     protected RGB _background;
     
     public PaintableObject(Position position, RGB foreground, RGB background)

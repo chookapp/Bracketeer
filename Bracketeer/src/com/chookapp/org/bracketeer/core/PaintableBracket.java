@@ -27,8 +27,8 @@ import com.chookapp.org.bracketeer.preferences.PreferencesConstants;
 
 public class PaintableBracket extends PaintableObject
 {
-    String _highlightType;
-    RGB _outlineColor;
+    private String _highlightType;
+    private RGB _outlineColor;
     
     public PaintableBracket(Position position, RGB foreground, RGB background, String highlightType)
     {
@@ -83,6 +83,13 @@ public class PaintableBracket extends PaintableObject
         {
             Activator.log(e);
         }
+    }
+
+    public PaintableBracket clone(Position newPos)
+    {
+        PaintableBracket ret = new PaintableBracket(newPos, _foreground, _background, _highlightType);
+        ret._outlineColor = _outlineColor;
+        return ret; 
     }
 
     
