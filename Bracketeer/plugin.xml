@@ -189,13 +189,13 @@
             commandId="com.chookapp.org.bracketeer.commands.EnableSurroundingBrackets"
             contextId="org.eclipse.ui.textEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="CTRL+B CTRL+S">
+            sequence="CTRL+[ CTRL+S">
       </key>
       <key
             commandId="com.chookapp.org.bracketeer.commands.EnableHintsInEditor"
             contextId="org.eclipse.ui.textEditorScope"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="CTRL+B CTRL+H">
+            sequence="CTRL+[ CTRL+H">
       </key>
    </extension>
    <extension

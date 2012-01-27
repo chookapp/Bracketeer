@@ -70,7 +70,7 @@ public class PaintableBracket extends PaintableObject
                 }
                 
                 Point metrics = gc.textExtent(txt);
-                Rectangle rect = new Rectangle(p.x, p.y, metrics.x, metrics.y);
+                Rectangle rect = new Rectangle(p.x, p.y, metrics.x-1, metrics.y-1);
                 
                 gc.drawRectangle(rect);
                                 
