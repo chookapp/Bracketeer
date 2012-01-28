@@ -12,12 +12,15 @@
  *******************************************************************************/
 package com.chookapp.org.bracketeer.cdt.core.internals;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.source.DefaultCharacterPairMatcher;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 
 import org.eclipse.cdt.core.dom.ILinkage;
@@ -27,19 +30,19 @@ import org.eclipse.cdt.ui.text.ICPartitions;
 /**
  * Helper class to match pairs of characters.
  */
-public class CPairMatcher extends DefaultCharacterPairMatcher {
+public class CPairMatcher extends BracketeerCharacterPairMatcher {
 
     private static final int ANGLE_BRACKETS_SEARCH_BOUND = 200;
     
     private boolean fMatchAngularBrackets= true;
     private int fAnchor= -1;
 
+    private List<Position> _inactiveCode = Collections.emptyList();
+
     public CPairMatcher(char[] pairs) {
         super(pairs, ICPartitions.C_PARTITIONING);
     }
 
-    /* @see ICharacterPairMatcher#match(IDocument, int) */
-    @Override
     public IRegion match(IDocument document, int offset) {
         try {
             return performMatch(document, offset);
@@ -75,7 +78,7 @@ public class CPairMatcher extends DefaultCharacterPairMatcher {
             region= findOpeningAngleBracket(document, offset - 1);
             fAnchor= ICharacterPairMatcher.RIGHT;
         } else {
-            region= super.match(document, offset);
+            region= super.match(document, _inactiveCode, offset);
             fAnchor= -1;
         }
         if (region != null) {
@@ -233,6 +236,11 @@ public class CPairMatcher extends DefaultCharacterPairMatcher {
      */
     public void configure(ILanguage language) {
         fMatchAngularBrackets= language != null && language.getLinkageID() == ILinkage.CPP_LINKAGE_ID;
+    }
+
+    public void updateInactiveCodePositions(List<Position> inactiveCode)
+    {
+        _inactiveCode = inactiveCode;
     }
 
 }

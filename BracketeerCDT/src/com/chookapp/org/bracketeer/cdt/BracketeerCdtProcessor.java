@@ -11,6 +11,19 @@
  *******************************************************************************/
 package com.chookapp.org.bracketeer.cdt;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EmptyStackException;
+import java.util.List;
+import java.util.Stack;
+
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorElifStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorElseStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorEndifStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIfStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIfdefStatement;
+import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIfndefStatement;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.model.ICElement;
@@ -23,6 +36,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.ui.IEditorPart;
@@ -45,6 +59,9 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
     private CPairMatcher _matcher;
 
     private ICElement _celem;
+    private IDocument _doc;
+    
+    private IASTTranslationUnit _ast;
 
 //    @SuppressWarnings("restriction")
 //    class AstRunner implements ASTCache.ASTRunnable
@@ -74,12 +91,12 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         
         _celem = CDTUITools.getEditorInputCElement(part.getEditorInput());
         _matcher = new CPairMatcher(BRACKETS);
-    }
-   
+        _doc = doc;
+    }   
     
-    private BracketsPair getMatchingPair(IDocument doc, int offset)
+    private BracketsPair getMatchingPair(int offset)
     {
-        IRegion region = _matcher.match(doc, offset);
+        IRegion region = _matcher.match(_doc, offset);
         if( region == null )
             return null;
         
@@ -95,11 +112,11 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         try
         {
             if( isAnchorOpening )
-                return new BracketsPair(offset, doc.getChar(offset), 
-                                        targetOffset, doc.getChar(targetOffset));
+                return new BracketsPair(offset, _doc.getChar(offset), 
+                                        targetOffset, _doc.getChar(targetOffset));
             else
-                return new BracketsPair(targetOffset, doc.getChar(targetOffset), 
-                                        offset, doc.getChar(offset));
+                return new BracketsPair(targetOffset, _doc.getChar(targetOffset), 
+                                        offset, _doc.getChar(offset));
         }
         catch (BadLocationException e)
         {
@@ -108,19 +125,24 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         return null;
     }
 
-    private SingleBracket getLonelyBracket(IDocument doc, int offset)
+    private SingleBracket getLonelyBracket(int offset, List<Position> inactiveCode)
     {
         final int charOffset = offset - 1;
         char prevChar;
         try
         {
-            prevChar = doc.getChar(Math.max(charOffset, 0));
+            prevChar = _doc.getChar(Math.max(charOffset, 0));
             if (LONELY_BRACKETS.indexOf(prevChar) == -1) return null;
-            final String partition= TextUtilities.getContentType(doc, ICPartitions.C_PARTITIONING, charOffset, false);
+            final String partition= TextUtilities.getContentType(_doc, ICPartitions.C_PARTITIONING, charOffset, false);
             for( String partName : ICPartitions.ALL_CPARTITIONS )
             {
                 if (partName.equals( partition ))
                     return null;
+                for (Position pos : inactiveCode)
+                {
+                    if(pos.includes(offset))
+                        return null;
+                }
             }
             
             return new SingleBracket(charOffset, Utils.isOpenningBracket(prevChar), prevChar);
@@ -139,22 +161,25 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         if(Activator.DEBUG)
             Activator.trace("starting process..."); //$NON-NLS-1$
         
-        processBrackets(doc, container);
+        _doc = doc;
+        updateAst();
+        processBrackets(container);
         processAst(container);
         
         if(Activator.DEBUG)
             Activator.trace("process ended (" + _cancelProcessing + ")"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    private void processBrackets(IDocument doc,
-                                 IBracketeerProcessingContainer container)
+    private void processBrackets(IBracketeerProcessingContainer container)
     {
-        for(int i = 1; i < doc.getLength(); i++)
+        List<Position> inactiveCode = collectInactiveCodePositions(_ast);
+        _matcher.updateInactiveCodePositions(inactiveCode);
+        for(int i = 1; i < _doc.getLength()+1; i++)
         {            
             if( _cancelProcessing )
                 break;
             
-            BracketsPair pair = getMatchingPair(doc, i);
+            BracketsPair pair = getMatchingPair(i);
             if(pair != null)
             {
                 if(Activator.DEBUG)
@@ -163,7 +188,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
                 continue;
             }
             
-            SingleBracket single = getLonelyBracket(doc, i);
+            SingleBracket single = getLonelyBracket(i, inactiveCode);
             if( single != null )
                 container.add(single);
         }
@@ -172,45 +197,178 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
 //    @SuppressWarnings("restriction")
     private void processAst(IBracketeerProcessingContainer container)
     {
-        if( _celem == null )
+        if(_ast == null )
             return;
-        
+
 //        AstRunner runner = new AstRunner(container);
 //        ASTProvider provider = CUIPlugin.getDefault().getASTProvider();
 //        
 //        if( provider.runOnAST(_celem, ASTProvider.WAIT_ACTIVE_ONLY, null, runner) == Status.OK_STATUS)
 //            return;
-        
+
+        ClosingBracketHintVisitor visitor = new ClosingBracketHintVisitor(container, 
+                                                                          _cancelProcessing,
+                                                                          _hintConf);
+
+        _ast.accept(visitor);
+        //runner.runOnAST(null, ast);
+
+        IASTPreprocessorStatement[] stmts = _ast.getAllPreprocessorStatements();
+        PreprocessorVisitor preVisotor = new PreprocessorVisitor(container, 
+                                                                 _cancelProcessing,
+                                                                 _hintConf);
+        preVisotor.visit(stmts);
+    }
+
+    
+    private void updateAst()
+    {
         try
         {
+            _ast = null;
+            if( _celem == null )
+                return;
+            
             ITranslationUnit tu = (ITranslationUnit) _celem;
             IASTTranslationUnit ast;
             ast = tu.getAST(null, ITranslationUnit.AST_SKIP_ALL_HEADERS |
-                                  ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT |
-                                  ITranslationUnit.AST_SKIP_TRIVIAL_EXPRESSIONS_IN_AGGREGATE_INITIALIZERS |
-                                  ITranslationUnit.AST_PARSE_INACTIVE_CODE);
-            if( ast == null )
-                return;
+                            ITranslationUnit.AST_CONFIGURE_USING_SOURCE_CONTEXT |
+                            ITranslationUnit.AST_SKIP_TRIVIAL_EXPRESSIONS_IN_AGGREGATE_INITIALIZERS |
+                            ITranslationUnit.AST_PARSE_INACTIVE_CODE);
 
-            ClosingBracketHintVisitor visitor = new ClosingBracketHintVisitor(container, 
-                                                                              _cancelProcessing,
-                                                                              _hintConf);
-            
-            ast.accept(visitor);
-            //runner.runOnAST(null, ast);
-            
-            IASTPreprocessorStatement[] stmts = ast.getAllPreprocessorStatements();
-            PreprocessorVisitor preVisotor = new PreprocessorVisitor(container, 
-                                                                     _cancelProcessing,
-                                                                     _hintConf);
-            preVisotor.visit(stmts);
+            _ast = ast;
         }
         catch (CoreException e)
         {
             Activator.log(e);
-            return;            
         }
     }
+    
+    /**
+     * copied from org.eclipse.cdt.internal.ui.editor.InactiveCodeHighlighting.
+     * 
+     * Collect source positions of preprocessor-hidden branches 
+     * in the given translation unit.
+     * 
+     * @param translationUnit  the {@link IASTTranslationUnit}, may be <code>null</code>
+     * @return a {@link List} of {@link IRegion}s
+     */
+    private List<Position> collectInactiveCodePositions(IASTTranslationUnit translationUnit) {
+        if (translationUnit == null) {
+            return Collections.emptyList();
+        }
+        String fileName = translationUnit.getFilePath();
+        if (fileName == null) {
+            return Collections.emptyList();
+        }
+        List<Position> positions = new ArrayList<Position>();
+        int inactiveCodeStart = -1;
+        boolean inInactiveCode = false;
+        Stack<Boolean> inactiveCodeStack = new Stack<Boolean>();
 
+        IASTPreprocessorStatement[] preprocStmts = translationUnit.getAllPreprocessorStatements();
+
+        for (IASTPreprocessorStatement statement : preprocStmts) {
+            IASTFileLocation floc= statement.getFileLocation();
+            if (floc == null || !fileName.equals(floc.getFileName())) {
+                // preprocessor directive is from a different file
+                continue;
+            }
+            if (statement instanceof IASTPreprocessorIfStatement) {
+                IASTPreprocessorIfStatement ifStmt = (IASTPreprocessorIfStatement)statement;
+                inactiveCodeStack.push(Boolean.valueOf(inInactiveCode));
+                if (!ifStmt.taken()) {
+                    if (!inInactiveCode) {
+                        inactiveCodeStart = floc.getNodeOffset();
+                        inInactiveCode = true;
+                    }
+                }
+            } else if (statement instanceof IASTPreprocessorIfdefStatement) {
+                IASTPreprocessorIfdefStatement ifdefStmt = (IASTPreprocessorIfdefStatement)statement;
+                inactiveCodeStack.push(Boolean.valueOf(inInactiveCode));
+                if (!ifdefStmt.taken()) {
+                    if (!inInactiveCode) {
+                        inactiveCodeStart = floc.getNodeOffset();
+                        inInactiveCode = true;
+                    }
+                }
+            } else if (statement instanceof IASTPreprocessorIfndefStatement) {
+                IASTPreprocessorIfndefStatement ifndefStmt = (IASTPreprocessorIfndefStatement)statement;
+                inactiveCodeStack.push(Boolean.valueOf(inInactiveCode));
+                if (!ifndefStmt.taken()) {
+                    if (!inInactiveCode) {
+                        inactiveCodeStart = floc.getNodeOffset();
+                        inInactiveCode = true;
+                    }
+                }
+            } else if (statement instanceof IASTPreprocessorElseStatement) {
+                IASTPreprocessorElseStatement elseStmt = (IASTPreprocessorElseStatement)statement;
+                if (!elseStmt.taken() && !inInactiveCode) {
+                    inactiveCodeStart = floc.getNodeOffset();
+                    inInactiveCode = true;
+                } else if (elseStmt.taken() && inInactiveCode) {
+                    int inactiveCodeEnd = floc.getNodeOffset();
+                    positions.add(createInactiveCodePosition(inactiveCodeStart, inactiveCodeEnd, false));
+                    inInactiveCode = false;
+                }
+            } else if (statement instanceof IASTPreprocessorElifStatement) {
+                IASTPreprocessorElifStatement elifStmt = (IASTPreprocessorElifStatement)statement;
+                if (!elifStmt.taken() && !inInactiveCode) {
+                    inactiveCodeStart = floc.getNodeOffset();
+                    inInactiveCode = true;
+                } else if (elifStmt.taken() && inInactiveCode) {
+                    int inactiveCodeEnd = floc.getNodeOffset();
+                    positions.add(createInactiveCodePosition(inactiveCodeStart, inactiveCodeEnd, false));
+                    inInactiveCode = false;
+                }
+            } else if (statement instanceof IASTPreprocessorEndifStatement) {
+                try {
+                    boolean wasInInactiveCode = inactiveCodeStack.pop().booleanValue();
+                    if (inInactiveCode && !wasInInactiveCode) {
+                        int inactiveCodeEnd = floc.getNodeOffset() + floc.getNodeLength();
+                        positions.add(createInactiveCodePosition(inactiveCodeStart, inactiveCodeEnd, true));
+                    }
+                    inInactiveCode = wasInInactiveCode;
+                }
+                catch( EmptyStackException e) {}
+            }
+        }
+        if (inInactiveCode) {
+            // handle unterminated #if - http://bugs.eclipse.org/255018
+            int inactiveCodeEnd = _doc.getLength();
+            positions.add(createInactiveCodePosition(inactiveCodeStart, inactiveCodeEnd, true));
+        }
+        return positions;
+    }
+
+    /**
+     * Create a highlight position aligned to start at a line offset. The region's start is
+     * decreased to the line offset, and the end offset decreased to the line start if
+     * <code>inclusive</code> is <code>false</code>. 
+     * 
+     * @param startOffset  the start offset of the region to align
+     * @param endOffset  the (exclusive) end offset of the region to align
+     * @param inclusive whether  the last line should be included or not
+     * @param key  the highlight key
+     * @return a position aligned for background highlighting
+     */
+    private Position createInactiveCodePosition(int startOffset, int endOffset, boolean inclusive) 
+    {
+        final IDocument document= _doc;
+        try {
+            if (document != null) {
+                int start= document.getLineOfOffset(startOffset);
+                int end= document.getLineOfOffset(endOffset);
+                startOffset= document.getLineOffset(start);
+                if (!inclusive) {
+                    endOffset= document.getLineOffset(end);
+                }
+            }
+        } catch (BadLocationException x) {
+            // concurrent modification?
+        }
+        return new Position(startOffset, endOffset - startOffset);
+    }
+    
   
 }
