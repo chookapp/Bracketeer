@@ -17,13 +17,28 @@
                type="for">
          </Hint>
          <Hint
-               type="switch">
+               type="break-for">
          </Hint>
          <Hint
                type="foreach">
          </Hint>
          <Hint
+               type="switch">
+         </Hint>
+         <Hint
+               type="break-case">
+         </Hint>
+         <Hint
+               type="break-foreach">
+         </Hint>
+         <Hint
                type="while">
+         </Hint>
+         <Hint
+               type="break-while">
+         </Hint>
+         <Hint
+               type="break-do">
          </Hint>
          <Hint
                type="if">
