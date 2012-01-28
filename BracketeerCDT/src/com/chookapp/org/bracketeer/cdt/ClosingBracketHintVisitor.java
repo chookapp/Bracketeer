@@ -10,11 +10,19 @@
  *******************************************************************************/
 package com.chookapp.org.bracketeer.cdt;
 
+import java.util.EmptyStackException;
+import java.util.Stack;
+
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
+import org.eclipse.cdt.core.dom.ast.IASTBreakStatement;
+import org.eclipse.cdt.core.dom.ast.IASTCaseStatement;
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
+import org.eclipse.cdt.core.dom.ast.IASTContinueStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
+import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
@@ -35,9 +43,36 @@ import com.chookapp.org.bracketeer.common.IHintConfiguration;
 
 public class ClosingBracketHintVisitor extends ASTVisitor
 {
+    
+    class ScopeInfo
+    {
+        public String _str;
+        public int _offset;
+        public IASTStatement _statement;
+        
+        public ScopeInfo(String str, int offset, IASTStatement statement)
+        {
+            _str = str;
+            _offset = offset;
+            _statement = statement;
+        }        
+    }
+
+    public class ScopeTraceException extends Exception
+    {   
+        private static final long serialVersionUID = 6297837237586982280L;
+          
+        public ScopeTraceException(String message)
+        {
+            super(message);
+        }
+    }
+
+    
     Boolean _cancelProcessing;
     IBracketeerProcessingContainer _container;
     IHintConfiguration _hintConf;
+    Stack<ScopeInfo> _scopeStack;
     
     public ClosingBracketHintVisitor(IBracketeerProcessingContainer container,
                                      Boolean cancelProcessing, 
@@ -49,8 +84,51 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         
         shouldVisitStatements = true;
         shouldVisitDeclarations = true;
+        
+        _scopeStack = new Stack<ClosingBracketHintVisitor.ScopeInfo>();
     }
+    
+    @Override
+    public int leave(IASTStatement statement)
+    {
+        try
+        {
+            if( (statement instanceof IASTSwitchStatement) || 
+                    (statement instanceof IASTForStatement) ||
+                    (statement instanceof IASTWhileStatement) ||
+                    (statement instanceof IASTDoStatement) )
+            {
+                ScopeInfo scope;
+                if( statement instanceof IASTSwitchStatement )
+                {
+                    scope = _scopeStack.peek();
+                    if((scope._statement instanceof IASTCaseStatement) || 
+                            (scope._statement instanceof IASTDefaultStatement))
+                    {
+                        _scopeStack.pop();
+                    }
+                }
 
+                scope = _scopeStack.pop();
+                if(!scope._statement.getClass().equals(statement.getClass()))
+                {
+                    if(Activator.DEBUG)
+                    {
+                        Activator.log("Lost track of scope. Expected:" + scope._statement + 
+                                      " but was:" + statement);
+                    }
+                }
+            }
+        }       
+        catch(EmptyStackException e)
+        {
+            if(Activator.DEBUG)
+                Activator.log(e);
+        }
+
+        return super.leave(statement);
+    }
+    
     @Override
     public int visit(IASTStatement statement) 
     {
@@ -67,12 +145,97 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             
             if( statement instanceof IASTWhileStatement )
                 visitWhile((IASTWhileStatement) statement);
+            
+            if( statement instanceof IASTDoStatement )
+                visitDo((IASTDoStatement) statement);
+            
+            if( statement instanceof IASTCaseStatement || statement instanceof IASTDefaultStatement )
+                visitCase(statement);
+            
+            if( statement instanceof IASTBreakStatement || statement instanceof IASTContinueStatement )
+                visitBreak(statement);
+            
         }
         catch(Exception e)
         {
-            Activator.log(e);
+            if(!(e instanceof ScopeTraceException || e instanceof EmptyStackException))
+                Activator.log(e);
+            else if(Activator.DEBUG)
+                Activator.log(e);
         }
         return shouldContinue();
+    }
+
+    private void visitBreak(IASTStatement statement) throws ScopeTraceException
+    {
+        if(_scopeStack.isEmpty())
+            throw new ScopeTraceException("break without scope: " + statement);
+        
+        ScopeInfo scope = _scopeStack.peek();
+        
+        String hintType;
+        if( scope._statement instanceof IASTForStatement )
+            hintType = "break-for";
+        else if( scope._statement instanceof IASTWhileStatement )
+            hintType = "break-while";
+        else if( scope._statement instanceof IASTDoStatement )
+            hintType = "break-do";
+        else if( scope._statement instanceof IASTCaseStatement || scope._statement instanceof IASTDefaultStatement )
+            hintType = "break-case";
+        else
+            throw new ScopeTraceException("Unexpect scope ("+scope._statement+") on break/continue:" + statement);
+        
+        int endLoc = statement.getFileLocation().getNodeOffset() + statement.getFileLocation().getNodeLength() - 1; 
+        _container.add(new Hint(hintType, scope._offset, endLoc, scope._str));
+        
+    }
+
+    private void visitCase(IASTStatement statement) throws ScopeTraceException
+    {
+        ScopeInfo scope = _scopeStack.peek();
+        if( !(scope._statement instanceof IASTSwitchStatement) )
+        {
+            if(!((scope._statement instanceof IASTCaseStatement) ||
+                 (scope._statement instanceof IASTDefaultStatement)) )
+            {
+                throw new ScopeTraceException("Lost track of stack (in case), found:" + scope._statement);
+            }
+            
+            _scopeStack.pop();
+            scope = _scopeStack.peek();
+        }
+        
+        if( !(scope._statement instanceof IASTSwitchStatement) )
+        {
+            throw new ScopeTraceException("Lost track of stack (in case2), found:" + scope._statement);
+        }
+        
+        String hint = "";
+        if(statement instanceof IASTCaseStatement)
+        {
+            IASTExpression cond = ((IASTCaseStatement)statement).getExpression();
+            if( cond != null )
+                hint = cond.getRawSignature();
+            hint = "case: " + hint;
+        }
+        else // default
+        {
+            hint = "default";
+        }
+        
+        int startLoc = statement.getFileLocation().getNodeOffset();
+        _scopeStack.push(new ScopeInfo(scope._str + " - " + hint, startLoc, statement)); 
+    }
+
+    private void visitDo(IASTDoStatement statement)
+    {
+        IASTExpression cond = statement.getCondition();
+        String hint = "";
+        if( cond != null )
+            hint = cond.getRawSignature();
+        hint = "do_while( " + hint + " )";
+        int startLoc = statement.getFileLocation().getNodeOffset();
+        _scopeStack.push(new ScopeInfo(hint, startLoc, statement));
     }
 
     private void visitIf(IASTIfStatement statement)
@@ -123,7 +286,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             if( endLoc == -1 )
                 endLoc = location.getNodeOffset()+location.getNodeLength()-1;
             int startLoc = statement.getFileLocation().getNodeOffset();
-            _container.add(new Hint("if", startLoc, endLoc, "if("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            _container.add(new Hint("if", startLoc, endLoc, "if( "+hint+" )")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         } 
 
         if( elseClause != null && !(elseClause instanceof IASTIfStatement) && 
@@ -132,7 +295,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             IASTFileLocation location = elseClause.getFileLocation();
             endLoc = location.getNodeOffset()+location.getNodeLength()-1;
             int startLoc = location.getNodeOffset();
-            _container.add(new Hint("if", startLoc, endLoc, "else_of_if("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            _container.add(new Hint("if", startLoc, endLoc, "else_of_if( "+hint+" )")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         }
     }
 
@@ -142,43 +305,50 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         IASTFileLocation location = statement.getBody().getFileLocation();
         int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
         int startLoc = statement.getFileLocation().getNodeOffset();
-        _container.add(new Hint("switch", startLoc, endLoc, "switch("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        hint = "switch( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$
+        _container.add(new Hint("switch", startLoc, endLoc, hint)); //$NON-NLS-1$ 
+        _scopeStack.push(new ScopeInfo(hint, startLoc, statement));
     }
 
 
     private void visitFor(IASTForStatement statement)
     {
         /* TODO: specific params: show also initializer && increment expressions */
+
+        IASTExpression cond = statement.getConditionExpression();
+        String hint = "";
+        if( cond != null )
+            hint = cond.getRawSignature();
+        hint = "for( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$
+        int startLoc = statement.getFileLocation().getNodeOffset();
+        _scopeStack.push(new ScopeInfo(hint, startLoc, statement));
         
         IASTStatement body = statement.getBody();
         if( body instanceof IASTCompoundStatement)
         {
-            IASTExpression cond = statement.getConditionExpression();
-            
-            String hint = "";
-            if( cond != null )
-                hint = cond.getRawSignature();
             IASTFileLocation location = body.getFileLocation();
-            int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
-            int startLoc = statement.getFileLocation().getNodeOffset();
-            _container.add(new Hint("for", startLoc, endLoc, "for("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            int endLoc = location.getNodeOffset()+location.getNodeLength()-1;            
+            _container.add(new Hint("for", startLoc, endLoc, hint)); //$NON-NLS-1$ 
         }
     }
     
     private void visitWhile(IASTWhileStatement statement)
     {
+        IASTExpression cond = statement.getCondition();        
+        String hint = "";
+        if( cond != null )
+            hint = cond.getRawSignature();
+        hint = "while( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$
+        int startLoc = statement.getFileLocation().getNodeOffset();
+        _scopeStack.push(new ScopeInfo(hint, startLoc, statement));
+        
         IASTStatement body = statement.getBody();
         if( body instanceof IASTCompoundStatement)
         {
             IASTFileLocation location = body.getFileLocation();
-            IASTExpression cond = statement.getCondition();
-            
-            String hint = "";
-            if( cond != null )
-                hint = cond.getRawSignature();
+       
             int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
-            int startLoc = statement.getFileLocation().getNodeOffset();
-            _container.add(new Hint("while", startLoc, endLoc, "while("+hint+")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            _container.add(new Hint("while", startLoc, endLoc, hint)); //$NON-NLS-1$ 
         }
     }
     
@@ -206,6 +376,9 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         if(!( body instanceof IASTCompoundStatement) )
             return;
         
+        // starting a function empties the stack... (which should already be empty on good flow)
+        _scopeStack.clear();
+        
         IASTFileLocation location = body.getFileLocation();
         int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
 
@@ -215,7 +388,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         StringBuffer hint = new StringBuffer();
         hint.append(declerator.getName().getRawSignature());            
         /* TODO: specific params: exclude function parameters (show only the name) */
-        hint.append('(');
+        hint.append("( ");
         IASTNode[] decChildren = declerator.getChildren();
         boolean firstParam = true;
         for (int i = 0; i < decChildren.length; i++)
@@ -227,11 +400,11 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 if( firstParam )
                     firstParam = false;
                 else
-                    hint.append(',');
+                    hint.append(", ");
                 hint.append(param.getDeclarator().getName());                    
             }
         }
-        hint.append(')');
+        hint.append(" )");
         
         _container.add(new Hint("function", startLoc, endLoc, hint.toString())); //$NON-NLS-1$        
     }

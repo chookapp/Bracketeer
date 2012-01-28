@@ -78,26 +78,26 @@ public class PreprocessorVisitor
             if( stmt instanceof IASTPreprocessorIfStatement)
             {
                 StringBuffer str = new StringBuffer();
-                str.append("if(");
+                str.append("if( ");
                 str.append(stripEolBackslash(((IASTPreprocessorIfStatement)stmt).getCondition()));
-                str.append(')');
+                str.append(" )");
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
             else if( stmt instanceof IASTPreprocessorIfdefStatement)
             {
                 StringBuffer str = new StringBuffer();
-                str.append("if_defined(");
+                str.append("if_defined( ");
                 str.append(stripEolBackslash(((IASTPreprocessorIfdefStatement)stmt).getCondition()));
-                str.append(')');
+                str.append(" )");
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
             else if( stmt instanceof IASTPreprocessorIfndefStatement)
             {
                 StringBuffer str = new StringBuffer();
-                str.append("if_not_defined(");
+                str.append("if_not_defined( ");
                 str.append(stripEolBackslash(((IASTPreprocessorIfndefStatement)stmt).getCondition()));
-                str.append(')');
+                str.append(" )");
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
@@ -118,9 +118,9 @@ public class PreprocessorVisitor
                 }
                 
                 StringBuffer str = new StringBuffer();
-                str.append("if(");
+                str.append("if( ");
                 str.append(stripEolBackslash(((IASTPreprocessorElifStatement)stmt).getCondition()));
-                str.append(')');
+                str.append(" )");
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
