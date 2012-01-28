@@ -12,6 +12,7 @@ package com.chookapp.org.bracketeer.jdt;
 
 import java.util.EmptyStackException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -24,16 +25,20 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
+import com.chookapp.org.bracketeer.common.BracketsPair;
 import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.IHintConfiguration;
@@ -115,6 +120,40 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 Activator.log(e);
         }
     }
+    
+    void addBrackets(ParameterizedType node)
+    {
+        @SuppressWarnings("unchecked")
+        List<Type> args = node.typeArguments();
+        if(args.isEmpty())
+            return;
+        
+        Type type = args.get(0);
+        int startLoc = type.getStartPosition() - 1;
+        type = args.get(args.size()-1);
+        int endLoc = type.getStartPosition() + type.getLength();
+        _container.add(new BracketsPair(startLoc, '<', endLoc, '>'));
+                
+    }
+    
+    private void addBrackets(List<TypeParameter> typeParameters)
+    {
+        if(typeParameters == null || typeParameters.isEmpty())
+            return;
+        
+        TypeParameter type = typeParameters.get(0);
+        int startLoc = type.getStartPosition() - 1;
+        type = typeParameters.get(typeParameters.size()-1);
+        int endLoc = type.getStartPosition() + type.getLength();
+        _container.add(new BracketsPair(startLoc, '<', endLoc, '>'));
+    }
+    
+    @Override
+    public boolean visit(ParameterizedType node)
+    {
+        addBrackets(node);
+        return shouldContinue();
+    } 
     
     @Override
     public boolean visit(SwitchCase node)
@@ -236,6 +275,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         return shouldContinue();
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public boolean visit(TypeDeclaration node)
     {
@@ -243,8 +283,9 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         int startLoc = node.getName().getStartPosition();
         int endLoc = node.getStartPosition() + node.getLength() - 1;
         _container.add(new Hint("type", startLoc, endLoc, hint)); //$NON-NLS-1$
+        addBrackets(node.typeParameters());
         return shouldContinue();
-    }
+    }  
 
     @Override
     public boolean visit(MethodDeclaration node)

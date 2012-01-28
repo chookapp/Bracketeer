@@ -43,7 +43,8 @@ Build 1.2.0 (next release)
 
 * Modified default hot-keys for enable/disable hints (**Ctrl-[, Ctrl-H**) and enable/disable sorrounding brackets (**Ctrl-[, Ctrl-S**), as suggested in [issue 7](https://github.com/chookapp/Bracketeer/issues/7).
 * The popup now has colors and highlights the matching bracket.
-* Added hints for break/continue from within: for, while, do, case (& default) and Java's foreach. This should address [issue 3](https://github.com/chookapp/Bracketeer/issues/3).
+* Added hints for break/continue from within "for", "while", "do", switch's "case"/"default" and Java's "foreach". This should address [issue 3](https://github.com/chookapp/Bracketeer/issues/3).
+* Improved support for matching pairs of angluar brackets when used in template expressions (both in C++ and in Java).
 * Some small bug fixes.
 
 Build 1.1.0

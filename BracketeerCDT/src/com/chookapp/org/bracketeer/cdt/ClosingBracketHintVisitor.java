@@ -29,6 +29,7 @@ import org.eclipse.cdt.core.dom.ast.IASTForStatement;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
+import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
@@ -36,7 +37,10 @@ import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTIfStatement;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateId;
 
+import com.chookapp.org.bracketeer.common.BracketsPair;
 import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.IHintConfiguration;
@@ -424,9 +428,31 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
             int startLoc = location.getNodeOffset();
             _container.add(new Hint("type", startLoc, endLoc, hint)); //$NON-NLS-1$
-        }        
+        }
+
+        if(spec instanceof ICPPASTNamedTypeSpecifier)
+        {
+            IASTName name = ((ICPPASTNamedTypeSpecifier) spec).getName();
+            if( name instanceof ICPPASTTemplateId )
+            {
+                IASTNode[] args = ((ICPPASTTemplateId) name).getTemplateArguments();
+                addBrackets(args);
+            }
+        }
+        
     }
-    
+        
+    private void addBrackets(IASTNode[] args)
+    {
+        if(args == null || args.length == 0)
+            return;
+                
+        int startLoc = args[0].getFileLocation().getNodeOffset() - 1;
+        IASTFileLocation endFileLoc = args[args.length-1].getFileLocation();
+        int endLoc = endFileLoc.getNodeOffset() + endFileLoc.getNodeLength();
+        _container.add(new BracketsPair(startLoc, '<', endLoc, '>'));        
+    }
+
     private int shouldContinue()
     {
         if( _cancelProcessing )
