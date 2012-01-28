@@ -73,7 +73,7 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.MAX_LENGTH,
                          30);
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
-                         true);
+                         false);
         
         String[] prefsToCopyFromDef = {PreferencesConstants.Hints.WhenToShow.SHOW_IN_EDITOR,
                                        PreferencesConstants.Hints.WhenToShow.MIN_LINES_DISTANCE,
