@@ -975,7 +975,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         try
         {
-            _popup = new Popup(_textWidget, _doc, paintBracket);
+            _popup = new Popup(_sourceViewer, _textWidget, _doc, paintBracket);
         }
         catch(BadLocationException e)
         {
@@ -1379,34 +1379,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
     
     private IRegion getWidgetRange(int offset, int length)
     {                
-        if (_sourceViewer instanceof ITextViewerExtension5) {
-            ITextViewerExtension5 extension= (ITextViewerExtension5) _sourceViewer;
-            IRegion widgetRange= extension.modelRange2WidgetRange(new Region(offset, length));
-            if (widgetRange == null)
-                return null;
-
-            try {
-                // don't draw if the pair position is really hidden and widgetRange just
-                // marks the coverage around it.
-                IDocument doc= _sourceViewer.getDocument();
-                int startLine= doc.getLineOfOffset(offset);
-                int endLine= doc.getLineOfOffset(offset + length);
-                if (extension.modelLine2WidgetLine(startLine) == -1 || extension.modelLine2WidgetLine(endLine) == -1)
-                    return null;
-            } catch (BadLocationException e) {
-                return null;
-            }
-
-            return widgetRange;
-
-        } else {
-            IRegion region= _sourceViewer.getVisibleRegion();
-            if (region.getOffset() > offset || region.getOffset() + region.getLength() < offset + length)
-                return null;
-            offset -= region.getOffset();
-            
-            return new Region(offset, length);
-        }
+        return TextUtils.getWidgetRange(_sourceViewer, offset, length);
     }
 
     private int getDistanceBetween(Point p1, Point p2)

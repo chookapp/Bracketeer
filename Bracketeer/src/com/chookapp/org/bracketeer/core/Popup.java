@@ -19,6 +19,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -40,11 +41,12 @@ public class Popup implements IDisposable, PaintListener
     private SourceViewer _sourceViewer;
     private PaintableBracket _bracketToPaint;
 
-    public Popup(final StyledText parent, IDocument origDoc, PaintableBracket paintBracket) throws BadLocationException
+    public Popup(final ISourceViewer parentSv, final StyledText parentSt, 
+                 IDocument origDoc, PaintableBracket paintBracket) throws BadLocationException
     {
         _bracketToPaint = null;
         
-        _shell = new Shell(parent.getShell(), SWT.NO_FOCUS | SWT.ON_TOP | SWT.TOOL);
+        _shell = new Shell(parentSt.getShell(), SWT.NO_FOCUS | SWT.ON_TOP | SWT.TOOL);
         _shell.setLayout(new FillLayout());
         
     
@@ -55,10 +57,10 @@ public class Popup implements IDisposable, PaintListener
         
         _sourceViewer.setEditable(false);
         StyledText textWidget = _sourceViewer.getTextWidget();
-        textWidget.setFont(parent.getFont());
-        textWidget.setTabs(parent.getTabs());
-        textWidget.setForeground(parent.getForeground());
-        textWidget.setBackground(parent.getBackground());
+        textWidget.setFont(parentSt.getFont());
+        textWidget.setTabs(parentSt.getTabs());
+        textWidget.setForeground(parentSt.getForeground());
+        textWidget.setBackground(parentSt.getBackground());
         textWidget.addPaintListener(this);
         
         GC gc = new GC(textWidget);
@@ -74,7 +76,7 @@ public class Popup implements IDisposable, PaintListener
         
         try
         {
-            updatePopupContent(_sourceViewer, parent, origDoc, paintBracket);
+            updatePopupContent(_sourceViewer, parentSv, parentSt, origDoc, paintBracket);
         }
         catch (BadLocationException e)
         {
@@ -83,18 +85,18 @@ public class Popup implements IDisposable, PaintListener
             throw e;
         }
         
-        Point txtSize = new Point(parent.getSize().x, popupHight);
+        Point txtSize = new Point(parentSt.getSize().x, popupHight);
         
         _shell.setSize(txtSize);
-        Point parentLocation = parent.getDisplay().map(parent, null, 0, 0);
+        Point parentLocation = parentSt.getDisplay().map(parentSt, null, 0, 0);
         _shell.setLocation(parentLocation.x, parentLocation.y - txtSize.y);
 
         _shell.setVisible(true);
     }
 
 
-    private void updatePopupContent(SourceViewer sv, StyledText parent, IDocument origDoc, 
-                                    PaintableBracket paintBracket) throws BadLocationException
+    private void updatePopupContent(SourceViewer sv, final ISourceViewer parentSv, final StyledText parentSt, 
+                                    IDocument origDoc, PaintableBracket paintBracket) throws BadLocationException
     {
         Document newDoc = new Document();
         sv.setInput(newDoc);
@@ -126,7 +128,10 @@ public class Popup implements IDisposable, PaintListener
                 Position newPos = new Position((origPos.getOffset() - region.getOffset()) + newDocOffset, 1);
                 _bracketToPaint = paintBracket.clone(newPos);
             }
-            StyleRange[] ranges = parent.getStyleRanges(region.getOffset(), region.getLength());
+            
+            region = TextUtils.getWidgetRange(parentSv, region.getOffset(), region.getLength());
+            
+            StyleRange[] ranges = parentSt.getStyleRanges(region.getOffset(), region.getLength());
             for (StyleRange styleRange : ranges)
             {
                 styleRange.start = newDocOffset;
