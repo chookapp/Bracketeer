@@ -51,6 +51,10 @@ public class Activator implements BundleActivator {
     public static void log(Throwable e) {
         Platform.getLog(context.getBundle()).log(getStatus(e));
     }
+    
+    public static void log(Throwable e, String str) {
+        Platform.getLog(context.getBundle()).log(getStatus(e, str));
+    }
 
     public static void log(String message) {
         Platform.getLog(context.getBundle()).log(new Status(Status.ERROR, PLUGIN_ID, message));
@@ -68,4 +72,8 @@ public class Activator implements BundleActivator {
         return new Status(Status.WARNING, PLUGIN_ID, e.getLocalizedMessage(), e);
     }       
 
+    public static IStatus getStatus(Throwable e, String str) {
+        return new Status(Status.WARNING, PLUGIN_ID, e.getLocalizedMessage() + " " + str, e);
+    }
+    
 }

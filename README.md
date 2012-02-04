@@ -48,7 +48,7 @@ Build 1.2.0 (next release)
 * Improved pair matching when there is inactive code (C++ only, obviously).
 * Some small bug fixes.
 
-Build 1.1.0
+Build 1.1.0 (21/1/2012)
 -----------
 
 * Fixed [issue 1](https://github.com/chookapp/Bracketeer/issues/1) - Support Google's WindowBuilder.
@@ -62,3 +62,6 @@ Build 1.1.0
 * Fixed [issue 6](https://github.com/chookapp/Bracketeer/issues/6) - Join hint's multiple lines to one line.
 * Some small bug fixes.
 
+Build 1.1.0 (23/12/2011)
+-----------
+* Initial implementation.

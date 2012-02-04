@@ -38,6 +38,7 @@ import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateId;
 
 import com.chookapp.org.bracketeer.common.BracketsPair;
@@ -88,6 +89,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         
         shouldVisitStatements = true;
         shouldVisitDeclarations = true;
+        shouldVisitExpressions = true; // not really visiting expressions, see bug 370637.
         
         _scopeStack = new Stack<ClosingBracketHintVisitor.ScopeInfo>();
     }
@@ -433,15 +435,26 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         if(spec instanceof ICPPASTNamedTypeSpecifier)
         {
             IASTName name = ((ICPPASTNamedTypeSpecifier) spec).getName();
-            if( name instanceof ICPPASTTemplateId )
-            {
-                IASTNode[] args = ((ICPPASTTemplateId) name).getTemplateArguments();
-                addBrackets(args);
-            }
+            addBrackets(name);            
         }
         
     }
-        
+
+    private void addBrackets(IASTName name)
+    {
+        if( name instanceof ICPPASTTemplateId )
+        {
+            IASTNode[] args = ((ICPPASTTemplateId) name).getTemplateArguments();
+            addBrackets(args);
+        } 
+        else if( name instanceof ICPPASTQualifiedName)
+        {
+            IASTName[] names = ((ICPPASTQualifiedName) name).getNames();
+            for (IASTName n : names)
+                addBrackets(n);
+        }        
+    }
+
     private void addBrackets(IASTNode[] args)
     {
         if(args == null || args.length == 0)

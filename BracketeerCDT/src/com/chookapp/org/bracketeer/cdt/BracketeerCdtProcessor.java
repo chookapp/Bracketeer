@@ -104,7 +104,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
             throw new RuntimeException(Messages.BracketeerCdtProcessor_ErrLength);
 
         boolean isAnchorOpening = (ICharacterPairMatcher.LEFT == _matcher.getAnchor());        
-        int targetOffset =  isAnchorOpening ? region.getOffset() + region.getLength() : region.getOffset() + 1;
+        int targetOffset =  isAnchorOpening ? (region.getOffset() + region.getLength()) : (region.getOffset() + 1);
         
         offset--;
         targetOffset--;
@@ -120,7 +120,8 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         }
         catch (BadLocationException e)
         {
-            Activator.log(e);
+            Activator.log(e, String.format("offset=%1$d target=%2$d docLength=%3$d", 
+                                           offset, targetOffset, _doc.getLength()));
         }
         return null;
     }
