@@ -20,6 +20,7 @@ import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIfdefStatement;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorIfndefStatement;
 import org.eclipse.cdt.core.dom.ast.IASTPreprocessorStatement;
+import org.eclipse.jface.text.BadLocationException;
 
 import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
@@ -68,7 +69,7 @@ public class PreprocessorVisitor
         return str.replaceAll("\\\\(\\s*[\r|\n])", "$1");
     }
 
-    public void visit(IASTPreprocessorStatement[] stmts)
+    public void visit(IASTPreprocessorStatement[] stmts) throws BadLocationException
     {
         for (IASTPreprocessorStatement stmt : stmts)
         {

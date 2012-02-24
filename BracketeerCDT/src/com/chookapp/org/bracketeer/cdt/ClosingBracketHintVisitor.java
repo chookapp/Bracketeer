@@ -40,6 +40,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateId;
+import org.eclipse.jface.text.BadLocationException;
 
 import com.chookapp.org.bracketeer.common.BracketsPair;
 import com.chookapp.org.bracketeer.common.Hint;
@@ -162,6 +163,10 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 visitBreak(statement);
             
         }
+        catch(BadLocationException e)
+        {
+            _cancelProcessing = true;
+        }
         catch(Exception e)
         {
             if(!(e instanceof ScopeTraceException || e instanceof EmptyStackException))
@@ -172,7 +177,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         return shouldContinue();
     }
 
-    private void visitBreak(IASTStatement statement) throws ScopeTraceException
+    private void visitBreak(IASTStatement statement) throws ScopeTraceException, BadLocationException
     {
         if(_scopeStack.isEmpty())
             throw new ScopeTraceException("break without scope: " + statement);
@@ -198,6 +203,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
 
     private void visitCase(IASTStatement statement) throws ScopeTraceException
     {
+        /* TODO: specific params: don't show the switch part (only the case argument) */
+        
         ScopeInfo scope = _scopeStack.peek();
         if( !(scope._statement instanceof IASTSwitchStatement) )
         {
@@ -244,7 +251,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         _scopeStack.push(new ScopeInfo(hint, startLoc, statement));
     }
 
-    private void visitIf(IASTIfStatement statement)
+    private void visitIf(IASTIfStatement statement) throws BadLocationException
     {
         /* TODO: specific params: don't show the if hint if there's an "else if" after it (by checking if the elseClause is an instance of ifstatment) */
         
@@ -305,8 +312,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
     }
 
-    private void visitSwitch(IASTSwitchStatement statement)
-    {
+    private void visitSwitch(IASTSwitchStatement statement) throws BadLocationException
+    {        
         String hint = statement.getControllerExpression().getRawSignature();
         IASTFileLocation location = statement.getBody().getFileLocation();
         int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
@@ -317,7 +324,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     }
 
 
-    private void visitFor(IASTForStatement statement)
+    private void visitFor(IASTForStatement statement) throws BadLocationException
     {
         /* TODO: specific params: show also initializer && increment expressions */
 
@@ -338,7 +345,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
     }
     
-    private void visitWhile(IASTWhileStatement statement)
+    private void visitWhile(IASTWhileStatement statement) throws BadLocationException
     {
         IASTExpression cond = statement.getCondition();        
         String hint = "";
@@ -376,7 +383,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         return shouldContinue();
     }  
     
-    private void visitFunc(IASTFunctionDefinition declaration)
+    private void visitFunc(IASTFunctionDefinition declaration) throws BadLocationException
     {
         IASTStatement body = declaration.getBody();
         if(!( body instanceof IASTCompoundStatement) )
@@ -415,7 +422,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         _container.add(new Hint("function", startLoc, endLoc, hint.toString())); //$NON-NLS-1$        
     }
     
-    private void visitType(IASTSimpleDeclaration declaration)
+    private void visitType(IASTSimpleDeclaration declaration) throws BadLocationException
     {
         /* TODO: specific params: include type('class' / 'struct') */
         
@@ -440,7 +447,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         
     }
 
-    private void addBrackets(IASTName name)
+    private void addBrackets(IASTName name) throws BadLocationException
     {
         if( name instanceof ICPPASTTemplateId )
         {
@@ -455,7 +462,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }        
     }
 
-    private void addBrackets(IASTNode[] args)
+    private void addBrackets(IASTNode[] args) throws BadLocationException
     {
         if(args == null || args.length == 0)
             return;

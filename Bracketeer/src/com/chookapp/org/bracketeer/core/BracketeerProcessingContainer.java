@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
@@ -396,7 +397,7 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         return _updatingListeners;
     }
     
-    public void add(BracketsPair pair)
+    public void add(BracketsPair pair) throws BadLocationException
     {
         synchronized(_docLock)
         {
@@ -430,7 +431,7 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
     }
     
     
-    public void add(SingleBracket bracket)
+    public void add(SingleBracket bracket) throws BadLocationException
     {
         synchronized(_docLock)
         {
@@ -458,7 +459,7 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         }
     }    
     
-    public void add(Hint hint)
+    public void add(Hint hint) throws BadLocationException
     {
         synchronized(_docLock)
         {
@@ -487,17 +488,18 @@ public class BracketeerProcessingContainer implements IDisposable, IBracketeerPr
         }
     }    
     
-    private void addPosition(Position position)
+    private void addPosition(Position position) throws BadLocationException
     {
         try
         {
             if( position != null )
                 _doc.addPosition(_positionCategory, position);
         }
-        catch (Exception e)
+        catch (BadPositionCategoryException e)
         {
             Activator.log(e);
         }
+
     }
 
     private static <T> ObjectContainer<T> findExistingObj(List<ObjectContainer<T>> objList,

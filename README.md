@@ -62,6 +62,6 @@ Build 1.1.0 (21/1/2012)
 * Fixed [issue 6](https://github.com/chookapp/Bracketeer/issues/6) - Join hint's multiple lines to one line.
 * Some small bug fixes.
 
-Build 1.1.0 (23/12/2011)
+Build 1.0.0 (23/12/2011)
 -----------
 * Initial implementation.

@@ -137,10 +137,13 @@ public class BracketsHighlighter implements CaretListener, Listener,
 	    
 		if( _sourceViewer == null )
 			return;
-		
+			
 		_conf.removeListener(this);
 		
 		deactivate(false);
+		
+		ITextViewerExtension2 extension = (ITextViewerExtension2) _sourceViewer;
+		extension.removePainter(this);
 		
 		if (_processingThread != null)
 		{		    
@@ -551,6 +554,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         st.removeListener(SWT.KeyDown, this);
         st.removeListener(SWT.KeyUp, this);
         st.removePaintListener(this);
+        st.removeFocusListener(this);
     }
 
     @Override

@@ -162,16 +162,23 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         if(Activator.DEBUG)
             Activator.trace("starting process..."); //$NON-NLS-1$
         
-        _doc = doc;
-        updateAst();
-        processBrackets(container);
-        processAst(container);
+        try
+        {
+            _doc = doc;
+            updateAst();
+            processBrackets(container);
+            processAst(container);
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;            
+        }
         
         if(Activator.DEBUG)
             Activator.trace("process ended (" + _cancelProcessing + ")"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    private void processBrackets(IBracketeerProcessingContainer container)
+    private void processBrackets(IBracketeerProcessingContainer container) throws BadLocationException
     {
         List<Position> inactiveCode = collectInactiveCodePositions(_ast);
         _matcher.updateInactiveCodePositions(inactiveCode);
@@ -196,7 +203,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
     }
     
 //    @SuppressWarnings("restriction")
-    private void processAst(IBracketeerProcessingContainer container)
+    private void processAst(IBracketeerProcessingContainer container) throws BadLocationException
     {
         if(_ast == null )
             return;

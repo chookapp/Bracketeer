@@ -121,7 +121,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
     }
     
-    void addBrackets(ParameterizedType node)
+    private void addBrackets(ParameterizedType node) throws BadLocationException
     {
         @SuppressWarnings("unchecked")
         List<Type> args = node.typeArguments();
@@ -136,7 +136,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 
     }
     
-    private void addBrackets(List<TypeParameter> typeParameters)
+    private void addBrackets(List<TypeParameter> typeParameters) throws BadLocationException
     {
         if(typeParameters == null || typeParameters.isEmpty())
             return;
@@ -151,13 +151,22 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     @Override
     public boolean visit(ParameterizedType node)
     {
-        addBrackets(node);
+        try
+        {
+            addBrackets(node);
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        }
         return shouldContinue();
     } 
     
     @Override
     public boolean visit(SwitchCase node)
     {
+        /* TODO: specific params: don't show the switch part (only the case argument) */
+        
         try
         {
             ScopeInfo scope = _scopeStack.peek();
@@ -271,6 +280,10 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         {
             if(Activator.DEBUG)
                 Activator.log(e);
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
         }       
         return shouldContinue();
     }
@@ -282,8 +295,15 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         String hint = node.getName().getIdentifier();
         int startLoc = node.getName().getStartPosition();
         int endLoc = node.getStartPosition() + node.getLength() - 1;
-        _container.add(new Hint("type", startLoc, endLoc, hint)); //$NON-NLS-1$
-        addBrackets(node.typeParameters());
+        try
+        {
+            _container.add(new Hint("type", startLoc, endLoc, hint)); //$NON-NLS-1$
+            addBrackets(node.typeParameters());
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        } 
         return shouldContinue();
     }  
 
@@ -308,7 +328,14 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         hint.append(" )");
         int startLoc = node.getName().getStartPosition();
         int endLoc = node.getStartPosition() + node.getLength() - 1;
-        _container.add(new Hint("function", startLoc, endLoc, hint.toString())); //$NON-NLS-1$
+        try
+        {
+            _container.add(new Hint("function", startLoc, endLoc, hint.toString())); //$NON-NLS-1$
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        }
         return shouldContinue();
     }
     
@@ -317,11 +344,18 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     {
         /* TODO: specific params: show also initializer && increment expressions */
         String hint = GetNodeText(node.getExpression());
-        hint = "for( "+hint+" )";
+        hint = "for( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$ 
         int startLoc = node.getStartPosition();
         int endLoc = startLoc + node.getLength() - 1;
         _scopeStack.push(new ScopeInfo(hint, startLoc, node));
-        _container.add(new Hint("for", startLoc, endLoc, hint)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        try
+        {
+            _container.add(new Hint("for", startLoc, endLoc, hint)); //$NON-NLS-1$
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        } 
         return shouldContinue();
     }
 
@@ -339,9 +373,16 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         String hint = GetNodeText(node.getExpression());
         int startLoc = node.getStartPosition();
         int endLoc = startLoc + node.getLength() - 1;
-        hint = "foreach( "+hint+" )";
+        hint = "foreach( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$
         _scopeStack.push(new ScopeInfo(hint, startLoc, node));
-        _container.add(new Hint("foreach", startLoc, endLoc, hint)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        try
+        {
+            _container.add(new Hint("foreach", startLoc, endLoc, hint)); //$NON-NLS-1$
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        } 
         return shouldContinue();
     }
     
@@ -358,9 +399,16 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         String hint = GetNodeText(node.getExpression());
         int startLoc = node.getStartPosition();
         int endLoc = startLoc + node.getLength() - 1;
-        hint = "switch( "+hint+" )";
+        hint = "switch( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$ 
         _scopeStack.push(new ScopeInfo(hint, startLoc, node));
-        _container.add(new Hint("switch", startLoc, endLoc, hint)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        try
+        {
+            _container.add(new Hint("switch", startLoc, endLoc, hint)); //$NON-NLS-1$
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        } 
         return shouldContinue();
     }
     
@@ -377,9 +425,16 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         String hint = GetNodeText(node.getExpression());
         int startLoc = node.getStartPosition();
         int endLoc = startLoc + node.getLength() - 1;
-        hint = "while( "+hint+" )";
+        hint = "while( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$ 
         _scopeStack.push(new ScopeInfo(hint, startLoc, node));
-        _container.add(new Hint("while", startLoc, endLoc, hint)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        try
+        {
+            _container.add(new Hint("while", startLoc, endLoc, hint)); //$NON-NLS-1$ 
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        } 
         return shouldContinue();
     }
     
@@ -396,7 +451,14 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         String hint = GetNodeText(node.getExpression());
         int startLoc = node.getStartPosition();
         int endLoc = startLoc + node.getLength() - 1;        
-        _container.add(new Hint("synchronized", startLoc, endLoc, "synchronized( "+hint+" )")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        try
+        {
+            _container.add(new Hint("synchronized", startLoc, endLoc, "synchronized( "+hint+" )"));  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        }
         return shouldContinue();
     }
 

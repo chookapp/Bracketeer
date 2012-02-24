@@ -63,8 +63,15 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
 		if(Activator.DEBUG)
             Activator.trace("starting process..."); //$NON-NLS-1$
         
-        processBrackets(doc, container);
-        processAst(doc, container);
+        try
+        {
+            processBrackets(doc, container);
+            processAst(doc, container);
+        }
+        catch (BadLocationException e)
+        {
+            _cancelProcessing = true;
+        }
         
         if(Activator.DEBUG)
             Activator.trace("process ended (" + _cancelProcessing + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -88,7 +95,7 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
     }
 
     private void processBrackets(IDocument doc,
-			IBracketeerProcessingContainer container) 
+			IBracketeerProcessingContainer container) throws BadLocationException 
 	{
 		for(int i = 1; i < doc.getLength(); i++)
         {

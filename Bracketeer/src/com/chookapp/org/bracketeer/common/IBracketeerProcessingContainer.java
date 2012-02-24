@@ -12,6 +12,8 @@ package com.chookapp.org.bracketeer.common;
 
 import java.util.List;
 
+import org.eclipse.jface.text.BadLocationException;
+
 public interface IBracketeerProcessingContainer
 {
     /**
@@ -19,23 +21,26 @@ public interface IBracketeerProcessingContainer
      * If the pair already exists nothing happens
      * Adding a pair which has a single bracket shared with another pair is illegal and would cause unexpected results  
      * @param pair the pair to add
+     * @throws BadLocationException 
      */
-    public void add(BracketsPair pair);
+    public void add(BracketsPair pair) throws BadLocationException;
     
     /**
      * Adds a single bracket (has a missing pair) to the container
      * If the bracket already exists (as a single bracket) nothing happens
      * Adding a single bracket which is also in a pair is illegal and would cause unexpected results  
      * @param bracket the single bracket to add
+     * @throws BadLocationException 
      */
-    public void add(SingleBracket bracket);
+    public void add(SingleBracket bracket) throws BadLocationException;
  
     /**
      * Adds a hint to the container
      * A hint may overlap with a pair or a single bracket
      * @param hint the hint to add
+     * @throws BadLocationException 
      */
-    public void add(Hint hint);
+    public void add(Hint hint) throws BadLocationException;
     
     /**
      * Gets a pair which matches the specified offsets (there can be at most one match)
