@@ -33,8 +33,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.services.IDisposable;
 
-import com.chookapp.org.bracketeer.Activator;
-
 public class Popup implements IDisposable, PaintListener
 {
     private Shell _shell;
@@ -80,7 +78,6 @@ public class Popup implements IDisposable, PaintListener
         }
         catch (BadLocationException e)
         {
-            Activator.log(e);
             dispose();
             throw e;
         }

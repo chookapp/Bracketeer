@@ -25,11 +25,12 @@ import org.eclipse.jface.text.BadLocationException;
 import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.IHintConfiguration;
+import com.chookapp.org.bracketeer.common.MutableBool;
 
 
 public class PreprocessorVisitor
 {
-    Boolean _cancelProcessing;
+    MutableBool _cancelProcessing;
     IBracketeerProcessingContainer _container;
     IHintConfiguration _hintConf;
     
@@ -48,7 +49,7 @@ public class PreprocessorVisitor
     Stack<CondInfo> _stack;
     
     public PreprocessorVisitor(IBracketeerProcessingContainer container,
-                               Boolean cancelProcessing,
+                               MutableBool cancelProcessing,
                                IHintConfiguration hintConf)
     {
         _cancelProcessing = cancelProcessing;
@@ -73,7 +74,7 @@ public class PreprocessorVisitor
     {
         for (IASTPreprocessorStatement stmt : stmts)
         {
-            if(_cancelProcessing)
+            if(_cancelProcessing.get())
                 break;
             
             if( stmt instanceof IASTPreprocessorIfStatement)

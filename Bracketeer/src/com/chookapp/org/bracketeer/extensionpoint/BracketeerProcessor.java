@@ -18,17 +18,19 @@ import org.eclipse.jface.text.IDocumentListener;
 import com.chookapp.org.bracketeer.Activator;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.IHintConfiguration;
+import com.chookapp.org.bracketeer.common.MutableBool;
 
 public abstract class BracketeerProcessor implements IDocumentListener
 {
     
-    protected Boolean _cancelProcessing;
+    protected MutableBool _cancelProcessing;
     protected IDocument _doc;
     protected IHintConfiguration _hintConf;
     
     protected BracketeerProcessor(IDocument doc)
     {
         _doc = doc;
+        _cancelProcessing = new MutableBool(false);
     }
     
     public void setHintConf(IHintConfiguration conf)
@@ -38,7 +40,7 @@ public abstract class BracketeerProcessor implements IDocumentListener
     
     public boolean process(IBracketeerProcessingContainer container)
     {
-        _cancelProcessing = false;
+        _cancelProcessing.set(false);
         
         _doc.addDocumentListener(this);
         
@@ -47,7 +49,7 @@ public abstract class BracketeerProcessor implements IDocumentListener
         
         _doc.removeDocumentListener(this);
                
-        return !_cancelProcessing;
+        return !_cancelProcessing.get();
     }        
 
     private void postProcess(IDocument doc,
@@ -60,7 +62,7 @@ public abstract class BracketeerProcessor implements IDocumentListener
     {
         if( Activator.DEBUG )
             Activator.trace("doc about to be changed"); //$NON-NLS-1$
-        _cancelProcessing = true;
+        _cancelProcessing.set(true);
     }
 
     @Override

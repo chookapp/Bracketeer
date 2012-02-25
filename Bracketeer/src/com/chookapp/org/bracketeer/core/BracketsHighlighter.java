@@ -858,7 +858,6 @@ public class BracketsHighlighter implements CaretListener, Listener,
             }
             catch (BadLocationException e)
             {
-                Activator.log(e);
                 continue;
             }
             
@@ -934,7 +933,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         }
         catch (BadLocationException e)
         {
-            Activator.log(e);
+            return false;
         }
         
         BracketeerProcessingContainer cont = _processingThread.getBracketContainer();

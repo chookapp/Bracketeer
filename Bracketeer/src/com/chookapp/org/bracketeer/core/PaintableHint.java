@@ -24,8 +24,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
-import com.chookapp.org.bracketeer.Activator;
-
 public class PaintableHint extends PaintableObject
 {
 
@@ -140,7 +138,6 @@ public class PaintableHint extends PaintableObject
         }
         catch (BadLocationException e)
         {
-            Activator.log(e);
         }
         return null;
     }

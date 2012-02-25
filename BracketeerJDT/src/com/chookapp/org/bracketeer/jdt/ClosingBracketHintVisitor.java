@@ -42,6 +42,7 @@ import com.chookapp.org.bracketeer.common.BracketsPair;
 import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.IHintConfiguration;
+import com.chookapp.org.bracketeer.common.MutableBool;
 
 public class ClosingBracketHintVisitor extends ASTVisitor
 {
@@ -72,14 +73,14 @@ public class ClosingBracketHintVisitor extends ASTVisitor
 
         
     
-    Boolean _cancelProcessing;
+    MutableBool _cancelProcessing;
     IBracketeerProcessingContainer _container;
     IHintConfiguration _hintConf;
     IDocument _doc;
     Stack<ScopeInfo> _scopeStack;
     
     public ClosingBracketHintVisitor(IBracketeerProcessingContainer container,
-                                     IDocument doc, Boolean cancelProcessing, 
+                                     IDocument doc, MutableBool cancelProcessing, 
                                      IHintConfiguration hintConf)
     {
         _cancelProcessing = cancelProcessing;
@@ -157,7 +158,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         }
         return shouldContinue();
     } 
@@ -283,7 +284,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         }       
         return shouldContinue();
     }
@@ -302,7 +303,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         } 
         return shouldContinue();
     }  
@@ -334,7 +335,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         }
         return shouldContinue();
     }
@@ -354,7 +355,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         } 
         return shouldContinue();
     }
@@ -381,7 +382,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         } 
         return shouldContinue();
     }
@@ -407,7 +408,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         } 
         return shouldContinue();
     }
@@ -433,7 +434,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         } 
         return shouldContinue();
     }
@@ -457,7 +458,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         }
         return shouldContinue();
     }
@@ -514,7 +515,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            e.printStackTrace();
+            _cancelProcessing.set(true);
         }
         
         return shouldContinue();
@@ -531,13 +532,12 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            Activator.log(e);
             return "";
         }
     }
 
     private boolean shouldContinue()
     {
-        return !_cancelProcessing;
+        return !_cancelProcessing.get();
     }
 }

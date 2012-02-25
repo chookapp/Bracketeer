@@ -94,7 +94,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         _doc = doc;
     }   
     
-    private BracketsPair getMatchingPair(int offset)
+    private BracketsPair getMatchingPair(int offset) throws BadLocationException
     {
         IRegion region = _matcher.match(_doc, offset);
         if( region == null )
@@ -109,49 +109,36 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         offset--;
         targetOffset--;
         
-        try
-        {
-            if( isAnchorOpening )
-                return new BracketsPair(offset, _doc.getChar(offset), 
-                                        targetOffset, _doc.getChar(targetOffset));
-            else
-                return new BracketsPair(targetOffset, _doc.getChar(targetOffset), 
-                                        offset, _doc.getChar(offset));
-        }
-        catch (BadLocationException e)
-        {
-            Activator.log(e, String.format("offset=%1$d target=%2$d docLength=%3$d", 
-                                           offset, targetOffset, _doc.getLength()));
-        }
-        return null;
+
+        if( isAnchorOpening )
+            return new BracketsPair(offset, _doc.getChar(offset), 
+                                    targetOffset, _doc.getChar(targetOffset));
+        else
+            return new BracketsPair(targetOffset, _doc.getChar(targetOffset), 
+                                    offset, _doc.getChar(offset));
+   
     }
 
-    private SingleBracket getLonelyBracket(int offset, List<Position> inactiveCode)
+    private SingleBracket getLonelyBracket(int offset, List<Position> inactiveCode) throws BadLocationException
     {
         final int charOffset = offset - 1;
         char prevChar;
-        try
+   
+        prevChar = _doc.getChar(Math.max(charOffset, 0));
+        if (LONELY_BRACKETS.indexOf(prevChar) == -1) return null;
+        final String partition= TextUtilities.getContentType(_doc, ICPartitions.C_PARTITIONING, charOffset, false);
+        for( String partName : ICPartitions.ALL_CPARTITIONS )
         {
-            prevChar = _doc.getChar(Math.max(charOffset, 0));
-            if (LONELY_BRACKETS.indexOf(prevChar) == -1) return null;
-            final String partition= TextUtilities.getContentType(_doc, ICPartitions.C_PARTITIONING, charOffset, false);
-            for( String partName : ICPartitions.ALL_CPARTITIONS )
+            if (partName.equals( partition ))
+                return null;
+            for (Position pos : inactiveCode)
             {
-                if (partName.equals( partition ))
+                if(pos.includes(offset))
                     return null;
-                for (Position pos : inactiveCode)
-                {
-                    if(pos.includes(offset))
-                        return null;
-                }
             }
-            
-            return new SingleBracket(charOffset, Utils.isOpenningBracket(prevChar), prevChar);
         }
-        catch (BadLocationException e)
-        {
-        }
-        return null;
+        
+        return new SingleBracket(charOffset, Utils.isOpenningBracket(prevChar), prevChar);
     }
 
 
@@ -171,7 +158,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;            
+            _cancelProcessing.set(true);
         }
         
         if(Activator.DEBUG)
@@ -184,7 +171,7 @@ public class BracketeerCdtProcessor extends BracketeerProcessor
         _matcher.updateInactiveCodePositions(inactiveCode);
         for(int i = 1; i < _doc.getLength()+1; i++)
         {            
-            if( _cancelProcessing )
+            if( _cancelProcessing.get() )
                 break;
             
             BracketsPair pair = getMatchingPair(i);

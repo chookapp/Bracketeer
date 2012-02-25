@@ -46,6 +46,7 @@ import com.chookapp.org.bracketeer.common.BracketsPair;
 import com.chookapp.org.bracketeer.common.Hint;
 import com.chookapp.org.bracketeer.common.IBracketeerProcessingContainer;
 import com.chookapp.org.bracketeer.common.IHintConfiguration;
+import com.chookapp.org.bracketeer.common.MutableBool;
 
 public class ClosingBracketHintVisitor extends ASTVisitor
 {
@@ -75,13 +76,13 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     }
 
     
-    Boolean _cancelProcessing;
+    MutableBool _cancelProcessing;
     IBracketeerProcessingContainer _container;
     IHintConfiguration _hintConf;
     Stack<ScopeInfo> _scopeStack;
     
     public ClosingBracketHintVisitor(IBracketeerProcessingContainer container,
-                                     Boolean cancelProcessing, 
+                                     MutableBool cancelProcessing, 
                                      IHintConfiguration hintConf)
     {
         _cancelProcessing = cancelProcessing;
@@ -165,7 +166,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch(BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         }
         catch(Exception e)
         {
@@ -475,7 +476,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
 
     private int shouldContinue()
     {
-        if( _cancelProcessing )
+        if( _cancelProcessing.get() )
             return PROCESS_ABORT;
         else
             return PROCESS_CONTINUE;

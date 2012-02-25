@@ -70,7 +70,7 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
         }
         catch (BadLocationException e)
         {
-            _cancelProcessing = true;
+            _cancelProcessing.set(true);
         }
         
         if(Activator.DEBUG)
@@ -99,7 +99,7 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
 	{
 		for(int i = 1; i < doc.getLength(); i++)
         {
-            if( _cancelProcessing )
+            if( _cancelProcessing.get() )
                 break;
 		    
             BracketsPair pair = getMatchingPair(doc, i);
@@ -117,30 +117,24 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
         }
 	}
 
-	private SingleBracket getLonelyBracket(IDocument doc, int offset) 
+	private SingleBracket getLonelyBracket(IDocument doc, int offset) throws BadLocationException 
 	{
 		final int charOffset = offset - 1;
         char prevChar;
-        try
+   
+        prevChar = doc.getChar(Math.max(charOffset, 0));
+        if (LONELY_BRACKETS.indexOf(prevChar) == -1) return null;
+        final String partition= TextUtilities.getContentType(doc, IJavaPartitions.JAVA_PARTITIONING, charOffset, false);
+        for( String partName : ALL_JPARTITIONS )
         {
-            prevChar = doc.getChar(Math.max(charOffset, 0));
-            if (LONELY_BRACKETS.indexOf(prevChar) == -1) return null;
-            final String partition= TextUtilities.getContentType(doc, IJavaPartitions.JAVA_PARTITIONING, charOffset, false);
-            for( String partName : ALL_JPARTITIONS )
-            {
-                if (partName.equals( partition ))
-                    return null;
-            }
-            
-            return new SingleBracket(charOffset, Utils.isOpenningBracket(prevChar), prevChar);
+            if (partName.equals( partition ))
+                return null;
         }
-        catch (BadLocationException e)
-        {
-        }
-        return null;
+        
+        return new SingleBracket(charOffset, Utils.isOpenningBracket(prevChar), prevChar);
 	}
 
-	private BracketsPair getMatchingPair(IDocument doc, int offset) 
+	private BracketsPair getMatchingPair(IDocument doc, int offset) throws BadLocationException 
 	{
 		IRegion region = _matcher.match(doc, offset);
         if( region == null )
@@ -154,21 +148,13 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
         
         offset--;
         targetOffset--;
-        
-        try
-        {
-            if( isAnchorOpening )
-                return new BracketsPair(offset, doc.getChar(offset), 
-                                        targetOffset, doc.getChar(targetOffset));
-            else
-                return new BracketsPair(targetOffset, doc.getChar(targetOffset), 
-                                        offset, doc.getChar(offset));
-        }
-        catch (BadLocationException e)
-        {
-            Activator.log(e);
-        }
-        return null;
+    
+        if( isAnchorOpening )
+            return new BracketsPair(offset, doc.getChar(offset), 
+                                    targetOffset, doc.getChar(targetOffset));
+        else
+            return new BracketsPair(targetOffset, doc.getChar(targetOffset), 
+                                    offset, doc.getChar(offset));
 	}
 
 }
