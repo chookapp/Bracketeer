@@ -110,8 +110,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             {
                 if(Activator.DEBUG)
                 {
-                    Activator.log("Lost track of scope. Expected:" + scope._statement + 
-                                  " but was:" + node);
+                    Activator.log("Lost track of scope. Expected:" + scope._statement +  //$NON-NLS-1$
+                                  " but was:" + node); //$NON-NLS-1$
                 }
             }
         }       
@@ -175,7 +175,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             {
                 if(!(scope._statement instanceof SwitchCase))
                 {
-                    throw new ScopeTraceException("Lost track of stack (in case), found:" + scope._statement);
+                    throw new ScopeTraceException("Lost track of stack (in case), found:" + scope._statement); //$NON-NLS-1$
                 }
 
                 _scopeStack.pop();
@@ -184,21 +184,21 @@ public class ClosingBracketHintVisitor extends ASTVisitor
 
             if( !(scope._statement instanceof SwitchStatement) )
             {
-                throw new ScopeTraceException("Lost track of stack (in case2), found:" + scope._statement);
+                throw new ScopeTraceException("Lost track of stack (in case2), found:" + scope._statement); //$NON-NLS-1$
             }
 
-            String hint = "";
+            String hint = ""; //$NON-NLS-1$
             if( node.isDefault() )
             {
-                hint = "default";
+                hint = "default"; //$NON-NLS-1$
             }
             else
             {
-                hint = "case: " + node.getExpression();
+                hint = "case: " + node.getExpression(); //$NON-NLS-1$
             }
 
             int startLoc = node.getStartPosition();
-            _scopeStack.push(new ScopeInfo(scope._str + " - " + hint, startLoc, node)); 
+            _scopeStack.push(new ScopeInfo(scope._str + " - " + hint, startLoc, node));  //$NON-NLS-1$
         }
         catch(ScopeTraceException e)
         {
@@ -219,7 +219,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     {
         String hint = GetNodeText(node.getExpression());
         int startLoc = node.getStartPosition();
-        hint = "do_while( "+hint+" )";
+        hint = "do_while( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$
         _scopeStack.push(new ScopeInfo(hint, startLoc, node));
         return shouldContinue();    
     }    
@@ -249,7 +249,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         try
         {
             if(_scopeStack.isEmpty())
-                throw new ScopeTraceException("break without scope: " + node);
+                throw new ScopeTraceException("break without scope: " + node); //$NON-NLS-1$
 
             ScopeInfo scope = _scopeStack.peek();
 
@@ -262,17 +262,17 @@ public class ClosingBracketHintVisitor extends ASTVisitor
 
             String hintType;
             if( scope._statement instanceof ForStatement )
-                hintType = "break-for";
+                hintType = "break-for"; //$NON-NLS-1$
             else if( scope._statement instanceof EnhancedForStatement )
-                hintType = "break-foreach";
+                hintType = "break-foreach"; //$NON-NLS-1$
             else if( scope._statement instanceof WhileStatement )
-                hintType = "break-while";
+                hintType = "break-while"; //$NON-NLS-1$
             else if( scope._statement instanceof DoStatement )
-                hintType = "break-do";
+                hintType = "break-do"; //$NON-NLS-1$
             else if( scope._statement instanceof SwitchCase )
-                hintType = "break-case";
+                hintType = "break-case"; //$NON-NLS-1$
             else
-                throw new ScopeTraceException("Unexpect scope ("+scope._statement+") on break/continue:" + node);
+                throw new ScopeTraceException("Unexpect scope ("+scope._statement+") on break/continue:" + node); //$NON-NLS-1$ //$NON-NLS-2$
 
             int endLoc = node.getStartPosition() + node.getLength() - 1; 
             _container.add(new Hint(hintType, scope._offset, endLoc, scope._str));
@@ -317,16 +317,16 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         StringBuffer hint = new StringBuffer();
         hint.append(node.getName().getIdentifier());
         /* TODO: specific params: exclude function parameters (show only the name) */
-        hint.append("( ");
+        hint.append("( "); //$NON-NLS-1$
         for (@SuppressWarnings("rawtypes")
         Iterator iterator = node.parameters().iterator(); iterator.hasNext();)
         {
             SingleVariableDeclaration param = (SingleVariableDeclaration) iterator.next();
             hint.append(param.getName());
             if( iterator.hasNext() )
-                hint.append(", ");
+                hint.append(", "); //$NON-NLS-1$
         }
-        hint.append(" )");
+        hint.append(" )"); //$NON-NLS-1$
         int startLoc = node.getName().getStartPosition();
         int endLoc = node.getStartPosition() + node.getLength() - 1;
         try
@@ -524,7 +524,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     private String GetNodeText(ASTNode node)
     {
         if( node == null )
-            return "";
+            return ""; //$NON-NLS-1$
         
         try
         {
@@ -532,7 +532,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         catch (BadLocationException e)
         {
-            return "";
+            return ""; //$NON-NLS-1$
         }
     }
 

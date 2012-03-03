@@ -39,6 +39,7 @@ public class BracketeerCharacterPairMatcher
     private int fAnchor= -1;
     private final CharPairs fPairs;
     private final String fPartitioning;
+    private final static String InactiveCodeSuffix = "Inactive";
 
     /**
      * Creates a new character pair matcher that matches the specified characters within the
@@ -98,12 +99,12 @@ public class BracketeerCharacterPairMatcher
         fAnchor= isForward ? ICharacterPairMatcher.LEFT : ICharacterPairMatcher.RIGHT;
         final int searchStartPosition= isForward ? caretOffset : caretOffset - 2;
         final int adjustedOffset= isForward ? charOffset : caretOffset;
-        String suffix = "";
+        String suffix = ""; //$NON-NLS-1$
         for (Position pos : inactiveCode)
         {
             if(pos.includes(charOffset))
             {
-                suffix = "Inactive";
+                suffix = InactiveCodeSuffix;
                 break;
             }
             if(pos.getOffset() > charOffset)
@@ -273,8 +274,8 @@ public class BracketeerCharacterPairMatcher
                     Position inactivePosAfter = getInactivePositionEndingAfter(pos);
                     Position inactivePosBefore = getInactivePositionStartingBefore(pos);
                     fCachedPartition = intersect(fCachedPartition, inactivePosAfter, 
-                                                 (inactivePosAfter != null &&inactivePosAfter.includes(pos)) ? "Inactive" : "");
-                    fCachedPartition = intersect(fCachedPartition, inactivePosBefore, "");
+                                                 (inactivePosAfter != null &&inactivePosAfter.includes(pos)) ? InactiveCodeSuffix : ""); //$NON-NLS-2$
+                    fCachedPartition = intersect(fCachedPartition, inactivePosBefore, ""); //$NON-NLS-1$
                 } catch (BadLocationException e) {
                     fCachedPartition= null;
                 }

@@ -10,6 +10,7 @@ public class Messages extends NLS
     public static String BracketsHighlighter_ErrHintNotFound;
     public static String BracketsHighlighter_ErrPairNotFound;
     public static String BracketsHighlighter_ErrUnexpectedEvent;
+    public static String BracketsHighlighter_MatchNotHighlighetd;
     public static String BracketsHighlighter_UnableToGetEditor;
     public static String BracketsHighlighter_UnableToGetResource;
     public static String BracketsHighlighter_UnableToPaint_SourceViewer;

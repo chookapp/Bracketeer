@@ -73,7 +73,7 @@ public class Activator implements BundleActivator {
     }       
 
     public static IStatus getStatus(Throwable e, String str) {
-        return new Status(Status.WARNING, PLUGIN_ID, e.getLocalizedMessage() + " " + str, e);
+        return new Status(Status.WARNING, PLUGIN_ID, e.getLocalizedMessage() + " " + str, e); //$NON-NLS-1$
     }
     
 }

@@ -24,7 +24,7 @@ public class Hint
     {
         _originPosition = new Position(originOffset, 1);
         _hintPosition = new Position(hintOffset, 1);
-        _str = txt.replaceAll("\\s*[\r|\n]+\\s*", " ");
+        _str = txt.replaceAll("\\s*[\r|\n]+\\s*", " "); //$NON-NLS-1$ //$NON-NLS-2$
         _type = type;
     }
     

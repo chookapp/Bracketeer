@@ -67,7 +67,7 @@ public class PreprocessorVisitor
     
     private String stripEolBackslash(String str)
     {
-        return str.replaceAll("\\\\(\\s*[\r|\n])", "$1");
+        return str.replaceAll("\\\\(\\s*[\r|\n])", "$1"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     public void visit(IASTPreprocessorStatement[] stmts) throws BadLocationException
@@ -80,26 +80,26 @@ public class PreprocessorVisitor
             if( stmt instanceof IASTPreprocessorIfStatement)
             {
                 StringBuffer str = new StringBuffer();
-                str.append("if( ");
+                str.append("if( "); //$NON-NLS-1$
                 str.append(stripEolBackslash(((IASTPreprocessorIfStatement)stmt).getCondition()));
-                str.append(" )");
+                str.append(" )"); //$NON-NLS-1$
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
             else if( stmt instanceof IASTPreprocessorIfdefStatement)
             {
                 StringBuffer str = new StringBuffer();
-                str.append("if_defined( ");
+                str.append("if_defined( "); //$NON-NLS-1$
                 str.append(stripEolBackslash(((IASTPreprocessorIfdefStatement)stmt).getCondition()));
-                str.append(" )");
+                str.append(" )"); //$NON-NLS-1$
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
             else if( stmt instanceof IASTPreprocessorIfndefStatement)
             {
                 StringBuffer str = new StringBuffer();
-                str.append("if_not_defined( ");
+                str.append("if_not_defined( "); //$NON-NLS-1$
                 str.append(stripEolBackslash(((IASTPreprocessorIfndefStatement)stmt).getCondition()));
-                str.append(" )");
+                str.append(" )"); //$NON-NLS-1$
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
@@ -116,13 +116,13 @@ public class PreprocessorVisitor
                     IASTFileLocation location = stmt.getFileLocation();
                     int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                     int startLoc = cond._fileLoc.getNodeOffset();
-                    _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond));
+                    _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond)); //$NON-NLS-1$
                 }
                 
                 StringBuffer str = new StringBuffer();
-                str.append("if( ");
+                str.append("if( "); //$NON-NLS-1$
                 str.append(stripEolBackslash(((IASTPreprocessorElifStatement)stmt).getCondition()));
-                str.append(" )");
+                str.append(" )"); //$NON-NLS-1$
                 
                 _stack.push(new CondInfo(str.toString(), stmt.getFileLocation()));
             }
@@ -135,14 +135,14 @@ public class PreprocessorVisitor
                 }
 
                 StringBuffer str = new StringBuffer();
-                str.append("else_of_");
+                str.append("else_of_"); //$NON-NLS-1$
 
                 if( cond != null )
                 {
                     IASTFileLocation location = stmt.getFileLocation();
                     int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                     int startLoc = cond._fileLoc.getNodeOffset();
-                    _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond));
+                    _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond)); //$NON-NLS-1$
                     str.append(cond._cond);
                 }
                 
@@ -158,7 +158,7 @@ public class PreprocessorVisitor
                 IASTFileLocation location = stmt.getFileLocation();
                 int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
                 int startLoc = cond._fileLoc.getNodeOffset();
-                _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond));
+                _container.add(new Hint("preprocess", startLoc, endLoc, cond._cond)); //$NON-NLS-1$
             }            
         }
     }

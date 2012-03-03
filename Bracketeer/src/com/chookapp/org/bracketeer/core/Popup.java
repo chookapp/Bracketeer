@@ -98,7 +98,7 @@ public class Popup implements IDisposable, PaintListener
         Document newDoc = new Document();
         sv.setInput(newDoc);
         
-        String txt = "";
+        String txt = ""; //$NON-NLS-1$
         List<StyleRange> styleRanges = new ArrayList<StyleRange>();
     
         Position origPos = paintBracket.getPosition();

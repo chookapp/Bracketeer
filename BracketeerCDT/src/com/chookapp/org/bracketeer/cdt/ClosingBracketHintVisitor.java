@@ -122,8 +122,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 {
                     if(Activator.DEBUG)
                     {
-                        Activator.log("Lost track of scope. Expected:" + scope._statement + 
-                                      " but was:" + statement);
+                        Activator.log("Lost track of scope. Expected:" + scope._statement +  //$NON-NLS-1$
+                                      " but was:" + statement); //$NON-NLS-1$
                     }
                 }
             }
@@ -181,21 +181,21 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     private void visitBreak(IASTStatement statement) throws ScopeTraceException, BadLocationException
     {
         if(_scopeStack.isEmpty())
-            throw new ScopeTraceException("break without scope: " + statement);
+            throw new ScopeTraceException("break without scope: " + statement); //$NON-NLS-1$
         
         ScopeInfo scope = _scopeStack.peek();
         
         String hintType;
         if( scope._statement instanceof IASTForStatement )
-            hintType = "break-for";
+            hintType = "break-for"; //$NON-NLS-1$
         else if( scope._statement instanceof IASTWhileStatement )
-            hintType = "break-while";
+            hintType = "break-while"; //$NON-NLS-1$
         else if( scope._statement instanceof IASTDoStatement )
-            hintType = "break-do";
+            hintType = "break-do"; //$NON-NLS-1$
         else if( scope._statement instanceof IASTCaseStatement || scope._statement instanceof IASTDefaultStatement )
-            hintType = "break-case";
+            hintType = "break-case"; //$NON-NLS-1$
         else
-            throw new ScopeTraceException("Unexpect scope ("+scope._statement+") on break/continue:" + statement);
+            throw new ScopeTraceException("Unexpect scope ("+scope._statement+") on break/continue:" + statement); //$NON-NLS-1$ //$NON-NLS-2$
         
         int endLoc = statement.getFileLocation().getNodeOffset() + statement.getFileLocation().getNodeLength() - 1; 
         _container.add(new Hint(hintType, scope._offset, endLoc, scope._str));
@@ -212,7 +212,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
             if(!((scope._statement instanceof IASTCaseStatement) ||
                  (scope._statement instanceof IASTDefaultStatement)) )
             {
-                throw new ScopeTraceException("Lost track of stack (in case), found:" + scope._statement);
+                throw new ScopeTraceException("Lost track of stack (in case), found:" + scope._statement); //$NON-NLS-1$
             }
             
             _scopeStack.pop();
@@ -221,33 +221,33 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         
         if( !(scope._statement instanceof IASTSwitchStatement) )
         {
-            throw new ScopeTraceException("Lost track of stack (in case2), found:" + scope._statement);
+            throw new ScopeTraceException("Lost track of stack (in case2), found:" + scope._statement); //$NON-NLS-1$
         }
         
-        String hint = "";
+        String hint = ""; //$NON-NLS-1$
         if(statement instanceof IASTCaseStatement)
         {
             IASTExpression cond = ((IASTCaseStatement)statement).getExpression();
             if( cond != null )
                 hint = cond.getRawSignature();
-            hint = "case: " + hint;
+            hint = "case: " + hint; //$NON-NLS-1$
         }
         else // default
         {
-            hint = "default";
+            hint = "default"; //$NON-NLS-1$
         }
         
         int startLoc = statement.getFileLocation().getNodeOffset();
-        _scopeStack.push(new ScopeInfo(scope._str + " - " + hint, startLoc, statement)); 
+        _scopeStack.push(new ScopeInfo(scope._str + " - " + hint, startLoc, statement));  //$NON-NLS-1$
     }
 
     private void visitDo(IASTDoStatement statement)
     {
         IASTExpression cond = statement.getCondition();
-        String hint = "";
+        String hint = ""; //$NON-NLS-1$
         if( cond != null )
             hint = cond.getRawSignature();
-        hint = "do_while( " + hint + " )";
+        hint = "do_while( " + hint + " )"; //$NON-NLS-1$ //$NON-NLS-2$
         int startLoc = statement.getFileLocation().getNodeOffset();
         _scopeStack.push(new ScopeInfo(hint, startLoc, statement));
     }
@@ -256,7 +256,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     {
         /* TODO: specific params: don't show the if hint if there's an "else if" after it (by checking if the elseClause is an instance of ifstatment) */
         
-        String hint = "";
+        String hint = ""; //$NON-NLS-1$
         if( statement.getConditionExpression() != null )
         {
             hint = statement.getConditionExpression().getRawSignature();
@@ -330,7 +330,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         /* TODO: specific params: show also initializer && increment expressions */
 
         IASTExpression cond = statement.getConditionExpression();
-        String hint = "";
+        String hint = ""; //$NON-NLS-1$
         if( cond != null )
             hint = cond.getRawSignature();
         hint = "for( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -349,7 +349,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
     private void visitWhile(IASTWhileStatement statement) throws BadLocationException
     {
         IASTExpression cond = statement.getCondition();        
-        String hint = "";
+        String hint = ""; //$NON-NLS-1$
         if( cond != null )
             hint = cond.getRawSignature();
         hint = "while( "+hint+" )"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -402,7 +402,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         StringBuffer hint = new StringBuffer();
         hint.append(declerator.getName().getRawSignature());            
         /* TODO: specific params: exclude function parameters (show only the name) */
-        hint.append("( ");
+        hint.append("( "); //$NON-NLS-1$
         IASTNode[] decChildren = declerator.getChildren();
         boolean firstParam = true;
         for (int i = 0; i < decChildren.length; i++)
@@ -414,11 +414,11 @@ public class ClosingBracketHintVisitor extends ASTVisitor
                 if( firstParam )
                     firstParam = false;
                 else
-                    hint.append(", ");
+                    hint.append(", "); //$NON-NLS-1$
                 hint.append(param.getDeclarator().getName());                    
             }
         }
-        hint.append(" )");
+        hint.append(" )"); //$NON-NLS-1$
         
         _container.add(new Hint("function", startLoc, endLoc, hint.toString())); //$NON-NLS-1$        
     }

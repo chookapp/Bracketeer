@@ -2,7 +2,7 @@
 <feature
       id="com.chookapp.org.Bracketeer"
       label="Bracketeer"
-      version="1.1.0.qualifier"
+      version="1.2.0.qualifier"
       provider-name="Chookapp">
 
    <description url="https://github.com/chookapp/Bracketeer">
@@ -39,7 +39,7 @@ without it.
          id="com.chookapp.org.Bracketeer"
          download-size="0"
          install-size="0"
-         version="1.1.0.qualifier"
+         version="1.2.0.qualifier"
          unpack="false"/>
 
 </feature>

@@ -28,9 +28,9 @@ public class BracketeerProcessorsFactory implements IBracketeerProcessorsFactory
 	{
 	    try
 	    {
-    		if( part.getClass().getName().equals("org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor") ||
-    			part.getClass().getName().equals("org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor") ||
-    			part.getClass().getSuperclass().getName().equals("org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor") || 
+    		if( part.getClass().getName().equals("org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor") || //$NON-NLS-1$
+    			part.getClass().getName().equals("org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor") || //$NON-NLS-1$
+    			part.getClass().getSuperclass().getName().equals("org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor") ||  //$NON-NLS-1$
     			part.getClass().getSuperclass().getName().equals("org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor") ) //$NON-NLS-1$
     		{
     		    return new BracketeerJdtProcessor(part, doc);

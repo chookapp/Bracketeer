@@ -972,7 +972,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
         
         if(paintBracket == null)
         {
-            Activator.log("matching bracket not highligheted");
+            Activator.log(Messages.BracketsHighlighter_MatchNotHighlighetd);
             return false;
         }
         

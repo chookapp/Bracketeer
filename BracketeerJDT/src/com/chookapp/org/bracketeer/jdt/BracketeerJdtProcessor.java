@@ -141,7 +141,7 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
             return null;
         
         if( region.getLength() < 1 )
-            throw new RuntimeException("length is less than 1");
+            throw new RuntimeException("length is less than 1"); //$NON-NLS-1$
 
         boolean isAnchorOpening = (ICharacterPairMatcher.LEFT == _matcher.getAnchor());        
         int targetOffset =  isAnchorOpening ? region.getOffset() + region.getLength() : region.getOffset() + 1;
