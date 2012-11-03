@@ -11,6 +11,7 @@
 package com.chookapp.org.bracketeer.jdt;
 
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -81,6 +82,17 @@ public class BracketeerJdtProcessor extends BracketeerProcessor
     {
         if( _typeRoot == null )
             return;
+        
+        // can happen if this is a "classFile" without attached source...
+        try
+        {
+            if(_typeRoot.getSource() == null)
+                return;
+        }
+        catch (JavaModelException e)
+        {
+            return;
+        }
         
         ASTParser astp = ASTParser.newParser(AST.JLS3);
         astp.setSource(_typeRoot);
