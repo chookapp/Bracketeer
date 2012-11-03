@@ -172,8 +172,10 @@ public class BracketsHighlighter implements CaretListener, Listener,
 		processor.setHintConf(conf.getHintConfiguration());
 		_doc = doc;
 		
+		boolean editable = _textWidget.getEditable();
+		
 		_resource = (IResource) part.getEditorInput().getAdapter(IResource.class);
-		if (_resource == null)
+		if (_resource == null && editable)
 		    Activator.log(Messages.BracketsHighlighter_UnableToGetResource);
 		
         ITextEditor editor = (ITextEditor) part.getAdapter(ITextEditor.class);
@@ -1146,7 +1148,7 @@ public class BracketsHighlighter implements CaretListener, Listener,
             paintableObjectsList.add(new PaintableBracket(pos, fg, bg, highlightType));
             
             if( _conf.getSingleBracketConfiguration().getAnnotate() &&
-                    _resource != null && _annotationMap != null )
+                _resource != null && _annotationMap != null )
             {
                 try
                 {
