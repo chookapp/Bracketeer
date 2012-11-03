@@ -33,12 +33,14 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
 //    private Semaphore _processingCanceled = new Semaphore(0);
     private Object _docChangedLock = new Object();
     private boolean _docIsChanging;
+    private boolean _disposing;
     
     public ProcessingThread(IDocument doc, BracketeerProcessor processor)
     {
         _processor = processor;
         _documentChanged = false;
         _docIsChanging = false;
+        _disposing = false;
         _doc = doc;
         _bracketContainer = new BracketeerProcessingContainer(_doc);
 //        _isProcessing = false;        
@@ -52,13 +54,14 @@ public class ProcessingThread implements Runnable, IDocumentListener, IDisposabl
     @Override
     public void dispose()
     {
-        _doc.removeDocumentListener(this);        
+        _doc.removeDocumentListener(this);
+        _disposing = true;
     }
     
 
     public void run()
     {
-        while(true)
+        while(!_disposing)
         {                
             while(_documentChanged || _docIsChanging || 
                     _bracketContainer.isUpdatingListeners())
