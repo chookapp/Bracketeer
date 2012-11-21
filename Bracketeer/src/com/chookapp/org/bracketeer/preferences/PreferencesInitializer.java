@@ -69,7 +69,9 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
         store.setDefault(prefBase + PreferencesConstants.Hints.Font.BG_DEFAULT, true);
         
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.Ellipsis.ATTR,
-                         PreferencesConstants.Hints.Display.Ellipsis.VAL_MID);
+                PreferencesConstants.Hints.Display.Ellipsis.VAL_MID);
+        store.setDefault(prefBase + PreferencesConstants.Hints.Display.CommentType.ATTR,
+                PreferencesConstants.Hints.Display.CommentType.VAL_SLASH_STAR);
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.MAX_LENGTH,
                          30);
         store.setDefault(prefBase + PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
@@ -81,6 +83,7 @@ public class PreferencesInitializer extends AbstractPreferenceInitializer
                                        PreferencesConstants.Hints.Font.FG_COLOR,
                                        PreferencesConstants.Hints.Font.BG_DEFAULT,
                                        PreferencesConstants.Hints.Display.Ellipsis.ATTR,
+                                       PreferencesConstants.Hints.Display.CommentType.ATTR,
                                        PreferencesConstants.Hints.Display.MAX_LENGTH,
                                        PreferencesConstants.Hints.Display.STRIP_WHITESPACE};
         

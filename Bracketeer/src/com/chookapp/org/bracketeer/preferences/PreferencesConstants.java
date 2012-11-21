@@ -120,6 +120,13 @@ public final class PreferencesConstants
             public static final String MAX_LENGTH = PATH + "MaxLength"; //$NON-NLS-1$
             public static final String STRIP_WHITESPACE = PATH + "StripWhiteSpaces"; //$NON-NLS-1$
             
+            public final static class CommentType
+            {
+            	public static final String ATTR = PATH + "CommentType"; //$NON-NLS-1$
+            	public static final String VAL_SLASH_STAR = "slashstar"; //$NON-NLS-1$
+            	public static final String VAL_SLASH_SLASH = "slashslash"; //$NON-NLS-1$
+            }
+            
             public final static class Ellipsis
             {   
                 public static final String ATTR = PATH + "Ellipsis"; //$NON-NLS-1$

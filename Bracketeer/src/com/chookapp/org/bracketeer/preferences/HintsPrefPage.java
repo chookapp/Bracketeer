@@ -352,7 +352,19 @@ public class HintsPrefPage extends ChangingFieldsPrefPage implements IWorkbenchP
                 addField(radioGroupFieldEditor);
                 addDynamicFE(tabInfo, radioGroupFieldEditor, PreferencesConstants.Hints.Display.Ellipsis.ATTR);
             }
-        }
+
+            Composite commentTypeComposite = new Composite(composite_18, SWT.NONE);
+            {
+                RadioGroupFieldEditor radioGroupFieldEditor = new RadioGroupFieldEditor(basePref + PreferencesConstants.Hints.Display.CommentType.ATTR, 
+                                                                                        Messages.HintsPrefPage_CommentType, 1, 
+                                                                                        new String[][]{{Messages.HintsPrefPage_SlashSlash, PreferencesConstants.Hints.Display.CommentType.VAL_SLASH_SLASH},
+                                                                                                       {Messages.HintsPrefPage_SlashStar, PreferencesConstants.Hints.Display.CommentType.VAL_SLASH_STAR}},
+                                                                                                       commentTypeComposite, false);
+                radioGroupFieldEditor.setIndent(0);
+                addField(radioGroupFieldEditor);
+                addDynamicFE(tabInfo, radioGroupFieldEditor, PreferencesConstants.Hints.Display.CommentType.ATTR);
+            }
+}
         
         PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), "com.choockapp.org.bracketeer.hints_pref"); //$NON-NLS-1$
         return container;

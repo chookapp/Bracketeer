@@ -294,23 +294,29 @@ public class ProcessorConfiguration implements IPropertyChangeListener
                     color);
         }
 
+        private String makeComment(String type, String txt)
+        {
+            String commentType = getStringAttr(type, PreferencesConstants.Hints.Display.CommentType.ATTR);            
+
+        	if( commentType.equals(PreferencesConstants.Hints.Display.CommentType.VAL_SLASH_SLASH) )
+        		return " // " + txt; //$NON-NLS-1$
+        	else
+        		return " /* " + txt + " */"; //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        
         public String formatText(String type, String txt)
         {
             if( getBoolAttr(type, PreferencesConstants.Hints.Display.STRIP_WHITESPACE) )
                 txt = txt.replaceAll("[\\t ]+", ""); //$NON-NLS-1$ //$NON-NLS-2$
             int maxLen = getIntAttr(type, PreferencesConstants.Hints.Display.MAX_LENGTH);
-            txt = performEllipsis(type, txt, maxLen);
-            txt = " /* " + txt + " */"; //$NON-NLS-1$ //$NON-NLS-2$
-            return txt;
+            return makeComment(type, performEllipsis(type, txt, maxLen));
         }
         
         public String formatTextHovered(String type, String txt)
         {
             if( getBoolAttr(type, PreferencesConstants.Hints.Display.STRIP_WHITESPACE) )
                 txt = txt.replaceAll("[\\t ]+", ""); //$NON-NLS-1$ //$NON-NLS-2$
-            txt = performEllipsis(type, txt, _hoveredMaxLength);
-            txt = " /* " + txt + " */"; //$NON-NLS-1$ //$NON-NLS-2$
-            return txt;
+            return makeComment(type, performEllipsis(type, txt, _hoveredMaxLength));
         }        
         
         public boolean isItalic(String type)
@@ -489,7 +495,8 @@ public class ProcessorConfiguration implements IPropertyChangeListener
             
             listOfAttrs = new String[] {PreferencesConstants.Hints.Display.MAX_LENGTH,
                                         PreferencesConstants.Hints.Display.STRIP_WHITESPACE,
-                                        PreferencesConstants.Hints.Display.Ellipsis.ATTR};
+                                        PreferencesConstants.Hints.Display.Ellipsis.ATTR,
+                                        PreferencesConstants.Hints.Display.CommentType.ATTR};
             baseToUse = prefBase;
             if( _prefStore.getBoolean( prefBase + PreferencesConstants.Hints.Display.USE_DEFAULT ) )
             {

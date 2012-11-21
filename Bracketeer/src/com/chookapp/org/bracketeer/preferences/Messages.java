@@ -32,6 +32,9 @@ public class Messages extends NLS
     public static String HintsPrefPage_Display;
     public static String HintsPrefPage_DisplayHintsInEditor;
     public static String HintsPrefPage_Ellipsis;
+    public static String HintsPrefPage_CommentType;
+    public static String HintsPrefPage_SlashSlash;
+    public static String HintsPrefPage_SlashStar;
     public static String HintsPrefPage_End;
     public static String HintsPrefPage_FgColor;
     public static String HintsPrefPage_Font;
