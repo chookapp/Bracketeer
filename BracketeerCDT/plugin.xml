@@ -40,6 +40,9 @@
          <Hint
                type="preprocess">
          </Hint>
+         <Hint
+               type="namespace">
+         </Hint>
       </BracketeerProcessorsFactory>
    </extension> 
 

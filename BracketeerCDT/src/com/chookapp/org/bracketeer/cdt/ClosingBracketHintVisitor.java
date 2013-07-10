@@ -38,6 +38,7 @@ import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTemplateId;
 import org.eclipse.jface.text.BadLocationException;
@@ -92,6 +93,7 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         shouldVisitStatements = true;
         shouldVisitDeclarations = true;
         shouldVisitExpressions = true; // not really visiting expressions, see bug 370637.
+        shouldVisitNamespaces = true;
         
         _scopeStack = new Stack<ClosingBracketHintVisitor.ScopeInfo>();
     }
@@ -177,6 +179,20 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         }
         return shouldContinue();
     }
+
+    @Override
+	public int visit(ICPPASTNamespaceDefinition namespaceDefinition) {
+    	IASTName name = namespaceDefinition.getName();
+        try {
+            IASTFileLocation location = namespaceDefinition.getFileLocation();
+            int endLoc = location.getNodeOffset()+location.getNodeLength()-1;
+            int startLoc = location.getNodeOffset();
+            _container.add(new Hint("namespace", startLoc, endLoc, "namespace " + name.toString())); //$NON-NLS-1$
+		} catch (BadLocationException e) {
+            _cancelProcessing.set(true);
+		}            
+		return shouldContinue();
+	}
 
     private void visitBreak(IASTStatement statement) throws ScopeTraceException, BadLocationException
     {
