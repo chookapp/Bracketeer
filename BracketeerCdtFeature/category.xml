@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <bundle id="com.chookapp.org.BracketeerCDT" version="1.2.0.qualifier">
+      <category name="brack_cdt"/>
+   </bundle>
+   <category-def name="brack_cdt" label="Bracketeer CDT"/>
+</site>
