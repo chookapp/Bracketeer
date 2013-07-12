@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <bundle id="com.chookapp.org.BracketeerCDT" version="1.2.0.qualifier">
+   <feature url="features/com.chookapp.org.BracketeerCDT_1.2.0.qualifier.jar" id="com.chookapp.org.BracketeerCDT" version="1.2.0.qualifier">
       <category name="brack_cdt"/>
-   </bundle>
-   <category-def name="brack_cdt" label="Bracketeer CDT"/>
+   </feature>
+   <feature url="features/com.chookapp.org.Bracketeer_1.2.0.qualifier.jar" id="com.chookapp.org.Bracketeer" version="1.2.0.qualifier">
+      <category name="brack_cdt"/>
+   </feature>
+   <category-def name="brack_cdt" label="Bracketeer CDT">
+      <description>
+         Highlights matching brackets and annotates closing braces in the Eclipse CDT
+      </description>
+   </category-def>
 </site>

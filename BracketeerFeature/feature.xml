@@ -24,7 +24,7 @@ without it.
    </license>
 
    <url>
-      <update url="http://chookapp.github.com/ChookappUpdateSite/"/>
+       <update url="http://mattgodbolt.github.io/Bracketeer"/>
    </url>
 
    <requires>
