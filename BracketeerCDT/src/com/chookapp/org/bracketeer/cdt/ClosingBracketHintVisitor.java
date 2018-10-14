@@ -457,8 +457,8 @@ public class ClosingBracketHintVisitor extends ASTVisitor
         } 
         else if( name instanceof ICPPASTQualifiedName)
         {
-            IASTName[] names = ((ICPPASTQualifiedName) name).getNames();
-            for (IASTName n : names)
+            ICPPASTNameSpecifier[] names = ((ICPPASTQualifiedName) name).getQualifier();
+            for (ICPPASTNameSpecifier n : names)
                 addBrackets(n);
         }        
     }
